@@ -25,6 +25,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Generate KDoc
+        run: ./gradlew dokkaHtml --no-daemon --stacktrace
+
       - name: Prepare Jekyll source
         run: |
           mkdir -p site-src/docs site-src/assets/css site-src/_layouts site-src/_includes
@@ -56,6 +65,8 @@ jobs:
               cat "$file"
             } > "$dest"
           done
+          # Copy KDoc output
+          cp -r build/dokka site-src/kdoc
           # Copy Google verification
           cp pages/googlea59f33fe422494f1.html site-src
 
