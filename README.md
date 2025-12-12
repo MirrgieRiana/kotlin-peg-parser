@@ -6,62 +6,6 @@ Xarpeg provides a compact, operator-driven parser combinator API. It targets JVM
 
 ---
 
-## 📚 Tutorial - Learn Step by Step
-
-Ready to build powerful parsers? Follow our structured tutorial guide to master Xarpeg from basics to advanced techniques:
-
-### Step-by-Step Learning Path
-
-1. **🚀 [Quickstart](./docs/01-quickstart.md)** - Build your first parser  
-   Start here with a minimal DSL example and learn how to run it immediately.
-
-2. **🔧 [Combinators](./docs/02-combinators.md)** - Combine parsers effectively  
-   Master sequences, choices, repetition, and other core patterns to build complex grammars.
-
-3. **🔁 [Expressions & Recursion](./docs/03-expressions.md)** - Handle recursive grammars  
-   Learn to use `parser {}` / `by lazy` and leverage associativity helpers for expression parsing.
-
-4. **⚙️ [Runtime Behavior](./docs/04-runtime.md)** - Understand errors and performance  
-   Deep dive into exceptions, full consumption requirements, and cache control.
-
-### Additional Resources
-
-- **[Complete Tutorial Guide](./docs/index.md)** — Entry point for all tutorial content
-- **[GitHub Pages](https://mirrgieriana.github.io/kotlin-peg-parser)** — Published documentation site
-- **[GitHub Repository](https://github.com/MirrgieRiana/kotlin-peg-parser/)** — Source code and issue tracking
-
----
-
-## Installation
-
-Gradle coordinates follow the project metadata (`group = "io.github.mirrgieriana.xarpite"`, `version = "1.0.0-SNAPSHOT"`). Add the dependency as usual:
-
-### Gradle (Kotlin DSL)
-
-```kotlin
-repositories {
-    maven { url = uri("https://raw.githubusercontent.com/MirrgieRiana/kotlin-peg-parser/maven/maven") }
-}
-
-dependencies {
-    implementation("io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.3")
-}
-```
-
-### Gradle (Groovy)
-
-```groovy
-repositories {
-    maven { url "https://raw.githubusercontent.com/MirrgieRiana/kotlin-peg-parser/maven/maven" }
-}
-
-dependencies {
-    implementation "io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.3"
-}
-```
-
----
-
 ## Features
 
 - **Kotlin Multiplatform** - JVM, JS (IR/Node.js), and Native (Linux x64)
@@ -109,6 +53,32 @@ Key points in the example:
 
 ---
 
+## 📚 Tutorial - Learn Step by Step
+
+Ready to build powerful parsers? Follow our structured tutorial guide to master Xarpeg from basics to advanced techniques:
+
+### Step-by-Step Learning Path
+
+1. **🚀 [Quickstart](./docs/01-quickstart.md)** - Build your first parser  
+   Start here with a minimal DSL example and learn how to run it immediately.
+
+2. **🔧 [Combinators](./docs/02-combinators.md)** - Combine parsers effectively  
+   Master sequences, choices, repetition, and other core patterns to build complex grammars.
+
+3. **🔁 [Expressions & Recursion](./docs/03-expressions.md)** - Handle recursive grammars  
+   Learn to use `parser {}` / `by lazy` and leverage associativity helpers for expression parsing.
+
+4. **⚙️ [Runtime Behavior](./docs/04-runtime.md)** - Understand errors and performance  
+   Deep dive into exceptions, full consumption requirements, and cache control.
+
+### Additional Resources
+
+- **[Complete Tutorial Guide](./docs/index.md)** — Entry point for all tutorial content
+- **[GitHub Pages](https://mirrgieriana.github.io/kotlin-peg-parser)** — Published documentation site
+- **[GitHub Repository](https://github.com/MirrgieRiana/kotlin-peg-parser/)** — Source code and issue tracking
+
+---
+
 ## Core Concepts & Combinators
 
 - **Parser<T>**: `fun interface` with `parseOrNull(context, start)`; parse helpers pass a `ParseContext` that handles caching.
@@ -123,16 +93,74 @@ Key points in the example:
 
 ---
 
-## Memoization and Performance
+### Memoization and Performance
 
 `ParseContext` caches results per `(parser, position)` when `useCache = true` (the default in `parseAllOrThrow`). Disable caching with `useCache = false` if you need to reduce memory and your grammar does not backtrack heavily.
 
 ---
 
-## Error Handling
+### Error Handling
 
 - `UnmatchedInputParseException` — nothing matched at the current position.
 - `ExtraCharactersParseException` — parsing succeeded but did not consume all input (reports the trailing position).
+
+---
+
+## Real-World Examples
+
+### Xarpite
+
+**Xarpite** is a practical application built using Xarpeg. It demonstrates how this library can be used in real-world scenarios to parse complex grammars efficiently.
+
+Xarpite serves as both:
+- A **working example** of the parser library in action
+- The **original project** from which this parser was extracted and generalized
+
+The parser component that powers Xarpite was refined over time and eventually extracted into this standalone library to make it reusable across different Kotlin Multiplatform projects.
+
+**Repository:** [github.com/MirrgieRiana/Xarpite](https://github.com/MirrgieRiana/Xarpite)
+
+Exploring the Xarpite source code can provide additional insights into:
+- Structuring larger parser grammars
+- Integrating the parser into a complete application
+- Performance optimization techniques with caching
+- Handling complex parsing scenarios
+
+---
+
+## Installation
+
+Gradle coordinates follow the project metadata (`group = "io.github.mirrgieriana.xarpite"`, `version = "1.0.0-SNAPSHOT"`). Add the dependency as usual:
+
+### Gradle (Kotlin DSL)
+
+```kotlin
+repositories {
+    maven { url = uri("https://raw.githubusercontent.com/MirrgieRiana/kotlin-peg-parser/maven/maven") }
+}
+
+dependencies {
+    implementation("io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.3")
+}
+```
+
+### Gradle (Groovy)
+
+```groovy
+repositories {
+    maven { url "https://raw.githubusercontent.com/MirrgieRiana/kotlin-peg-parser/maven/maven" }
+}
+
+dependencies {
+    implementation "io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.3"
+}
+```
+
+---
+
+## Versioning
+
+The current version is `1.0.0-SNAPSHOT`; the API may evolve while iterating on the operator-based DSL. Pin an explicit version when depending on this library.
 
 ---
 
@@ -176,37 +204,9 @@ Alternatively, you can run the hello sample directly:
 
 ---
 
-## Versioning
-
-The current version is `1.0.0-SNAPSHOT`; the API may evolve while iterating on the operator-based DSL. Pin an explicit version when depending on this library.
-
----
-
 ## License
 
 Xarpeg is distributed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-## Real-World Examples
-
-### Xarpite
-
-**Xarpite** is a practical application built using Xarpeg. It demonstrates how this library can be used in real-world scenarios to parse complex grammars efficiently.
-
-Xarpite serves as both:
-- A **working example** of the parser library in action
-- The **original project** from which this parser was extracted and generalized
-
-The parser component that powers Xarpite was refined over time and eventually extracted into this standalone library to make it reusable across different Kotlin Multiplatform projects.
-
-**Repository:** [github.com/MirrgieRiana/Xarpite](https://github.com/MirrgieRiana/Xarpite)
-
-Exploring the Xarpite source code can provide additional insights into:
-- Structuring larger parser grammars
-- Integrating the parser into a complete application
-- Performance optimization techniques with caching
-- Handling complex parsing scenarios
 
 ---
 
