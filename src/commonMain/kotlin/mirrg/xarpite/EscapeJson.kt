@@ -13,7 +13,12 @@ fun String.escapeJsonString(): String {
             '\t' -> builder.append("\\t")
             else -> {
                 if (ch < ' ') {
-                    builder.append("\\u%04x".format(ch.code))
+                    builder.append("\\u")
+                    val code = ch.code
+                    builder.append(((code shr 12) and 0xF).toHexDigit())
+                    builder.append(((code shr 8) and 0xF).toHexDigit())
+                    builder.append(((code shr 4) and 0xF).toHexDigit())
+                    builder.append((code and 0xF).toHexDigit())
                 } else {
                     builder.append(ch)
                 }
@@ -21,4 +26,9 @@ fun String.escapeJsonString(): String {
         }
     }
     return builder.toString()
+}
+
+private fun Int.toHexDigit(): Char {
+    val d = this and 0xF
+    return if (d < 10) ('0'.code + d).toChar() else ('a'.code + (d - 10)).toChar()
 }
