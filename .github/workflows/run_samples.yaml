@@ -20,12 +20,14 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
+      with:
+        cache-disabled: true
 
     - name: Build hello sample distribution
-      working-directory: samples
+      working-directory: samples/hello
       run: |
         # Build the executable distribution using Gradle
-        ../gradlew :hello:installDist --console=plain
+        ./gradlew installDist --console=plain
 
     - name: Run hello sample and verify output
       working-directory: samples/hello
