@@ -24,11 +24,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare site content
+      - name: Build site content (Markdown → HTML)
         run: |
           mkdir -p site
           cp README.md site/README.md
           cp -r docs site/docs
+          pandoc README.md -f gfm -t html -s -o site/index.html
+          find docs -name '*.md' -print0 | while IFS= read -r -d '' file; do
+            out="site/${file%.md}.html"
+            mkdir -p "$(dirname "$out")"
+            pandoc "$file" -f gfm -t html -s -o "$out"
+          done
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
