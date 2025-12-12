@@ -63,7 +63,11 @@ class ParserAdditionalTest {
     @Test
     fun zeroOrMoreStopsBeforeMismatch() = runTest {
         val parser = (+'a').zeroOrMore
-        assertEquals(listOf('a', 'a'), parser.parseAllOrThrow("aab"))
+        val context = ParseContext("aab", useCache = true)
+        val result = parser.parseOrNull(context, 0)
+        assertNotNull(result)
+        assertEquals(listOf('a', 'a'), result.value)
+        assertEquals(2, result.end)
     }
 
     @Test
@@ -80,7 +84,7 @@ class ParserAdditionalTest {
 
     @Test
     fun orParserTriesLaterBranches() = runTest {
-        val parser = +'a' + +'b' + +'c'
+        val parser = or(+'a', +'b', +'c')
         assertEquals('c', parser.parseAllOrThrow("c"))
     }
 
@@ -112,7 +116,7 @@ class ParserAdditionalTest {
 
     @Test
     fun leftAssociativeStopsAtGap() = runTest {
-        val num = +Regex("[0-9]+")
+        val num = +Regex("[0-9]+") map { it.value.toInt() }
         val add = leftAssociative(num, -'+') { a, _, b -> a + b }
         assertExtraCharacters { add.parseAllOrThrow("1+2x3") }
     }
