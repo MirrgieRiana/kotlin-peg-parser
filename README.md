@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.0-SNAPSHOT")
+    implementation("io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.3")
 }
 ```
 
@@ -49,7 +49,7 @@ repositories {
 }
 
 dependencies {
-    implementation "io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.0-SNAPSHOT"
+    implementation "io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.3"
 }
 ```
 
