@@ -93,6 +93,9 @@ tasks.register("generateTuples") {
     val generatedTupleParserKt = outputDirParsers.get().file("TupleParser.kt").asFile
     
     doLast {
+        // Configuration: Maximum tuple size to generate
+        val maxTupleSize = 5
+        
         // Create output directories
         generatedTuplesKt.parentFile.mkdirs()
         generatedTupleParserKt.parentFile.mkdirs()
@@ -103,7 +106,7 @@ tasks.register("generateTuples") {
             appendLine("package mirrg.xarpite.parser")
             appendLine()
             appendLine("object Tuple0")
-            for (n in 1..5) {
+            for (n in 1..maxTupleSize) {
                 val params = typeParams.take(n)
                 val typeParamStr = params.joinToString(", ") { "out $it" }
                 val paramStr = params.mapIndexed { i, p -> "val ${p.lowercase()}: $p" }.joinToString(", ")
@@ -120,7 +123,7 @@ tasks.register("generateTuples") {
             appendLine("import mirrg.xarpite.parser.ParseResult")
             appendLine("import mirrg.xarpite.parser.Parser")
             appendLine("import mirrg.xarpite.parser.Tuple0")
-            for (n in 1..5) {
+            for (n in 1..maxTupleSize) {
                 appendLine("import mirrg.xarpite.parser.Tuple$n")
             }
             appendLine("import kotlin.jvm.JvmName")
@@ -151,7 +154,7 @@ tasks.register("generateTuples") {
             appendLine("@JvmName(\"times0P\")")
             appendLine("operator fun <A : Any> Parser<Tuple0>.times(other: Parser<A>) = combine(this, other) { _, b -> b }")
             appendLine()
-            for (n in 1..5) {
+            for (n in 1..maxTupleSize) {
                 val params = typeParams.take(n)
                 val typeParamStr = params.joinToString(", ") { "$it : Any" }
                 appendLine("@JvmName(\"times0$n\")")
@@ -164,7 +167,7 @@ tasks.register("generateTuples") {
             appendLine("@JvmName(\"timesP0\")")
             appendLine("operator fun <A : Any> Parser<A>.times(other: Parser<Tuple0>) = combine(this, other) { a, _ -> a }")
             appendLine()
-            for (n in 1..5) {
+            for (n in 1..maxTupleSize) {
                 val params = typeParams.take(n)
                 val typeParamStr = params.joinToString(", ") { "$it : Any" }
                 appendLine("@JvmName(\"times${n}0\")")
@@ -180,7 +183,7 @@ tasks.register("generateTuples") {
             appendLine()
             appendLine("// Parser vs TupleNParser = Tuple(N+1)Parser")
             appendLine()
-            for (n in 1..4) {
+            for (n in 1..(maxTupleSize - 1)) {
                 val resultN = n + 1
                 val rightParams = typeParams.subList(1, n + 1)  // B, C, D, E (skip A)
                 val resultParams = typeParams.take(resultN)
@@ -193,7 +196,7 @@ tasks.register("generateTuples") {
             appendLine()
             appendLine("// TupleNParser vs Parser = Tuple(N+1)Parser")
             appendLine()
-            for (n in 1..4) {
+            for (n in 1..(maxTupleSize - 1)) {
                 val resultN = n + 1
                 val leftParams = typeParams.take(n)
                 val resultParams = typeParams.take(resultN)
@@ -207,10 +210,10 @@ tasks.register("generateTuples") {
             appendLine("// TupleNParser vs TupleMParser = Tuple(N+M)Parser")
             appendLine()
             val combinations = mutableListOf<Triple<Int, Int, Int>>()
-            for (leftN in 1..4) {
-                for (rightN in 1..4) {
+            for (leftN in 1..(maxTupleSize - 1)) {
+                for (rightN in 1..(maxTupleSize - 1)) {
                     val resultN = leftN + rightN
-                    if (resultN <= 5) {
+                    if (resultN <= maxTupleSize) {
                         combinations.add(Triple(leftN, rightN, resultN))
                     }
                 }
