@@ -43,7 +43,7 @@ class ParserAdditionalTest {
 
     @Test
     fun regexParserAnchorsAtStart() = runTest {
-        val parser = +Regex("[a-z]+")
+        val parser = +Regex("[a-z]+") map { it.value }
         assertUnmatchedInput { parser.parseAllOrThrow("1abc") }
         assertEquals("abc", parser.parseAllOrThrow("abc"))
     }
@@ -100,16 +100,15 @@ class ParserAdditionalTest {
     fun ignoreParserConsumesValue() = runTest {
         val parser = -'q' * +'w'
         val result = parser.parseAllOrThrow("qw")
-        assertEquals('w', result.b)
+        assertEquals('w', result)
     }
 
     @Test
     fun delegationParserAllowsMutualRecursion() = runTest {
         val language = object {
-            val term = +Regex("[0-9]+") + ( -'(' * parser { expr } * -')' )
-            val expr: mirrg.xarpite.parser.Parser<Int> by lazy {
-                leftAssociative(term, -'+') { a, _, b -> a + b }
-            }
+            val number = +Regex("[0-9]+") map { it.value.toInt() }
+            val term: mirrg.xarpite.parser.Parser<Int> by lazy { number + ( -'(' * parser { expr } * -')' ) }
+            val expr: mirrg.xarpite.parser.Parser<Int> by lazy { leftAssociative(term, -'+') { a, _, b -> a + b } }
         }
         assertEquals(6, language.expr.parseAllOrThrow("1+2+3"))
         assertEquals(9, language.expr.parseAllOrThrow("(4+5)"))
@@ -124,7 +123,7 @@ class ParserAdditionalTest {
 
     @Test
     fun rightAssociativeConsumesChain() = runTest {
-        val num = +Regex("[0-9]+")
+        val num = +Regex("[0-9]+") map { it.value }
         val pow = rightAssociative(num, -'^') { a, _, b -> "${a}^$b" }
         assertEquals("1^2^3", pow.parseAllOrThrow("1^2^3"))
     }

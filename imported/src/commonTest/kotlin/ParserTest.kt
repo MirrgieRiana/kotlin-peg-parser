@@ -1,5 +1,3 @@
-import assertExtraCharacters
-import assertUnmatchedInput
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -303,4 +301,29 @@ class ParserTest {
 
     }
 
+    companion object {
+
+        private fun assertExtraCharacters(block: () -> Unit) {
+            try {
+                block()
+                fail("Expected ExtraCharactersParseException, but no exception was thrown.")
+            } catch (_: ExtraCharactersParseException) {
+                // ok
+            } catch (e: Throwable) {
+                fail("Expected ExtraCharactersParseException, but got ${e::class}", e)
+            }
+        }
+
+        private fun assertUnmatchedInput(block: () -> Unit) {
+            try {
+                block()
+                fail("Expected UnmatchedInputParseException, but no exception was thrown.")
+            } catch (_: UnmatchedInputParseException) {
+                // ok
+            } catch (e: Throwable) {
+                fail("Expected UnmatchedInputParseException, but got ${e::class}", e)
+            }
+        }
+
+    }
 }

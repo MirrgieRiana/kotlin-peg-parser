@@ -33,10 +33,13 @@ kotlin {
     }
     
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            kotlin.srcDir("imported/src/commonMain/kotlin")
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
             }
         }
         val jvmMain by getting
