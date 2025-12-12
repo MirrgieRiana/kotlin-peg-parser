@@ -2,7 +2,7 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url = uri("../build/maven") }
+        maven { url = uri("https://raw.githubusercontent.com/MirrgieRiana/kotlin-peg-parser/maven/maven") }
     }
 }
 
