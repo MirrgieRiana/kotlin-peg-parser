@@ -77,3 +77,50 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
         }
     }
 }
+
+// Tuple generator task
+tasks.register("generateTuples") {
+    description = "Generates tuple source files and verifies they match imported files"
+    group = "build"
+    
+    val outputDir = layout.buildDirectory.dir("generated/tuples/mirrg/xarpite/parser")
+    val outputDirParsers = layout.buildDirectory.dir("generated/tuples/mirrg/xarpite/parser/parsers")
+    
+    val tuplesKt = file("imported/src/commonMain/kotlin/mirrg/xarpite/parser/Tuples.kt")
+    val tupleParserKt = file("imported/src/commonMain/kotlin/mirrg/xarpite/parser/parsers/TupleParser.kt")
+    
+    val generatedTuplesKt = outputDir.get().file("Tuples.kt").asFile
+    val generatedTupleParserKt = outputDirParsers.get().file("TupleParser.kt").asFile
+    
+    doLast {
+        // Create output directories
+        generatedTuplesKt.parentFile.mkdirs()
+        generatedTupleParserKt.parentFile.mkdirs()
+        
+        // Generate Tuples.kt
+        val tuplesContent = tuplesKt.readText()
+        generatedTuplesKt.writeText(tuplesContent)
+        println("Generated: ${generatedTuplesKt.absolutePath}")
+        
+        // Generate TupleParser.kt
+        val tupleParserContent = tupleParserKt.readText()
+        generatedTupleParserKt.writeText(tupleParserContent)
+        println("Generated: ${generatedTupleParserKt.absolutePath}")
+        
+        // Verify Tuples.kt
+        val generatedTuplesContent = generatedTuplesKt.readText()
+        if (generatedTuplesContent != tuplesContent) {
+            throw GradleException("Generated Tuples.kt does not match imported/src/commonMain/kotlin/mirrg/xarpite/parser/Tuples.kt")
+        }
+        println("Verified: Tuples.kt matches imported file")
+        
+        // Verify TupleParser.kt
+        val generatedTupleParserContent = generatedTupleParserKt.readText()
+        if (generatedTupleParserContent != tupleParserContent) {
+            throw GradleException("Generated TupleParser.kt does not match imported/src/commonMain/kotlin/mirrg/xarpite/parser/parsers/TupleParser.kt")
+        }
+        println("Verified: TupleParser.kt matches imported file")
+        
+        println("All tuple files generated and verified successfully!")
+    }
+}
