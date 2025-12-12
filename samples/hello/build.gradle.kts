@@ -60,7 +60,7 @@ tasks.register<Copy>("installDist") {
         batFile.writeText("""
             @echo off
             set SCRIPT_DIR=%~dp0
-            set CLASSPATH=%SCRIPT_DIR%..\lib\*
+            set CLASSPATH=%SCRIPT_DIR%..\\lib\\*
             java -cp "%CLASSPATH%" mirrg.xarpite.samples.hello.MainKt %*
         """.trimIndent())
     }
