@@ -107,8 +107,12 @@ class ParserAdditionalTest {
     fun delegationParserAllowsMutualRecursion() = runTest {
         val language = object {
             val number = +Regex("[0-9]+") map { it.value.toInt() }
-            val term: mirrg.xarpite.parser.Parser<Int> by lazy { number + ( -'(' * parser { expr } * -')' ) }
-            val expr: mirrg.xarpite.parser.Parser<Int> by lazy { leftAssociative(term, -'+') { a, _, b -> a + b } }
+            val term: mirrg.xarpite.parser.Parser<Int> by lazy {
+                number + (-'(' * parser { expr } * -')')
+            }
+            val expr: mirrg.xarpite.parser.Parser<Int> by lazy {
+                leftAssociative(term, -'+') { a, _, b -> a + b }
+            }
         }
         assertEquals(6, language.expr.parseAllOrThrow("1+2+3"))
         assertEquals(9, language.expr.parseAllOrThrow("(4+5)"))
