@@ -4,24 +4,31 @@
 
 Xarpeg provides a compact, operator-driven parser combinator API. It targets JVM, JS (Node.js), and Linux x64, works directly on raw input strings (no tokenizer), and ships with opt-in caching to keep backtracking predictable.
 
-## Features
-
-- **Kotlin Multiplatform** - JVM, JS (IR/Node.js), and Native (Linux x64)
-- **Operator-based DSL** - Unary `+` builds parsers from literals/regex, binary `+` expresses alternatives, `*` sequences tuples, `!` is negative lookahead, `-` ignores tokens
-- **Tuple-centric results** - Sequence results are `Tuple0..Tuple5` so you can explicitly keep or drop intermediate values
-- **Built-in cache** - Memoizes `(parser, position)` by default; toggle per parse call
-- **No tokenizer** - Consume the source `String` directly with character, string, or regex parsers
-
 ---
 
-## Tutorial
+## 📚 Tutorial - Learn Step by Step
 
-### Links
+Ready to build powerful parsers? Follow our structured tutorial guide to master Xarpeg from basics to advanced techniques:
 
-- [GitHub Repository](https://github.com/MirrgieRiana/kotlin-peg-parser/) — Official repository for source code and issue tracking
-- [GitHub Pages](https://mirrgieriana.github.io/kotlin-peg-parser) — Published site that serves the README and `docs` directory
+### Step-by-Step Learning Path
 
-See the published docs entry point at [docs/index.md](./docs/index.md). GitHub Pages hosts the README at the site root with the `docs` directory preserved for deeper content.
+1. **🚀 [Quickstart](./docs/01-quickstart.md)** - Build your first parser  
+   Start here with a minimal DSL example and learn how to run it immediately.
+
+2. **🔧 [Combinators](./docs/02-combinators.md)** - Combine parsers effectively  
+   Master sequences, choices, repetition, and other core patterns to build complex grammars.
+
+3. **🔁 [Expressions & Recursion](./docs/03-expressions.md)** - Handle recursive grammars  
+   Learn to use `parser {}` / `by lazy` and leverage associativity helpers for expression parsing.
+
+4. **⚙️ [Runtime Behavior](./docs/04-runtime.md)** - Understand errors and performance  
+   Deep dive into exceptions, full consumption requirements, and cache control.
+
+### Additional Resources
+
+- **[Complete Tutorial Guide](./docs/index.md)** — Entry point for all tutorial content
+- **[GitHub Pages](https://mirrgieriana.github.io/kotlin-peg-parser)** — Published documentation site
+- **[GitHub Repository](https://github.com/MirrgieRiana/kotlin-peg-parser/)** — Source code and issue tracking
 
 ---
 
@@ -52,6 +59,16 @@ dependencies {
     implementation "io.github.mirrgieriana.xarpite:kotlin-peg-parser:1.0.3"
 }
 ```
+
+---
+
+## Features
+
+- **Kotlin Multiplatform** - JVM, JS (IR/Node.js), and Native (Linux x64)
+- **Operator-based DSL** - Unary `+` builds parsers from literals/regex, binary `+` expresses alternatives, `*` sequences tuples, `!` is negative lookahead, `-` ignores tokens
+- **Tuple-centric results** - Sequence results are `Tuple0..Tuple5` so you can explicitly keep or drop intermediate values
+- **Built-in cache** - Memoizes `(parser, position)` by default; toggle per parse call
+- **No tokenizer** - Consume the source `String` directly with character, string, or regex parsers
 
 ---
 
@@ -87,6 +104,8 @@ Key points in the example:
 - `*` sequences parsers and returns tuples (`Tuple1..Tuple5`), preserving the parts you care about.
 - `leftAssociative`/`rightAssociative` build operator chains without manual recursion.
 - `parseAllOrThrow` requires the entire input to be consumed; it throws on unmatched input or trailing characters.
+
+> 💡 **Want to learn more?** Check out the [Tutorial section](#-tutorial---learn-step-by-step) above for a complete step-by-step guide!
 
 ---
 
