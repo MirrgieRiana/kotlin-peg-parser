@@ -20,19 +20,19 @@
     
     <nav class="header-nav" style="margin-top: 1.5rem;">
       <a href="{{ '/' | relative_url }}" class="btn">Home</a>
-      <a href="{{ '/チュートリアル/' | relative_url }}" class="btn">チュートリアル</a>
+      <a href="{{ '/docs/' | relative_url }}" class="btn">チュートリアル</a>
       <a href="{{ site.repository }}" class="btn" target="_blank">GitHub</a>
     </nav>
   </header>
 
   <main class="main-content" role="main">
-    {% if page.url contains '/チュートリアル/' and page.url != '/チュートリアル/index.html' %}
-    <nav class="doc-nav" aria-label="Documentation Navigation">
-      <a href="{{ '/チュートリアル/' | relative_url }}" class="doc-nav-item">📚 Guide Home</a>
-      <a href="{{ '/チュートリアル/01-quickstart.html' | relative_url }}" class="doc-nav-item">🚀 Step 1: Quickstart</a>
-      <a href="{{ '/チュートリアル/02-combinators.html' | relative_url }}" class="doc-nav-item">🔧 Step 2: Combinators</a>
-      <a href="{{ '/チュートリアル/03-expressions.html' | relative_url }}" class="doc-nav-item">🎯 Step 3: Expressions</a>
-      <a href="{{ '/チュートリアル/04-runtime.html' | relative_url }}" class="doc-nav-item">⚙️ Step 4: Runtime</a>
+    {% if page.url contains '/docs/' and page.url != '/docs/index.html' %}
+    <nav class="doc-nav" aria-label="チュートリアルナビゲーション">
+      <a href="{{ '/docs/' | relative_url }}" class="doc-nav-item">📚 チュートリアルホーム</a>
+      <a href="{{ '/docs/01-quickstart.html' | relative_url }}" class="doc-nav-item">🚀 Step 1: Quickstart</a>
+      <a href="{{ '/docs/02-combinators.html' | relative_url }}" class="doc-nav-item">🔧 Step 2: Combinators</a>
+      <a href="{{ '/docs/03-expressions.html' | relative_url }}" class="doc-nav-item">🎯 Step 3: Expressions</a>
+      <a href="{{ '/docs/04-runtime.html' | relative_url }}" class="doc-nav-item">⚙️ Step 4: Runtime</a>
     </nav>
     {% endif %}
 
@@ -40,19 +40,19 @@
       {{ content }}
     </article>
 
-    {% if page.url contains '/チュートリアル/' %}
+    {% if page.url contains '/docs/' %}
     <nav style="margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border-color); display: flex; justify-content: space-between;">
       {% if page.url contains '01-quickstart' %}
         <div></div>
-        <a href="{{ '/チュートリアル/02-combinators.html' | relative_url }}" style="font-weight: 600;">Next: Step 2 – Combinators →</a>
+        <a href="{{ '/docs/02-combinators.html' | relative_url }}" style="font-weight: 600;">Next: Step 2 – Combinators →</a>
       {% elsif page.url contains '02-combinators' %}
-        <a href="{{ '/チュートリアル/01-quickstart.html' | relative_url }}" style="font-weight: 600;">← Previous: Step 1 – Quickstart</a>
-        <a href="{{ '/チュートリアル/03-expressions.html' | relative_url }}" style="font-weight: 600;">Next: Step 3 – Expressions →</a>
+        <a href="{{ '/docs/01-quickstart.html' | relative_url }}" style="font-weight: 600;">← Previous: Step 1 – Quickstart</a>
+        <a href="{{ '/docs/03-expressions.html' | relative_url }}" style="font-weight: 600;">Next: Step 3 – Expressions →</a>
       {% elsif page.url contains '03-expressions' %}
-        <a href="{{ '/チュートリアル/02-combinators.html' | relative_url }}" style="font-weight: 600;">← Previous: Step 2 – Combinators</a>
-        <a href="{{ '/チュートリアル/04-runtime.html' | relative_url }}" style="font-weight: 600;">Next: Step 4 – Runtime →</a>
+        <a href="{{ '/docs/02-combinators.html' | relative_url }}" style="font-weight: 600;">← Previous: Step 2 – Combinators</a>
+        <a href="{{ '/docs/04-runtime.html' | relative_url }}" style="font-weight: 600;">Next: Step 4 – Runtime →</a>
       {% elsif page.url contains '04-runtime' %}
-        <a href="{{ '/チュートリアル/03-expressions.html' | relative_url }}" style="font-weight: 600;">← Previous: Step 3 – Expressions</a>
+        <a href="{{ '/docs/03-expressions.html' | relative_url }}" style="font-weight: 600;">← Previous: Step 3 – Expressions</a>
         <div></div>
       {% endif %}
     </nav>

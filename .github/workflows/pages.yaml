@@ -27,7 +27,7 @@ jobs:
 
       - name: Prepare Jekyll source
         run: |
-          mkdir -p site-src/チュートリアル site-src/assets/css site-src/_layouts site-src/_includes
+          mkdir -p site-src/docs site-src/assets/css site-src/_layouts site-src/_includes
           # Copy config, assets, layouts, and includes
           cp pages/_config.yml site-src/
           cp pages/assets/css/style.scss site-src/assets/css/
@@ -43,8 +43,8 @@ jobs:
           EOF
             cat README.md
           } > site-src/index.md
-          # Copy tutorial documentation with front matter
-          find チュートリアル -name '*.md' -print0 | while IFS= read -r -d '' file; do
+          # Copy documentation with front matter
+          find docs -name '*.md' -print0 | while IFS= read -r -d '' file; do
             dest="site-src/$file"
             mkdir -p "$(dirname "$dest")"
             {

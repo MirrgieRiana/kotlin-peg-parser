@@ -5,11 +5,11 @@ show_downloads: false
 
 # Navigation
 header_pages:
-  - チュートリアル/index.md
-  - チュートリアル/01-quickstart.md
-  - チュートリアル/02-combinators.md
-  - チュートリアル/03-expressions.md
-  - チュートリアル/04-runtime.md
+  - docs/index.md
+  - docs/01-quickstart.md
+  - docs/02-combinators.md
+  - docs/03-expressions.md
+  - docs/04-runtime.md
 
 # Appearance
 markdown: kramdown
