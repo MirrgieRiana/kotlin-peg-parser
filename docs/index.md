@@ -1,4 +1,4 @@
-# Kotlin PEG Parser Guide
+# Xarpeg: Kotlin PEG Parser Guide
 
 This guide is split into themed subpages so you can learn step by step. For API signatures, rely on IDE completion and KDoc.
 
