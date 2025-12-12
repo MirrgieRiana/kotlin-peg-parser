@@ -31,5 +31,4 @@ fun main() {
 2. `parseAllOrThrow` throws if the input is not fully consumed, so you notice bad input immediately.
 3. Use IDE completion and KDoc to inspect each combinator’s types and return shapes.
 
-Next, expand the composition patterns to build richer grammars.  
-→ [Step 2: Combine parsers](02-combinators.md)
+Next, expand the composition patterns to build richer grammars.
