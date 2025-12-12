@@ -12,6 +12,8 @@ This guide is split into themed subpages so you can learn step by step. For API 
   → [03-expressions.md](03-expressions.md)
 - **Step 4 – Errors and runtime behavior:** exceptions, full consumption, cache on/off  
   → [04-runtime.md](04-runtime.md)
+- **Step 5 – Working with parsing positions:** using `mapEx` to access positions while keeping types simple  
+  → [05-positions.md](05-positions.md)
 
 ## When you want more detail
 
