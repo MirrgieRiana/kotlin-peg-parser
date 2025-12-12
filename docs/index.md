@@ -15,6 +15,19 @@ This guide is split into themed subpages so you can learn step by step. For API 
 - **Step 5 – Working with parsing positions:** using `mapEx` to access positions while keeping types simple  
   → [05-positions.md](05-positions.md)
 
+## Complete example: JSON parser
+
+Want to see a real-world parser in action? Check out the full JSON parser implementation that handles all JSON data types including strings with escape sequences, numbers, booleans, null, arrays, and nested objects with recursion.
+
+→ [src/commonTest/kotlin/JsonParserTest.kt](https://github.com/MirrgieRiana/kotlin-peg-parser/blob/main/src/commonTest/kotlin/JsonParserTest.kt)
+
+This example demonstrates:
+- Parsing strings with escape sequences (`\"`, `\\`, `\n`, `\uXXXX`, etc.)
+- Handling numbers in various formats (integers, decimals, scientific notation)
+- Building recursive parsers for arrays and objects using `by lazy` and `parser {}`
+- Separating list items with custom separator parsers
+- Comprehensive unit tests showing the parser in action
+
 ## When you want more detail
 
 - For observed behavior, the tests in `imported/src/commonTest/kotlin/ParserTest.kt` are a quick reference.
