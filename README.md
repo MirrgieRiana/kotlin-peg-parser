@@ -49,7 +49,7 @@ Key points in the example:
 - `leftAssociative`/`rightAssociative` build operator chains without manual recursion.
 - `parseAllOrThrow` requires the entire input to be consumed; it throws on unmatched input or trailing characters.
 
-> 💡 **Want to learn more?** Check out the [Tutorial section](#-tutorial---learn-step-by-step) above for a complete step-by-step guide!
+> 💡 **Want to learn more?** Check out the [Tutorial section](#-tutorial---learn-step-by-step) below for a complete step-by-step guide!
 
 ---
 
@@ -166,7 +166,7 @@ dependencies {
 
 ## Versioning
 
-The current version is `1.0.0-SNAPSHOT`; the API may evolve while iterating on the operator-based DSL. Pin an explicit version when depending on this library.
+The latest published version is `1.0.3`; the API may evolve while iterating on the operator-based DSL. Pin an explicit version when depending on this library.
 
 ---
 
@@ -205,7 +205,7 @@ Alternatively, you can run the hello sample directly:
 
 ```bash
 ./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishJvmPublicationToMavenLocal
-(cd samples && ../gradlew :hello:jvmRun)
+(cd samples && ../gradlew :hello:run)
 ```
 
 ---
