@@ -261,7 +261,7 @@ tasks.register("generateSrcFromDocs") {
     description = "Extracts Kotlin code blocks from README.md and docs into generated sources"
     group = "documentation"
 
-    val outputDir = layout.buildDirectory.dir("generated/docs")
+    val outputDir = layout.projectDirectory.dir("src/commonMain/kotlin")
 
     inputs.files(file("README.md"), fileTree("docs") { include("**/*.md") })
     outputs.dir(outputDir)
