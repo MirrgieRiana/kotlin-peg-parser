@@ -16,6 +16,11 @@
 
 ## Documentation
 
+### Links
+
+- [GitHub Repository](https://github.com/MirrgieRiana/kotlin-peg-parser/) — Official repository for source code and issue tracking
+- [GitHub Pages](https://mirrgieriana.github.io/kotlin-peg-parser) — Published site that serves the README and `docs` directory
+
 See the published docs entry point at [docs/index.md](./docs/index.md). GitHub Pages hosts the README at the site root with the `docs` directory preserved for deeper content.
 
 ---
@@ -134,6 +139,14 @@ A small Hello World app is available for quick verification:
 ```bash
 ./gradlew jvmJar
 java -cp build/libs/kotlin-peg-parser-jvm-1.0.0-SNAPSHOT.jar mirrg.xarpite.peg.HelloWorldKt
+```
+
+A standalone Gradle sample that consumes the library via its Maven coordinate lives under `samples/hello`:
+
+```bash
+./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishJvmPublicationToMavenLocal
+(cd samples && ../gradlew :hello:build)
+java -cp samples/hello/build/libs/hello-jvm-1.0.0-SNAPSHOT.jar mirrg.xarpite.samples.hello.MainKt
 ```
 
 ---
