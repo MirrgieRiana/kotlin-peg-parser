@@ -267,7 +267,7 @@ tasks.register("generateSrcFromDocs") {
     outputs.dir(outputDir)
 
     doLast {
-        val kotlinBlockRegex = Regex("""^```kotlin\s*\R(.*?)\R```""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
+        val kotlinBlockRegex = Regex("""```kotlin\s*\R(.*?)\R```""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
         val projectDirFile = projectDir
         val sourceFiles = listOf(file("README.md")) + fileTree("docs") { include("**/*.md") }.files
 
