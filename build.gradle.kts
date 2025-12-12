@@ -52,6 +52,7 @@ kotlin {
 publishing {
     repositories {
         maven {
+            name = "local"
             url = uri(layout.buildDirectory.dir("maven"))
         }
     }
