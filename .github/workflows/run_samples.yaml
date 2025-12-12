@@ -33,7 +33,7 @@ jobs:
       working-directory: samples/java-run
       run: |
         # Run the sample using java command directly
-        OUTPUT=$(java -cp "build/install/java-run/lib/*" mirrg.xarpite.samples.javarun.MainKt)
+        OUTPUT=$(java -cp "build/install/java-run/lib/*" mirrg.xarpite.samples.java_run.MainKt)
         echo "Sample output: $OUTPUT"
         
         # Expected output
