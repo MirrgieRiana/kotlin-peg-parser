@@ -194,18 +194,18 @@ A small Hello World app is available for quick verification:
 java -cp build/libs/kotlin-peg-parser-jvm-1.0.0-SNAPSHOT.jar mirrg.xarpite.peg.HelloWorldKt
 ```
 
-A standalone Gradle sample that consumes the library via its Maven coordinate lives under `samples/hello`:
+A standalone Gradle sample that consumes the library via its Maven coordinate lives under `samples/java-run`:
 
 ```bash
 ./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishJvmPublicationToMavenLocal
-(cd samples/hello && ./gradlew run)
+(cd samples/java-run && ./gradlew run)
 ```
 
 ---
 
 ## License
 
-Xarpeg is distributed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Xarpeg is distributed under the MIT License. See the [LICENSE](https://github.com/MirrgieRiana/kotlin-peg-parser/blob/main/LICENSE) file for details.
 
 ---
 
