@@ -292,26 +292,13 @@ tasks.register("generateSrcFromDocs") {
                             } else false
                         }.joinToString("\n").trim()
 
-                        val objectName = relativePath.replace("/", "_").replace(".", "_")
-                            .replace(Regex("[^A-Za-z0-9_]"), "_") + "_block$index"
-
                         val fileContent = buildString {
                             appendLine("@file:Suppress(\"unused\")")
                             appendLine("package docsnippets")
                             appendLine()
                             imports.forEach { appendLine(it) }
                             if (imports.isNotEmpty()) appendLine()
-                            appendLine("object $objectName {")
-                            if (blockBody.isNotEmpty()) {
-                                blockBody.lines().forEach { line ->
-                                    if (line.isNotEmpty()) {
-                                        appendLine("    $line")
-                                    } else {
-                                        appendLine()
-                                    }
-                                }
-                            }
-                            appendLine("}")
+                            appendLine(blockBody)
                         }
                         val blockFile = outputDir.file("${relativePath.replace("/", ".")}.block$index.kt").asFile
                         blockFile.parentFile.mkdirs()
