@@ -138,6 +138,12 @@ java -cp build/libs/kotlin-peg-parser-jvm-1.0.0-SNAPSHOT.jar mirrg.xarpite.peg.H
 
 ---
 
+### Documentation contributions
+
+- Write all documentation (including `docs/`) in English.
+
+---
+
 ## Versioning
 
 The current version is `1.0.0-SNAPSHOT`; the API may evolve while iterating on the operator-based DSL. Pin an explicit version when depending on this library.
