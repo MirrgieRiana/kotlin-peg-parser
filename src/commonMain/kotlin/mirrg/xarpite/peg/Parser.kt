@@ -17,8 +17,8 @@ fun <T> repeatParser(parser: Parser<T>): Parser<List<T>> = fun(input: String): P
     val results = mutableListOf<T>()
 
     while (rest.isNotEmpty()) {
-        val result = parser(rest) ?: return null
-        if (result.rest.length == rest.length) return null
+        val result = parser(rest) ?: break
+        if (result.rest.length == rest.length) break
         results.add(result.value)
         rest = result.rest
     }

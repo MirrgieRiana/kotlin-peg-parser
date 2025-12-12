@@ -25,6 +25,16 @@ class ParserTest {
     }
 
     @Test
+    fun repeatAllowsZeroMatch() {
+        val parser = repeatParser(parseA)
+        val result = parser("")
+
+        assertNotNull(result)
+        assertEquals(emptyList<String>(), result.value)
+        assertEquals("", result.rest)
+    }
+
+    @Test
     fun failWhenNoALeading() {
         assertNull(parseA("b"))
     }
