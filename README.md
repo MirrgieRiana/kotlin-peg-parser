@@ -19,9 +19,9 @@
 ### Links
 
 - [GitHub Repository](https://github.com/MirrgieRiana/kotlin-peg-parser/) — Official repository for source code and issue tracking
-- [GitHub Pages](https://mirrgieriana.github.io/kotlin-peg-parser) — Published site that serves the README and `docs` directory
+- [GitHub Pages](https://mirrgieriana.github.io/kotlin-peg-parser) — Published site that serves the README and `チュートリアル` directory
 
-See the published docs entry point at [docs/index.md](./docs/index.md). GitHub Pages hosts the README at the site root with the `docs` directory preserved for deeper content.
+See the published tutorial entry point at [チュートリアル/index.md](./チュートリアル/index.md). GitHub Pages hosts the README at the site root with the `チュートリアル` directory preserved for deeper content.
 
 ---
 
