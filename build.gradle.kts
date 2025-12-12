@@ -267,7 +267,7 @@ tasks.register("generateSrcFromDocs") {
     outputs.dir(outputDir)
 
     doLast {
-        val kotlinBlockRegex = Regex("""```kotlin\s*\n(.*?)```""", setOf(RegexOption.DOT_MATCHES_ALL))
+        val kotlinBlockRegex = Regex("""```kotlin\s*\n?(.*?)```""", setOf(RegexOption.DOT_MATCHES_ALL))
         val projectDirFile = projectDir
         val sourceFiles = listOf(file("README.md")) + fileTree("docs") { include("**/*.md") }.files
 
@@ -276,11 +276,17 @@ tasks.register("generateSrcFromDocs") {
             .forEach { sourceFile ->
                 val relativePath = sourceFile.relativeTo(projectDirFile).path.replace('\\', '/')
                 val outputFile = outputDir.get().file("${relativePath.replace("/", ".")}.kt").asFile
-                outputFile.parentFile.mkdirs()
-
                 val codeBlocks = kotlinBlockRegex.findAll(sourceFile.readText()).map { it.groupValues[1].trimEnd() }.toList()
-                outputFile.writeText(codeBlocks.joinToString("\n\n"))
-                println("Generated: ${outputFile.absolutePath}")
+                if (codeBlocks.isNotEmpty()) {
+                    outputFile.parentFile.mkdirs()
+                    outputFile.writeText(codeBlocks.joinToString("\n\n"))
+                    println("Generated: ${outputFile.absolutePath}")
+                } else if (outputFile.exists()) {
+                    outputFile.delete()
+                    println("Removed: ${outputFile.absolutePath}")
+                } else {
+                    println("Skipped (no Kotlin blocks): ${relativePath}")
+                }
             }
     }
 }
