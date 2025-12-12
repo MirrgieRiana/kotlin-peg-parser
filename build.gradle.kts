@@ -11,7 +11,7 @@ repositories {
     mavenCentral()
 }
 
-val generatedDocsDir = layout.buildDirectory.dir("generated/docsnippets")
+val generatedDocsDir = layout.buildDirectory.dir("docSrc")
 
 kotlin {
     // JVM target
@@ -260,7 +260,7 @@ tasks.register("generateTuples") {
 }
 
 // Documentation source generator task
-tasks.register("generateSrcFromDocs") {
+tasks.register("generateDocSrc") {
     description = "Extracts Kotlin code blocks from README.md and docs into generated sources"
     group = "documentation"
 
