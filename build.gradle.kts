@@ -19,14 +19,18 @@ kotlin {
     
     // JS target with module kind
     js(IR) {
-        binaries.executable()
+        binaries.executable {
+            entryPoint = "mirrg.xarpite.peg.main"
+        }
         nodejs()
     }
     
     // Native target for Linux x64
     linuxX64 {
         binaries {
-            executable()
+            executable {
+                entryPoint = "mirrg.xarpite.peg.main"
+            }
         }
     }
     
