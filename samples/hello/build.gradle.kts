@@ -3,6 +3,12 @@ plugins {
     application
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = uri("https://raw.githubusercontent.com/MirrgieRiana/kotlin-peg-parser/maven/maven") }
+}
+
 group = "mirrg.xarpite.samples"
 version = "1.0.3"
 

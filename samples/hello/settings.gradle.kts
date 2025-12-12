@@ -9,5 +9,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "samples"
-include("hello")
+rootProject.name = "hello"
