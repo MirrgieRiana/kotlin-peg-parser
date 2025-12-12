@@ -2,8 +2,8 @@
 
 Welcome to the `mirrg.xarpite.kotlin-peg-parser` docs.
 
-- Start with the [Quick Start](../README.md#quick-start) in the site root README.
-- Explore the operator DSL and combinators in the [Core Concepts & Combinators](../README.md#core-concepts--combinators) section.
-- See error handling details in the [Error Handling](../README.md#error-handling) section.
+- Start with the Quick Start in the [README](../README.md) at the site root.
+- Explore the operator DSL and combinators described in the [README](../README.md).
+- See error handling details in the [README](../README.md) as well.
 
 This site is published from the `main` branch via GitHub Pages with the `docs` directory kept at the top level.
