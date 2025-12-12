@@ -98,7 +98,6 @@ jobs:
           git push origin HEAD:maven
 
       - name: Create GitHub Release
-        if: steps.changes.outputs.changed == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
