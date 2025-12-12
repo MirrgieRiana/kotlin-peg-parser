@@ -136,7 +136,7 @@ Exploring the Xarpite source code can provide additional insights into:
 
 ## Installation
 
-Gradle coordinates follow the project metadata (`group = "io.github.mirrgieriana.xarpite"`, `version = "<latest-version>"`, check [Releases](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases) for the current value). Add the dependency as usual:
+Gradle coordinates follow the project metadata (`group = "io.github.mirrgieriana.xarpite"`, `version = "<latest-version>"`). Check [Releases](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases) for the current value. Add the dependency as usual:
 
 ### Gradle (Kotlin DSL)
 
