@@ -1,6 +1,6 @@
 # Documentation
 
-Welcome to the `mirrg.xarpite.kotlin-peg-parser` docs.
+Welcome to the project documentation.
 
 See the [README](../README.md) at the site root for the Quick Start, Core Concepts & Combinators, and Error Handling guidance. This `docs` directory will house additional notes as they grow.
 
