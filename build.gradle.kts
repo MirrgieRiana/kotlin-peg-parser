@@ -17,13 +17,13 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    
+
     // JS target with module kind
     js(IR) {
         binaries.executable()
         nodejs()
     }
-    
+
     // Native target for Linux x64
     linuxX64 {
         binaries {
@@ -32,11 +32,12 @@ kotlin {
             }
         }
     }
-    
+
     sourceSets {
         val commonMain by getting {
             kotlin.srcDir("imported/src/commonMain/kotlin")
         }
+
         val commonTest by getting {
             kotlin.srcDir("imported/src/commonTest/kotlin")
             dependencies {
@@ -44,6 +45,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
             }
         }
+
         val jvmMain by getting
         val jvmTest by getting
         val jsMain by getting
