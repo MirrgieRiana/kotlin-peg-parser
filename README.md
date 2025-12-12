@@ -2,7 +2,7 @@
 
 **Xarpeg: Kotlin PEG Parser - Lightweight PEG-style parser combinators for Kotlin Multiplatform**
 
-Xarpeg: Kotlin PEG Parser provides a compact, operator-driven parser combinator API. It targets JVM, JS (Node.js), and Linux x64, works directly on raw input strings (no tokenizer), and ships with opt-in caching to keep backtracking predictable.
+Xarpeg provides a compact, operator-driven parser combinator API. It targets JVM, JS (Node.js), and Linux x64, works directly on raw input strings (no tokenizer), and ships with opt-in caching to keep backtracking predictable.
 
 ## Features
 
@@ -159,7 +159,7 @@ The current version is `1.0.0-SNAPSHOT`; the API may evolve while iterating on t
 
 ## License
 
-Xarpeg: Kotlin PEG Parser is distributed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Xarpeg is distributed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -167,7 +167,7 @@ Xarpeg: Kotlin PEG Parser is distributed under the MIT License. See the [LICENSE
 
 ### Xarpite
 
-**Xarpite** is a practical application built using Xarpeg: Kotlin PEG Parser. It demonstrates how this library can be used in real-world scenarios to parse complex grammars efficiently.
+**Xarpite** is a practical application built using Xarpeg. It demonstrates how this library can be used in real-world scenarios to parse complex grammars efficiently.
 
 Xarpite serves as both:
 - A **working example** of the parser library in action
