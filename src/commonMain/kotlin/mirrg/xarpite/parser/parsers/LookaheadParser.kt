@@ -4,7 +4,7 @@ import mirrg.xarpite.parser.ParseContext
 import mirrg.xarpite.parser.ParseResult
 import mirrg.xarpite.parser.Parser
 
-class AndParser<T : Any>(val parser: Parser<T>) : Parser<T> {
+class LookaheadParser<T : Any>(val parser: Parser<T>) : Parser<T> {
     override fun parseOrNull(context: ParseContext, start: Int): ParseResult<T>? {
         val result = context.parseOrNull(parser, start)
         if (result == null) return null
@@ -12,4 +12,4 @@ class AndParser<T : Any>(val parser: Parser<T>) : Parser<T> {
     }
 }
 
-fun <T : Any> Parser<T>.and() = AndParser(this)
+fun <T : Any> Parser<T>.lookahead() = LookaheadParser(this)
