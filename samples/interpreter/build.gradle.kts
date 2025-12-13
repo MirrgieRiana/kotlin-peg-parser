@@ -20,3 +20,9 @@ dependencies {
     implementation(libs.xarpeg)
     testImplementation(kotlin("test"))
 }
+
+tasks.test {
+    useJUnitPlatform()
+    // Ensure the distribution is built before running tests
+    dependsOn(tasks.installDist)
+}
