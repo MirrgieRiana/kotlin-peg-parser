@@ -112,8 +112,6 @@ tasks.register("generateTuples") {
         // Create output directories
         outputDir.asFile.mkdirs()
         outputDirParsers.asFile.mkdirs()
-        generatedTuplesKt.parentFile.mkdirs()
-        generatedTupleParserKt.parentFile.mkdirs()
         
         // Generate Tuples.kt programmatically
         val typeParams = listOf("A", "B", "C", "D", "E")
