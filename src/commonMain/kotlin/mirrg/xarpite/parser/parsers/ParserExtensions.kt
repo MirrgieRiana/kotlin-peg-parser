@@ -8,7 +8,7 @@ import mirrg.xarpite.parser.Parser
  * 
  * Example:
  * ```
- * val parser = "hello".toParser()
+ * val parser = +"hello"
  * val captured = parser.capture  // equivalent to +parser
  * ```
  */
@@ -21,7 +21,7 @@ val <T : Any> Parser<T>.capture: Parser<mirrg.xarpite.parser.Tuple1<T>>
  * 
  * Example:
  * ```
- * val parser = "hello".toParser()
+ * val parser = +"hello"
  * val ignored = parser.ignore  // equivalent to -parser
  * ```
  */
@@ -34,7 +34,7 @@ val Parser<*>.ignore: Parser<mirrg.xarpite.parser.Tuple0>
  * 
  * Example:
  * ```
- * val parser = "hello".toParser()
+ * val parser = +"hello"
  * val notParser = parser.not  // equivalent to !parser
  * ```
  */
