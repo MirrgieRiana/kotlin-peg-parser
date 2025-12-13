@@ -1,6 +1,8 @@
-[![CI Status](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/actions/workflows/check.yaml/badge.svg)](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/actions/workflows/check.yaml)
-[![GitHub Release](https://img.shields.io/github/v/release/MirrgieRiana/xarpeg-kotlin-peg-parser)](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases/latest)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  [![CI Status](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/actions/workflows/check.yaml/badge.svg)](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/actions/workflows/check.yaml)
+  [![GitHub Release](https://img.shields.io/github/v/release/MirrgieRiana/xarpeg-kotlin-peg-parser)](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases/latest)
+  [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+</p>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/MirrgieRiana/xarpeg-kotlin-peg-parser/main/assets/xarpeg-logo.svg" alt="Xarpeg logo" width="400">
