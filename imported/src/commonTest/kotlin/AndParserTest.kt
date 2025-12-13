@@ -75,4 +75,32 @@ class AndParserTest {
         val result = parser.parseAllOrThrow("123")
         assertEquals("123", result)
     }
+
+    @Test
+    fun andParserForKeywordLookahead() {
+        val keyword = +"if"
+        val notWordChar = +Regex("[^a-zA-Z0-9_]")
+        val ifKeyword = keyword * notWordChar.and() map { tuple -> tuple.a }
+        
+        val context1 = ParseContext("if ", useCache = true)
+        val result1 = ifKeyword.parseOrNull(context1, 0)
+        assertNotNull(result1)
+        assertEquals("if", result1.value)
+        assertEquals(2, result1.end)
+        
+        val context2 = ParseContext("ifx", useCache = true)
+        val result2 = ifKeyword.parseOrNull(context2, 0)
+        assertNull(result2)
+    }
+
+    @Test
+    fun andParserVsCharSequence() {
+        val parser = (+'a').and() * +'a' * (+'b').and() * +'b' * +'c'
+        val result = parser.parseAllOrThrow("abc")
+        assertEquals('a', result.a)
+        assertEquals('a', result.b)
+        assertEquals('b', result.c)
+        assertEquals('b', result.d)
+        assertEquals('c', result.e)
+    }
 }
