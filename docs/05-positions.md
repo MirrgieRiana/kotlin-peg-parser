@@ -44,7 +44,9 @@ val identifierWithPosition = identifier mapEx { ctx, result ->
     "${result.value.value}@${result.start}-${result.end}"
 }
 
-identifierWithPosition.parseAllOrThrow("hello") // => "hello@0-5"
+fun main() {
+    identifierWithPosition.parseAllOrThrow("hello") // => "hello@0-5"
+}
 ```
 
 Notice that even though we access position information, the result type is still simple: `Parser<String>`.
@@ -73,8 +75,10 @@ fun <T : Any> Parser<T>.withLocation(): Parser<Located<T>> = this mapEx { ctx, r
 val keyword = +Regex("[a-z]+") map { it.value }
 val keywordWithLocation = keyword.withLocation()
 
-val result = keywordWithLocation.parseAllOrThrow("hello")
-// => Located(value=hello, line=1, column=1)
+fun main() {
+    val result = keywordWithLocation.parseAllOrThrow("hello")
+    // => Located(value=hello, line=1, column=1)
+}
 ```
 
 ## Getting the matched text

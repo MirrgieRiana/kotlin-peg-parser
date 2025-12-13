@@ -18,7 +18,9 @@ val expr: Parser<Int> = object {
     val root = add
 }.root
 
-expr.parseAllOrThrow("2*(3+4)") // => 14
+fun main() {
+    expr.parseAllOrThrow("2*(3+4)") // => 14
+}
 ```
 
 - Resolve self-reference with `parser { ... }` or `by lazy`.

@@ -86,6 +86,10 @@ The key to this parser is the `stringPart` regex:
 import mirrg.xarpite.parser.parsers.*
 
 val stringPartRegexParser = +Regex("""[^"$]+|\$(?!\()""")
+
+fun main() {
+    stringPartRegexParser
+}
 ```
 
 This regex pattern matches:
@@ -135,6 +139,10 @@ object TemplateWithNestedStrings {
     // Now expressions can contain template strings
     val factor: Parser<Int> = number + grouped + (templateString map { it.length })
     val sum: Parser<Int> = leftAssociative(factor, -'+') { a, _, b -> a + b }
+}
+
+fun main() {
+    TemplateWithNestedStrings.templateString
 }
 ```
 
