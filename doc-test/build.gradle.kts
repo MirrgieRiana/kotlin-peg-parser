@@ -71,6 +71,7 @@ tasks.register("generateSrc") {
                         while (i < lines.size) {
                             val line = lines[i]
                             val trimmed = line.trim()
+                            val isMainDeclaration = trimmed.startsWith("fun main(")
                             val isNamedObject = trimmed.startsWith("object ") &&
                                 !trimmed.startsWith("object {") &&
                                 !trimmed.startsWith("object:") &&
@@ -92,11 +93,10 @@ tasks.register("generateSrc") {
                                 continue
                             }
 
-                            if (trimmed.startsWith("fun main(")) {
-                                hasMain = true
-                            }
-
                             if (isDeclaration) {
+                                if (isMainDeclaration) {
+                                    hasMain = true
+                                }
                                 var braceCount = 0
                                 val declLines = mutableListOf<String>()
                                 var j = i
@@ -120,6 +120,7 @@ tasks.register("generateSrc") {
                                 declarations.addAll(declLines)
                                 declarations.add("")
                                 i = j
+                                continue
                             } else {
                                 val contentLine = if (isGradleDsl && trimmed.isNotEmpty()) "// $line" else line
                                 statements.add(contentLine)
