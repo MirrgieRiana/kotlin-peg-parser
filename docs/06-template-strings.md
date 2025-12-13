@@ -29,7 +29,7 @@ data class ExpressionPart(val value: Int) : TemplateElement()
 val templateStringParser: Parser<String> = object {
     // Expression parser (reusing from earlier tutorials)
     val number = +Regex("[0-9]+") map { it.value.toInt() }
-    val grouped: Parser<Int> by lazy { (-'(' * parser { sum } * -')') map { it.b } }
+    val grouped: Parser<Int> by lazy { (-'(' * parser { sum } * -')') map { value -> value } }
     val factor: Parser<Int> = number + grouped
     val product = leftAssociative(factor, -'*') { a, _, b -> a * b }
     val sum: Parser<Int> = leftAssociative(product, -'+') { a, _, b -> a + b }
@@ -44,8 +44,8 @@ val templateStringParser: Parser<String> = object {
 
     // Expression part: $(...)
     val expressionPart: Parser<TemplateElement> =
-        -Regex("""\$\(""") * expression * -')' map { tuple ->
-            ExpressionPart(tuple.b)
+        -Regex("""\$\(""") * expression * -')' map { value ->
+            ExpressionPart(value)
         }
 
     // Template elements can be string parts or expression parts
@@ -53,8 +53,8 @@ val templateStringParser: Parser<String> = object {
 
     // A complete template string: "..." with any number of elements
     val templateString: Parser<String> =
-        -'"' * templateElement.zeroOrMore * -'"' map { tuple ->
-            val elements = tuple.b
+        -'"' * templateElement.zeroOrMore * -'"' map { value ->
+            val elements = value
             elements.joinToString("") { element ->
                 when (element) {
                     is StringPart -> element.text
@@ -105,21 +105,21 @@ import mirrg.xarpite.parser.parsers.*
 
 object TemplateWithNestedStrings {
     val number = +Regex("[0-9]+") map { it.value.toInt() }
-    val grouped: Parser<Int> by lazy { (-'(' * parser { sum } * -')') map { it.b } }
+    val grouped: Parser<Int> by lazy { (-'(' * parser { sum } * -')') map { value -> value } }
 
     val stringPart: Parser<TemplateElement> =
         +Regex("""[^"$]+|\$(?!\()""") map { match -> StringPart(match.value) }
 
     val expressionPart: Parser<TemplateElement> =
-        -Regex("""\$\(""") * parser { sum } * -')' map { tuple ->
-            ExpressionPart(tuple.b)
+        -Regex("""\$\(""") * parser { sum } * -')' map { value ->
+            ExpressionPart(value)
         }
 
     val templateElement = expressionPart + stringPart
 
     val templateString: Parser<String> by lazy {
-        -'"' * templateElement.zeroOrMore * -'"' map { tuple ->
-            val elements = tuple.b
+        -'"' * templateElement.zeroOrMore * -'"' map { value ->
+            val elements = value
             elements.joinToString("") { element ->
                 when (element) {
                     is StringPart -> element.text
