@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper
+
 plugins {
     kotlin("multiplatform") version "2.2.20"
     id("maven-publish")
@@ -72,6 +74,22 @@ publishing {
             name = "local"
             url = uri(layout.buildDirectory.dir("maven"))
         }
+    }
+}
+
+val kotlinPluginVersion by lazy {
+    plugins.filterIsInstance<KotlinBasePluginWrapper>().first().pluginVersion
+}
+
+tasks.register("writeKotlinMetadata") {
+    val outputFile = layout.buildDirectory.file("maven/metadata/kotlin.json")
+    inputs.property("kotlinVersion", kotlinPluginVersion)
+    outputs.file(outputFile)
+
+    doLast {
+        val file = outputFile.get().asFile
+        file.parentFile.mkdirs()
+        file.writeText("""{"schemaVersion":1,"label":"Kotlin","message":"$kotlinPluginVersion","color":"blue"}""")
     }
 }
 
