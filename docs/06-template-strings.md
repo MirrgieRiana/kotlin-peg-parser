@@ -1,3 +1,8 @@
+---
+layout: default
+title: Step 6 – Template strings
+---
+
 # Step 6: Template strings without tokenization
 
 One of the key advantages of PEG-style parsers is that they work directly on the input string without requiring a separate tokenization phase. This makes it straightforward to handle template strings with embedded expressions—a pattern that can be challenging for traditional lexer-based parsers.

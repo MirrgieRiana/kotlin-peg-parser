@@ -1,3 +1,8 @@
+---
+layout: default
+title: Step 4 – Runtime
+---
+
 # Step 4: Errors and runtime behavior
 
 Review how parsers handle full consumption, exceptions, and memoization cache settings.

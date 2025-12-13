@@ -1,3 +1,8 @@
+---
+layout: default
+title: Step 3 – Expressions
+---
+
 # Step 3: Handle expressions and recursion
 
 Complex grammars need self-reference and associativity. This step shows how to define recursive parsers and use left/right associativity helpers.
