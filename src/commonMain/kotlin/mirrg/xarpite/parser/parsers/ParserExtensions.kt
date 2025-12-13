@@ -1,6 +1,8 @@
 package mirrg.xarpite.parser.parsers
 
 import mirrg.xarpite.parser.Parser
+import mirrg.xarpite.parser.Tuple0
+import mirrg.xarpite.parser.Tuple1
 
 /**
  * Extension property equivalent to unaryPlus operator.
@@ -12,7 +14,7 @@ import mirrg.xarpite.parser.Parser
  * val captured = parser.capture  // equivalent to +parser
  * ```
  */
-val <T : Any> Parser<T>.capture: Parser<mirrg.xarpite.parser.Tuple1<T>>
+val <T : Any> Parser<T>.capture: Parser<Tuple1<T>>
     get() = +this
 
 /**
@@ -25,7 +27,7 @@ val <T : Any> Parser<T>.capture: Parser<mirrg.xarpite.parser.Tuple1<T>>
  * val ignored = parser.ignore  // equivalent to -parser
  * ```
  */
-val Parser<*>.ignore: Parser<mirrg.xarpite.parser.Tuple0>
+val Parser<*>.ignore: Parser<Tuple0>
     get() = -this
 
 /**
@@ -38,5 +40,5 @@ val Parser<*>.ignore: Parser<mirrg.xarpite.parser.Tuple0>
  * val notParser = parser.not  // equivalent to !parser
  * ```
  */
-val Parser<*>.not: Parser<mirrg.xarpite.parser.Tuple0>
+val Parser<*>.not: Parser<Tuple0>
     get() = !this
