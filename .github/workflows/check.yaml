@@ -5,7 +5,6 @@ on:
     branches: [ main, master ]
     paths:
       - 'src/**'
-      - 'imported/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle/**'
@@ -15,7 +14,6 @@ on:
     branches: [ main, master ]
     paths:
       - 'src/**'
-      - 'imported/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle/**'
@@ -23,8 +21,7 @@ on:
       - 'gradlew.bat'
 
 jobs:
-  # Fast JVM-only validation for quick feedback (day-to-day development)
-  jvm-test:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -41,28 +38,5 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
 
-    - name: Run JVM tests
-      run: ./gradlew jvmTest --console=plain
-
-  # Full multiplatform build including native targets
-  multiplatform-build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    # Only run full build on main branch pushes, not on every PR
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
-
-    - name: Build all targets
-      run: ./gradlew build --console=plain
+    - name: Build with Gradle
+      run: ./gradlew build
