@@ -155,17 +155,32 @@ _           &lt;- [ \t\r\n]*</code></pre>
         const input = document.getElementById("input");
         const output = document.getElementById("output");
         const button = document.getElementById("parse");
+        const defaultInput = "2*(3+4)+5";
 
         const updateOutput = () => {
             output.value = parseExpression(input.value);
         };
 
+        const updateUrlQuery = () => {
+            const url = new URL(window.location.href);
+            url.searchParams.set("q", input.value);
+            window.history.replaceState(null, "", url);
+        };
+
         button.addEventListener("click", updateOutput);
-        input.addEventListener("input", updateOutput);
+        input.addEventListener("input", () => {
+            updateUrlQuery();
+            updateOutput();
+        });
 
         // Set default input value only if input is empty on page load
         if (input.value.trim() === "") {
-            input.value = "2*(3+4)+5";
+            const qParam = new URLSearchParams(window.location.search).get("q");
+            if (qParam !== null) {
+                input.value = qParam;
+            } else {
+                input.value = defaultInput;
+            }
         }
         updateOutput();
     </script>
