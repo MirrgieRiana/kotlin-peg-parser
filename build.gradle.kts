@@ -1,5 +1,10 @@
+import groovy.json.JsonOutput
 import org.gradle.api.DefaultTask
-import org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 
 plugins {
     kotlin("multiplatform") version "2.2.20"
@@ -79,29 +84,36 @@ publishing {
 }
 
 val kotlinPluginVersion by lazy {
-    plugins.filterIsInstance<KotlinBasePluginWrapper>().firstOrNull()?.pluginVersion
-        ?: error("Kotlin plugin is not applied")
+    kotlin.coreLibrariesVersion ?: error("Kotlin core libraries version is not set")
 }
 
-tasks.register<DefaultTask>("writeKotlinMetadata") {
-    val outputFile = layout.buildDirectory.file("maven/metadata/kotlin.json")
-    inputs.property("kotlinVersion", kotlinPluginVersion)
-    outputs.file(outputFile)
+abstract class WriteKotlinMetadata : DefaultTask() {
+    @get:Input
+    abstract val kotlinVersion: Property<String>
 
-    doLast {
-        val file = outputFile.get().asFile
-        val json = linkedMapOf(
-            "schemaVersion" to 1,
-            "label" to "Kotlin",
-            "message" to kotlinPluginVersion,
-            "color" to "blue",
-        ).entries.joinToString(prefix = "{", postfix = "}") { (key, value) ->
-            val formattedValue = if (value is Number) value.toString() else """"$value""""
-            """"$key":$formattedValue"""
+    @get:OutputFile
+    abstract val outputFile: RegularFileProperty
+
+    @TaskAction
+    fun write() {
+        val json = JsonOutput.toJson(
+            linkedMapOf(
+                "schemaVersion" to 1,
+                "label" to "Kotlin",
+                "message" to kotlinVersion.get(),
+                "color" to "blue",
+            )
+        )
+        outputFile.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(json)
         }
-        file.parentFile.mkdirs()
-        file.writeText(json)
     }
+}
+
+tasks.register<WriteKotlinMetadata>("writeKotlinMetadata") {
+    kotlinVersion.set(kotlinPluginVersion)
+    outputFile.set(layout.buildDirectory.file("maven/metadata/kotlin.json"))
 }
 
 // Dokka configuration for KDoc generation
