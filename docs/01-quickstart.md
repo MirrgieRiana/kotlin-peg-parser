@@ -1,3 +1,8 @@
+---
+layout: default
+title: Step 1 – Quickstart
+---
+
 # Step 1: Build your first parser
 
 This step walks through creating the smallest parser, running it, and turning input into typed values.

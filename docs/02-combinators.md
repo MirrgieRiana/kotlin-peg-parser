@@ -1,3 +1,8 @@
+---
+layout: default
+title: Step 2 – Combinators
+---
+
 # Step 2: Combine parsers
 
 Use the core DSL combinators to assemble multiple pieces into one parser.
