@@ -1,3 +1,4 @@
+
 plugins {
     kotlin("multiplatform") version "2.2.20"
     id("maven-publish")
@@ -54,15 +55,6 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-
-        val jvmMain by getting
-        val jvmTest by getting
-        val jsMain by getting
-        val jsTest by getting
-        val linuxX64Main by getting
-        val linuxX64Test by getting
-        val mingwX64Main by getting
-        val mingwX64Test by getting
     }
 }
 
@@ -71,6 +63,24 @@ publishing {
         maven {
             name = "local"
             url = uri(layout.buildDirectory.dir("maven"))
+        }
+    }
+}
+
+tasks.register("writeKotlinMetadata") {
+    val kotlinVersion = providers.provider {
+        kotlin.coreLibrariesVersion ?: error("Kotlin core libraries version is not set")
+    }
+    val outputFile = layout.buildDirectory.file("maven/metadata/kotlin.json")
+    inputs.property("kotlinVersion", kotlinVersion)
+    outputs.file(outputFile)
+
+    doLast {
+        val versionEscaped = kotlinVersion.get().replace("\"", "\\\"")
+        val json = """{"schemaVersion":1,"label":"Kotlin","message":"$versionEscaped","color":"blue"}"""
+        outputFile.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(json)
         }
     }
 }
@@ -96,22 +106,22 @@ tasks.register("generateTuples") {
     description = "Generates tuple source files and verifies they match imported files"
     group = "build"
     
-    val outputDir = layout.buildDirectory.dir("generated/tuples/io/github/mirrgieriana/xarpite/xarpeg")
-    val outputDirParsers = layout.buildDirectory.dir("generated/tuples/io/github/mirrgieriana/xarpite/xarpeg/parsers")
+    val outputDir = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg").asFile
+    val outputDirParsers = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg/parsers").asFile
     
     val tuplesKt = file("imported/src/commonMain/kotlin/io/github/mirrgieriana/xarpite/xarpeg/Tuples.kt")
     val tupleParserKt = file("imported/src/commonMain/kotlin/io/github/mirrgieriana/xarpite/xarpeg/parsers/TupleParser.kt")
     
-    val generatedTuplesKt = outputDir.get().file("Tuples.kt").asFile
-    val generatedTupleParserKt = outputDirParsers.get().file("TupleParser.kt").asFile
+    val generatedTuplesKt = outputDir.resolve("Tuples.kt")
+    val generatedTupleParserKt = outputDirParsers.resolve("TupleParser.kt")
     
     doLast {
         // Configuration: Maximum tuple size to generate
         val maxTupleSize = 5
         
         // Create output directories
-        generatedTuplesKt.parentFile.mkdirs()
-        generatedTupleParserKt.parentFile.mkdirs()
+        outputDir.mkdirs()
+        outputDirParsers.mkdirs()
         
         // Generate Tuples.kt programmatically
         val typeParams = listOf("A", "B", "C", "D", "E")
