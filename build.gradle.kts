@@ -131,9 +131,8 @@ tasks.register("generateTuples") {
         println("Generated: ${generatedTuplesKt.absolutePath}")
         
         // Generate TupleParser.kt programmatically
-        val tupleParserPackage = "package io.github.mirrgieriana.xarpite.xarpeg.parsers"
         val tupleParserContent = buildString {
-            appendLine(tupleParserPackage)
+            appendLine("package io.github.mirrgieriana.xarpite.xarpeg.parsers")
             appendLine()
             appendLine("import io.github.mirrgieriana.xarpite.xarpeg.ParseResult")
             appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Parser")
