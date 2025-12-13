@@ -27,7 +27,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
 
-  sample-java-run:
+  sample-minimal-jvm-sample:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,17 +44,17 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
 
-    - name: Build java-run sample distribution
-      working-directory: samples/java-run
+    - name: Build minimal-jvm-sample distribution
+      working-directory: samples/minimal-jvm-sample
       run: |
         # Build the executable distribution using Gradle
         ./gradlew installDist --console=plain --info --stacktrace
 
-    - name: Run java-run sample and verify output
-      working-directory: samples/java-run
+    - name: Run minimal-jvm-sample and verify output
+      working-directory: samples/minimal-jvm-sample
       run: |
         # Run the sample using java command directly
-        OUTPUT=$(java -cp "build/install/java-run/lib/*" mirrg.xarpite.samples.java_run.MainKt)
+        OUTPUT=$(java -cp "build/install/minimal-jvm-sample/lib/*" mirrg.xarpite.samples.java_run.MainKt)
         echo "Sample output: $OUTPUT"
         
         # Expected output
