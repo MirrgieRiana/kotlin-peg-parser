@@ -52,7 +52,7 @@ jobs:
       working-directory: samples/minimal-jvm-sample
       run: |
         # Build the executable distribution using Gradle
-        ./gradlew installDist --console=plain --info --stacktrace
+        ./gradlew check installDist --console=plain --info --stacktrace
 
     - name: Run minimal-jvm-sample and verify output
       working-directory: samples/minimal-jvm-sample
@@ -95,7 +95,7 @@ jobs:
       working-directory: samples/interpreter
       run: |
         # Build the executable distribution using Gradle
-        ./gradlew installDist --console=plain --info --stacktrace
+        ./gradlew check installDist --console=plain --info --stacktrace
 
     - name: Run interpreter sample and verify output
       working-directory: samples/interpreter
@@ -138,4 +138,4 @@ jobs:
       working-directory: samples/online-parser
       run: |
         # Build the online parser sample
-        ./gradlew build --console=plain --info --stacktrace
+        ./gradlew check build --console=plain --info --stacktrace
