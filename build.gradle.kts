@@ -113,10 +113,13 @@ tasks.register("generateTuples") {
         outputDir.asFile.mkdirs()
         outputDirParsers.asFile.mkdirs()
         
+        fun packageLineOf(file: File) = file.useLines { lines ->
+            lines.firstOrNull { it.startsWith("package ") }
+        } ?: throw GradleException("Package declaration not found in $file")
+
         // Generate Tuples.kt programmatically
         val typeParams = listOf("A", "B", "C", "D", "E")
-        val tuplesPackage = tuplesKt.readLines().firstOrNull { it.startsWith("package ") }
-            ?: throw GradleException("Package declaration not found in $tuplesKt")
+        val tuplesPackage = packageLineOf(tuplesKt)
         val tuplesContent = buildString {
             appendLine(tuplesPackage)
             appendLine()
@@ -132,8 +135,7 @@ tasks.register("generateTuples") {
         println("Generated: ${generatedTuplesKt.absolutePath}")
         
         // Generate TupleParser.kt programmatically
-        val tupleParserPackage = tupleParserKt.readLines().firstOrNull { it.startsWith("package ") }
-            ?: throw GradleException("Package declaration not found in $tupleParserKt")
+        val tupleParserPackage = packageLineOf(tupleParserKt)
         val tupleParserContent = buildString {
             appendLine(tupleParserPackage)
             appendLine()
