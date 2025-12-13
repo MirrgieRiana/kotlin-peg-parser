@@ -113,16 +113,9 @@ tasks.register("generateTuples") {
         outputDir.mkdirs()
         outputDirParsers.mkdirs()
         
-        // Matches package declarations including dotted names, backtick identifiers, and trailing line comments
-        val packageRegex = Regex("^\\s*package\\s+((?:[\\w]+|`[^`]+`)(?:\\s*\\.\\s*(?:[\\w]+|`[^`]+`))*)(?:\\s*//.*)?\\s*$")
-        val packageSearchLimit = 10 // Package declarations should appear near the top; limit scanning for efficiency
-        fun packageLineOf(file: File) = file.useLines { lines ->
-            lines.take(packageSearchLimit).firstNotNullOfOrNull { line -> packageRegex.find(line)?.value?.trim() }
-        } ?: throw GradleException("Package declaration not found in ${file.absolutePath}")
-
         // Generate Tuples.kt programmatically
         val typeParams = listOf("A", "B", "C", "D", "E")
-        val tuplesPackage = packageLineOf(tuplesKt)
+        val tuplesPackage = "package io.github.mirrgieriana.xarpite.xarpeg"
         val tuplesContent = buildString {
             appendLine(tuplesPackage)
             appendLine()
@@ -138,7 +131,7 @@ tasks.register("generateTuples") {
         println("Generated: ${generatedTuplesKt.absolutePath}")
         
         // Generate TupleParser.kt programmatically
-        val tupleParserPackage = packageLineOf(tupleParserKt)
+        val tupleParserPackage = "package io.github.mirrgieriana.xarpite.xarpeg.parsers"
         val tupleParserContent = buildString {
             appendLine(tupleParserPackage)
             appendLine()
