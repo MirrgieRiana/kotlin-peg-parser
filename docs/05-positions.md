@@ -16,7 +16,7 @@ While building parsers, you typically work with simple types like `Parser<Int>` 
 The `map` combinator keeps your types simple by passing only the parsed value:
 
 ```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val number = +Regex("[0-9]+") map { it.value.toInt() }
@@ -33,8 +33,7 @@ This is ideal when you don't need position information and want to keep your cod
 When you need position information, use `mapEx`. It receives both the `ParseContext` and the full `ParseResult`:
 
 ```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
-import io.github.mirrgieriana.xarpite.xarpeg.text
+import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val identifier = +Regex("[a-zA-Z][a-zA-Z0-9_]*")
@@ -44,7 +43,9 @@ val identifierWithPosition = identifier mapEx { ctx, result ->
     "${result.value.value}@${result.start}-${result.end}"
 }
 
-identifierWithPosition.parseAllOrThrow("hello") // => "hello@0-5"
+fun main() {
+    identifierWithPosition.parseAllOrThrow("hello") // => "hello@0-5"
+}
 ```
 
 Notice that even though we access position information, the result type is still simple: `Parser<String>`.
@@ -56,8 +57,7 @@ Notice that even though we access position information, the result type is still
 Position information is particularly useful for generating helpful error messages:
 
 ```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.Parser
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 data class Located<T>(val value: T, val line: Int, val column: Int)
@@ -73,8 +73,10 @@ fun <T : Any> Parser<T>.withLocation(): Parser<Located<T>> = this mapEx { ctx, r
 val keyword = +Regex("[a-z]+") map { it.value }
 val keywordWithLocation = keyword.withLocation()
 
-val result = keywordWithLocation.parseAllOrThrow("hello")
-// => Located(value=hello, line=1, column=1)
+fun main() {
+    val result = keywordWithLocation.parseAllOrThrow("hello")
+    // => Located(value=hello, line=1, column=1)
+}
 ```
 
 ## Getting the matched text
@@ -82,8 +84,7 @@ val result = keywordWithLocation.parseAllOrThrow("hello")
 You can also extract the original matched text using the `text()` extension:
 
 ```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
-import io.github.mirrgieriana.xarpite.xarpeg.text
+import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val number = +Regex("[0-9]+")

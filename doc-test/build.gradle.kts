@@ -82,8 +82,6 @@ tasks.register("generateSrc") {
                 if (codeBlocks.isNotEmpty()) {
                     codeBlocks.forEachIndexed { index, block ->
                         val lines = block.lines()
-                        val isGradleDsl = block.isGradleDslBlock()
-
                         val imports = mutableListOf<String>()
                         val declarations = mutableListOf<String>()
                         val statements = mutableListOf<String>()
@@ -125,8 +123,7 @@ tasks.register("generateSrc") {
                                 i = nextIndex
                                 continue
                             } else {
-                                val contentLine = if (isGradleDsl && trimmed.isNotEmpty()) "// $line" else line
-                                statements.add(contentLine)
+                                statements.add(line)
                                 i++
                             }
                         }
@@ -141,7 +138,16 @@ tasks.register("generateSrc") {
                                 !trimmedLine.startsWith("fun ")
                         }
 
-                        if (hasMain && hasExecutableStatements) {
+                        if (!hasMain) {
+                            if (block.isGradleDslBlock()) {
+                                println("Skipped (gradle block without fun main): ${relativePath}#$index")
+                                return@forEach
+                            } else {
+                                throw GradleException("Code block at index $index in file $relativePath is missing fun main; add main() or mark as Gradle DSL.")
+                            }
+                        }
+
+                        if (hasExecutableStatements) {
                             throw GradleException("Code block at index $index in file $relativePath contains executable top-level statements together with main(); wrap calls like println/parseAllOrThrow or assignments inside main() or another function.")
                         }
 
@@ -161,17 +167,6 @@ tasks.register("generateSrc") {
                                 appendLine(line)
                             }
                             if (declarations.isNotEmpty()) appendLine()
-                            if (!hasMain) {
-                                appendLine("fun main() {")
-                                statements.dropLastWhile { it.isEmpty() }.forEach { line ->
-                                    if (line.isNotEmpty()) {
-                                        appendLine("    $line")
-                                    } else {
-                                        appendLine()
-                                    }
-                                }
-                                appendLine("}")
-                            }
                         }
                         val outputFile = generatedSrc.file("${packageName.replace(".", "/")}/Test.kt").asFile
                         outputFile.parentFile.mkdirs()

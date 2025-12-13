@@ -13,7 +13,7 @@ Use the core DSL combinators to assemble multiple pieces into one parser.
 ## Combining option and repetition
 
 ```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val sign = (+'+' + +'-').optional map { it.a ?: '+' }
@@ -24,9 +24,11 @@ val signedInt = sign * unsigned map { (s, value) ->
 
 val repeatedA = (+'a').oneOrMore map { it.joinToString("") }
 
-signedInt.parseAllOrThrow("-42") // => -42
-signedInt.parseAllOrThrow("99")  // => 99
-repeatedA.parseAllOrThrow("aaaa") // => "aaaa"
+fun main() {
+    signedInt.parseAllOrThrow("-42") // => -42
+    signedInt.parseAllOrThrow("99")  // => 99
+    repeatedA.parseAllOrThrow("aaaa") // => "aaaa"
+}
 ```
 
 - `optional` always rewinds, so it will not block what comes after. Its return is `Tuple1`, so use `it.a` or destructure with `map { (value) -> ... }`.

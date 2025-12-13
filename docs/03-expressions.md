@@ -5,8 +5,7 @@ Complex grammars need self-reference and associativity. This step shows how to d
 ## Expression parser with recursion
 
 ```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.Parser
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val expr: Parser<Int> = object {
@@ -18,7 +17,9 @@ val expr: Parser<Int> = object {
     val root = add
 }.root
 
-expr.parseAllOrThrow("2*(3+4)") // => 14
+fun main() {
+    expr.parseAllOrThrow("2*(3+4)") // => 14
+}
 ```
 
 - Resolve self-reference with `parser { ... }` or `by lazy`.
