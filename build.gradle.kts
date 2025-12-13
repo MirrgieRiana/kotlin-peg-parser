@@ -1,3 +1,4 @@
+import org.gradle.api.DefaultTask
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper
 
 plugins {
@@ -78,18 +79,28 @@ publishing {
 }
 
 val kotlinPluginVersion by lazy {
-    plugins.filterIsInstance<KotlinBasePluginWrapper>().first().pluginVersion
+    plugins.filterIsInstance<KotlinBasePluginWrapper>().firstOrNull()?.pluginVersion
+        ?: error("Kotlin plugin is not applied")
 }
 
-tasks.register("writeKotlinMetadata") {
+tasks.register<DefaultTask>("writeKotlinMetadata") {
     val outputFile = layout.buildDirectory.file("maven/metadata/kotlin.json")
     inputs.property("kotlinVersion", kotlinPluginVersion)
     outputs.file(outputFile)
 
     doLast {
         val file = outputFile.get().asFile
+        val json = linkedMapOf(
+            "schemaVersion" to 1,
+            "label" to "Kotlin",
+            "message" to kotlinPluginVersion,
+            "color" to "blue",
+        ).entries.joinToString(prefix = "{", postfix = "}") { (key, value) ->
+            val formattedValue = if (value is Number) value.toString() else """"$value""""
+            """"$key":$formattedValue"""
+        }
         file.parentFile.mkdirs()
-        file.writeText("""{"schemaVersion":1,"label":"Kotlin","message":"$kotlinPluginVersion","color":"blue"}""")
+        file.writeText(json)
     }
 }
 
