@@ -1,13 +1,8 @@
+package mirrg.xarpite.parser.parsers
+
 import mirrg.xarpite.parser.ParseContext
 import mirrg.xarpite.parser.Tuple0
 import mirrg.xarpite.parser.parseAllOrThrow
-import mirrg.xarpite.parser.parsers.capture
-import mirrg.xarpite.parser.parsers.ignore
-import mirrg.xarpite.parser.parsers.map
-import mirrg.xarpite.parser.parsers.not
-import mirrg.xarpite.parser.parsers.times
-import mirrg.xarpite.parser.parsers.unaryMinus
-import mirrg.xarpite.parser.parsers.unaryPlus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
