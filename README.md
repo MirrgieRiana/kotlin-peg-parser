@@ -202,11 +202,11 @@ A small Hello World app is available for quick verification:
 java -cp build/libs/xarpeg-kotlin-peg-parser-jvm-<latest-version>.jar mirrg.xarpite.peg.HelloWorldKt # replace with the version shown on Releases
 ```
 
-A standalone Gradle sample that consumes the library via its Maven coordinate lives under `samples/java-run`:
+A standalone Gradle sample that consumes the library via its Maven coordinate lives under `samples/minimal-jvm-sample`:
 
 ```bash
 ./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishJvmPublicationToMavenLocal
-(cd samples/java-run && ./gradlew run)
+(cd samples/minimal-jvm-sample && ./gradlew run)
 ```
 
 A browser-based online parser sample lives under `samples/online-parser`. Build it to emit `build/site/index.html` that imports the JS module:

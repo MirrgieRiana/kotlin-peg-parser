@@ -17,4 +17,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "java-run"
+rootProject.name = "minimal-jvm-sample"
