@@ -41,6 +41,18 @@ tasks.register("generateSrc") {
             return if (normalized.first().isDigit()) "_$normalized" else normalized
         }
 
+        fun String.isIndented(): Boolean = startsWith(" ") || startsWith("\t")
+
+        fun hasIndentedContentAfter(lines: List<String>, startIndex: Int): Boolean {
+            var idx = startIndex
+            while (idx < lines.size) {
+                val candidate = lines[idx]
+                if (candidate.isNotBlank()) return candidate.isIndented()
+                idx++
+            }
+            return false
+        }
+
         sourceFiles
             .sortedBy { it.first }
             .forEach { (relativePath, sourceFile) ->
@@ -97,22 +109,12 @@ tasks.register("generateSrc") {
                                     if (braceCount > 0) continue
                                     val nextLine = lines.getOrNull(j) ?: break
                                     if (nextLine.isBlank()) {
-                                        var k = j + 1
-                                        var nextNonBlank: String? = null
-                                        while (k < lines.size) {
-                                            val candidate = lines[k]
-                                            if (candidate.isNotBlank()) {
-                                                nextNonBlank = candidate
-                                                break
-                                            }
-                                            k++
-                                        }
-                                        val continueAfterBlank = nextNonBlank?.let { it.startsWith(" ") || it.startsWith("\t") } ?: false
+                                        val continueAfterBlank = hasIndentedContentAfter(lines, j + 1)
                                         declLines.add(nextLine)
                                         j++
                                         if (!continueAfterBlank) break else continue
                                     }
-                                    val isNextIndented = nextLine.startsWith(" ") || nextLine.startsWith("\t")
+                                    val isNextIndented = nextLine.isIndented()
                                     if (!isNextIndented) break
                                 }
                                 declarations.addAll(declLines)
@@ -131,7 +133,7 @@ tasks.register("generateSrc") {
                         }
 
                         if (hasMain && hasExecutableStatements) {
-                            throw GradleException("Code block at index $index in file $relativePath contains top-level statements alongside main(); move them into main.")
+                            throw GradleException("Code block at index $index in file $relativePath contains executable top-level statements together with main(); wrap those statements inside main() or another function.")
                         }
 
                         val basePackageSegment = sanitizeSegment(relativePath.replace("/", "_").replace(".", "_"))
