@@ -37,13 +37,13 @@ tasks.register("generateSrc") {
             .forEach { (relativePath, sourceFile) ->
                 val codeBlocks = kotlinBlockRegex.findAll(sourceFile.readText()).map { it.groupValues[1].trimEnd() }.toList()
                 if (codeBlocks.isNotEmpty()) {
-                    val imports = linkedSetOf<String>()
                     val defaultImports = listOf(
                         "import mirrg.xarpite.parser.Parser",
                         "import mirrg.xarpite.parser.parseAllOrThrow",
                         "import mirrg.xarpite.parser.parsers.*"
                     )
 
+                    val imports = linkedSetOf<String>().apply { addAll(defaultImports) }
                     val sharedDeclarations = mutableListOf<String>()
 
                     val blockBodies = codeBlocks.mapIndexed { index, block ->
@@ -57,7 +57,6 @@ tasks.register("generateSrc") {
                             }
                         }
 
-                        val declarationLines = mutableListOf<String>()
                         val statementLines = mutableListOf<String>()
 
                         var i = 0
@@ -104,13 +103,6 @@ tasks.register("generateSrc") {
 
                         buildString {
                             appendLine("private object Block_$index {")
-                            declarationLines.dropLastWhile { it.isEmpty() }.forEach { line ->
-                                if (line.isNotEmpty()) {
-                                    appendLine("    $line")
-                                } else {
-                                    appendLine()
-                                }
-                            }
                             val effectiveStatements = statementLines.dropLastWhile { it.isEmpty() }
                             if (effectiveStatements.isNotEmpty()) {
                                 appendLine("    init {")
