@@ -16,3 +16,4 @@ Write all project documentation (including content under `docs/`) in English.
 The `./gradlew check` task fails here when Kotlin/Native tries to download toolchains; use `./gradlew jvmTest` instead for test verification.
 
 When invoking Chrome (e.g., to analyze HTML files), specify the following options to suppress Chrome’s own background network activity and prevent connection attempts to disallowed domains triggered by that activity.
+- `--disable-background-networking --disable-component-extensions-with-background-pages --disable-component-update`
