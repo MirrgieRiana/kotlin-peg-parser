@@ -1,5 +1,5 @@
-import mirrg.xarpite.parser.ExtraCharactersParseException
-import mirrg.xarpite.parser.UnmatchedInputParseException
+import io.github.mirrgieriana.xarpite.xarpeg.ExtraCharactersParseException
+import io.github.mirrgieriana.xarpite.xarpeg.UnmatchedInputParseException
 import kotlin.test.fail
 
 fun assertExtraCharacters(block: () -> Unit) {

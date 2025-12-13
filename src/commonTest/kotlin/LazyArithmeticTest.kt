@@ -1,6 +1,7 @@
-import mirrg.xarpite.parser.ParseException
-import mirrg.xarpite.parser.Parser
-import mirrg.xarpite.parser.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.ParseException
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 import mirrg.xarpite.parser.parsers.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

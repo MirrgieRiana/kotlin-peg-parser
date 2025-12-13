@@ -1,23 +1,10 @@
 import assertExtraCharacters
 import assertUnmatchedInput
+import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import mirrg.xarpite.parser.NumberParser
-import mirrg.xarpite.parser.ParseContext
-import mirrg.xarpite.parser.parseAllOrThrow
-import mirrg.xarpite.parser.parsers.leftAssociative
-import mirrg.xarpite.parser.parsers.map
-import mirrg.xarpite.parser.parsers.not
-import mirrg.xarpite.parser.parsers.nothing
-import mirrg.xarpite.parser.parsers.oneOrMore
-import mirrg.xarpite.parser.parsers.optional
-import mirrg.xarpite.parser.parsers.or
-import mirrg.xarpite.parser.parsers.parser
-import mirrg.xarpite.parser.parsers.plus
-import mirrg.xarpite.parser.parsers.rightAssociative
-import mirrg.xarpite.parser.parsers.times
-import mirrg.xarpite.parser.parsers.unaryMinus
-import mirrg.xarpite.parser.parsers.unaryPlus
-import mirrg.xarpite.parser.parsers.unit
-import mirrg.xarpite.parser.parsers.zeroOrMore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -104,10 +91,10 @@ class ParserAdditionalTest {
     fun delegationParserAllowsMutualRecursion() {
         val language = object {
             val number = +Regex("[0-9]+") map { it.value.toInt() }
-            val term: mirrg.xarpite.parser.Parser<Int> by lazy {
+            val term: Parser<Int> by lazy {
                 number + (-'(' * parser { expr } * -')')
             }
-            val expr: mirrg.xarpite.parser.Parser<Int> by lazy {
+            val expr: Parser<Int> by lazy {
                 leftAssociative(term, -'+') { a, _, b -> a + b }
             }
         }
