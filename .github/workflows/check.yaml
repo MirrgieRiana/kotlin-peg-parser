@@ -3,22 +3,8 @@ name: check
 on:
   push:
     branches: [ main, master ]
-    paths:
-      - 'src/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle/**'
-      - 'gradlew'
-      - 'gradlew.bat'
   pull_request:
     branches: [ main, master ]
-    paths:
-      - 'src/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle/**'
-      - 'gradlew'
-      - 'gradlew.bat'
 
 jobs:
   build:
@@ -40,3 +26,29 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew build
+
+    - name: Build interpreter sample distribution
+      working-directory: samples/interpreter
+      run: |
+        # Build the executable distribution using Gradle
+        ./gradlew installDist --console=plain --info --stacktrace
+
+    - name: Run interpreter sample and verify output
+      working-directory: samples/interpreter
+      run: |
+        # Run the sample using java command directly
+        OUTPUT=$(java -cp "build/install/interpreter/lib/*" mirrg.xarpite.samples.interpreter.MainKt -e "2+3*4")
+        echo "Sample output: $OUTPUT"
+        
+        # Expected output
+        EXPECTED="14"
+        
+        # Verify the output matches expected
+        if [ "$OUTPUT" = "$EXPECTED" ]; then
+          echo "✓ Output matches expected: $EXPECTED"
+        else
+          echo "✗ Output mismatch!"
+          echo "  Expected: $EXPECTED"
+          echo "  Got: $OUTPUT"
+          exit 1
+        fi
