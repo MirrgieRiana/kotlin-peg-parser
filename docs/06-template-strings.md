@@ -83,12 +83,13 @@ The Kotlin string literals above double each quote mark that should appear in th
 The key to this parser is the `stringPart` regex:
 
 ```kotlin
+import mirrg.xarpite.parser.parseAllOrThrow
 import mirrg.xarpite.parser.parsers.*
 
 val stringPartRegexParser = +Regex("""[^"$]+|\$(?!\()""")
 
 fun main() {
-    stringPartRegexParser
+    stringPartRegexParser.parseAllOrThrow("hello")
 }
 ```
 
@@ -104,6 +105,7 @@ You can extend this pattern to handle nested template strings (strings inside ex
 
 ```kotlin
 import mirrg.xarpite.parser.Parser
+import mirrg.xarpite.parser.parseAllOrThrow
 import mirrg.xarpite.parser.parsers.*
 
 // Re-declared so this snippet remains self-contained for doc-test
@@ -142,7 +144,7 @@ object TemplateWithNestedStrings {
 }
 
 fun main() {
-    TemplateWithNestedStrings.templateString
+    TemplateWithNestedStrings.templateString.parseAllOrThrow("\"nested $(1+2)\"")
 }
 ```
 
