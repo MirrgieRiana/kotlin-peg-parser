@@ -55,11 +55,12 @@ tasks.register("generateDocSrc") {
                             linkedSetOf(
                                 "import mirrg.xarpite.parser.Parser",
                                 "import mirrg.xarpite.parser.parseAllOrThrow",
-                                "import mirrg.xarpite.parser.parsers.*",
-                                "import mirrg.xarpite.parser.Tuple1"
+                                "import mirrg.xarpite.parser.parsers.*"
                             )
                         } else {
-                            imports + "import mirrg.xarpite.parser.Tuple1"
+                            LinkedHashSet(imports)
+                        }.apply {
+                            if (blockBody.contains("Tuple1")) add("import mirrg.xarpite.parser.Tuple1")
                         }
 
                         val fileContent = buildString {
