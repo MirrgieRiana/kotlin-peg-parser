@@ -54,15 +54,6 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-
-        val jvmMain by getting
-        val jvmTest by getting
-        val jsMain by getting
-        val jsTest by getting
-        val linuxX64Main by getting
-        val linuxX64Test by getting
-        val mingwX64Main by getting
-        val mingwX64Test by getting
     }
 }
 
