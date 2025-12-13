@@ -113,9 +113,9 @@ tasks.register("generateTuples") {
         outputDir.mkdirs()
         outputDirParsers.mkdirs()
         
-        val packageRegex = Regex("^\\s*package\\s+([\\w.]+)\\s*")
+        val packageRegex = Regex("^\\s*package\\s+([\\w.`]+(?:\\s*\\.\\s*[\\w.`]+)*)(?:\\s*//.*)?\\s*$")
         fun packageLineOf(file: File) = file.useLines { lines ->
-            lines.firstNotNullOfOrNull { line -> packageRegex.find(line)?.groupValues?.getOrNull(1) }
+            lines.take(10).firstNotNullOfOrNull { line -> packageRegex.find(line)?.groupValues?.getOrNull(1) }
                 ?.let { "package $it" }
         } ?: throw GradleException("Package declaration not found in ${file.absolutePath}")
 
