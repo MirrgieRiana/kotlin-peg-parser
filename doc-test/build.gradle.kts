@@ -34,29 +34,45 @@ tasks.register("generateDocSrc") {
             .forEach { (relativePath, sourceFile) ->
                 val codeBlocks = kotlinBlockRegex.findAll(sourceFile.readText()).map { it.groupValues[1].trimEnd() }.toList()
                 if (codeBlocks.isNotEmpty()) {
-                    codeBlocks.forEachIndexed { index, originalBlock ->
-                        val imports = linkedSetOf<String>()
-                        val blockBody = originalBlock.lines().filterNot { line ->
+                    val imports = linkedSetOf<String>()
+                    val blocksWithBodies = codeBlocks.mapIndexed { index, originalBlock ->
+                        val body = originalBlock.lines().filterNot { line ->
                             val trimmed = line.trim()
                             if (trimmed.startsWith("import ")) {
                                 imports.add(trimmed)
                                 true
                             } else false
                         }.joinToString("\n").trim()
-
-                        val fileContent = buildString {
-                            appendLine("@file:Suppress(\"unused\")")
-                            appendLine("package docsnippets")
-                            appendLine()
-                            imports.forEach { appendLine(it) }
-                            if (imports.isNotEmpty()) appendLine()
-                            appendLine(blockBody)
-                        }
-                        val blockFile = generatedDocSrc.file("${relativePath.replace("/", ".")}.block$index.kt").asFile
-                        blockFile.parentFile.mkdirs()
-                        blockFile.writeText(fileContent)
-                        println("Generated: ${blockFile.absolutePath}")
+                        index to body
                     }
+
+                    val objectBase = relativePath.replace("/", "_").replace(".", "_").replace(Regex("[^A-Za-z0-9_]"), "_")
+                    val fileContent = buildString {
+                        appendLine("@file:Suppress(\"unused\")")
+                        appendLine("package docsnippets")
+                        appendLine()
+                        imports.forEach { appendLine(it) }
+                        if (imports.isNotEmpty()) appendLine()
+                        blocksWithBodies.forEach { (index, body) ->
+                            val objectName = "${objectBase}_block$index"
+                            appendLine("object $objectName {")
+                            if (body.isNotEmpty()) {
+                                body.lines().forEach { line ->
+                                    if (line.isNotEmpty()) {
+                                        appendLine("    $line")
+                                    } else {
+                                        appendLine()
+                                    }
+                                }
+                            }
+                            appendLine("}")
+                            appendLine()
+                        }
+                    }
+                    val outputFile = generatedDocSrc.file("${relativePath.replace("/", ".")}.kt").asFile
+                    outputFile.parentFile.mkdirs()
+                    outputFile.writeText(fileContent.trimEnd() + "\n")
+                    println("Generated: ${outputFile.absolutePath}")
                 } else {
                     println("Skipped (no Kotlin blocks): ${relativePath}")
                 }
