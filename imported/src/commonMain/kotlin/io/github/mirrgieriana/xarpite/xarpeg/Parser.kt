@@ -1,8 +1,8 @@
-package mirrg.xarpite.parser
+package io.github.mirrgieriana.xarpite.xarpeg
 
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.normalize
 import mirrg.kotlin.helium.truncate
 import mirrg.xarpite.escapeJsonString
-import mirrg.xarpite.parser.parsers.normalize
 
 fun interface Parser<out T : Any> {
     fun parseOrNull(context: ParseContext, start: Int): ParseResult<T>?
@@ -45,24 +45,4 @@ fun <T : Any> Parser<T>.parseAllOrThrow(src: String, useCache: Boolean = true): 
         throw ExtraCharactersParseException("""Extra characters found after position ${result.end}: "$string"""", result.end)
     }
     return result.value
-}
-
-
-object NumberParser : Parser<Int> {
-    override fun parseOrNull(context: ParseContext, start: Int): ParseResult<Int>? {
-        val sb = StringBuilder()
-        var index = start
-        while (index < context.src.length) {
-            val char = context.src[index]
-            if (char in '0'..'9') {
-                sb.append(char)
-                index++
-            } else {
-                break
-            }
-        }
-        if (sb.isEmpty()) return null
-        val number = sb.toString().toInt()
-        return ParseResult(number, start, index)
-    }
 }
