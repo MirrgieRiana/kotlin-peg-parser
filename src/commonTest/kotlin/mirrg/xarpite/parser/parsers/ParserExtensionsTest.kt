@@ -1,8 +1,13 @@
 package mirrg.xarpite.parser.parsers
 
-import mirrg.xarpite.parser.ParseContext
-import mirrg.xarpite.parser.Tuple0
-import mirrg.xarpite.parser.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple0
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryMinus
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.not
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

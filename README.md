@@ -1,6 +1,14 @@
+[![CI Status](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/actions/workflows/check.yaml/badge.svg)](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/actions/workflows/check.yaml)
+[![GitHub Release](https://img.shields.io/github/v/release/MirrgieRiana/xarpeg-kotlin-peg-parser)](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases/latest)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 # Xarpeg: Kotlin PEG Parser
 
 **Xarpeg: Kotlin PEG Parser - Lightweight PEG-style parser combinators for Kotlin Multiplatform**
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/MirrgieRiana/xarpeg-kotlin-peg-parser/main/assets/xarpeg-logo.svg" alt="Xarpeg logo" width="400">
+</p>
 
 Xarpeg (/ˈʃɑrpɛɡ/) provides a compact, operator-driven parser combinator API. It targets JVM, JS (Node.js), and Native (Linux x64, Windows x64), works directly on raw input strings (no tokenizer), and ships with opt-in caching to keep backtracking predictable.
 
@@ -18,12 +26,12 @@ Xarpeg (/ˈʃɑrpɛɡ/) provides a compact, operator-driven parser combinator AP
 
 ## Quick Start
 
-The API lives under `mirrg.xarpite.parser` and its `parsers` helpers. Operator overloads keep grammars short while remaining explicit about what is kept or ignored.
+The API lives under `io.github.mirrgieriana.xarpite.xarpeg` and its `parsers` helpers. Operator overloads keep grammars short while remaining explicit about what is kept or ignored.
 
 ```kotlin
-import mirrg.xarpite.parser.Parser
-import mirrg.xarpite.parser.parseAllOrThrow
-import mirrg.xarpite.parser.parsers.*
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 // Simple arithmetic expression parser.
 val expr: Parser<Int> = object {

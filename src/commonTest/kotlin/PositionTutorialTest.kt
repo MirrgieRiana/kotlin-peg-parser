@@ -1,9 +1,9 @@
-import mirrg.xarpite.parser.Parser
-import mirrg.xarpite.parser.parseAllOrThrow
-import mirrg.xarpite.parser.text
-import mirrg.xarpite.parser.parsers.map
-import mirrg.xarpite.parser.parsers.mapEx
-import mirrg.xarpite.parser.parsers.unaryPlus
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.text
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.mapEx
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
