@@ -97,9 +97,16 @@ tasks.register("generateSrc") {
                                     if (braceCount > 0) continue
                                     val nextLine = lines.getOrNull(j) ?: break
                                     if (nextLine.isBlank()) {
-                                        val nextNonBlank = lines.asSequence()
-                                            .drop(j + 1)
-                                            .firstOrNull { it.isNotBlank() }
+                                        var k = j + 1
+                                        var nextNonBlank: String? = null
+                                        while (k < lines.size) {
+                                            val candidate = lines[k]
+                                            if (candidate.isNotBlank()) {
+                                                nextNonBlank = candidate
+                                                break
+                                            }
+                                            k++
+                                        }
                                         val continueAfterBlank = nextNonBlank?.let { it.startsWith(" ") || it.startsWith("\t") } ?: false
                                         declLines.add(nextLine)
                                         j++
@@ -124,12 +131,11 @@ tasks.register("generateSrc") {
                         }
 
                         if (hasMain && hasExecutableStatements) {
-                            throw GradleException("Code block $relativePath#$index contains top-level statements alongside main(); move them into main.")
+                            throw GradleException("Code block at index $index in file $relativePath contains top-level statements alongside main(); move them into main.")
                         }
 
-                        val disambiguationSegment = sanitizeSegment(relativePath.replace("/", "_").replace(".", "_"))
-                        val packageName = (relativePath.split('/') + disambiguationSegment + index.toString())
-                            .map(::sanitizeSegment)
+                        val basePackageSegment = sanitizeSegment(relativePath.replace("/", "_").replace(".", "_"))
+                        val packageName = listOf(basePackageSegment, sanitizeSegment(index.toString()))
                             .joinToString(".")
 
                         generatedPackageNames.add(packageName)
