@@ -115,9 +115,8 @@ tasks.register("generateTuples") {
         
         // Generate Tuples.kt programmatically
         val typeParams = listOf("A", "B", "C", "D", "E")
-        val tuplesPackage = "package io.github.mirrgieriana.xarpite.xarpeg"
         val tuplesContent = buildString {
-            appendLine(tuplesPackage)
+            appendLine("package io.github.mirrgieriana.xarpite.xarpeg")
             appendLine()
             appendLine("object Tuple0")
             for (n in 1..maxTupleSize) {
