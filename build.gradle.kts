@@ -1,4 +1,5 @@
 
+
 plugins {
     kotlin("multiplatform") version "2.2.20"
     id("maven-publish")
@@ -12,15 +13,21 @@ val gitShaRegex = Regex("^[0-9a-fA-F]{${SHORT_SHA_LENGTH},${MAX_SHA_LENGTH}}$")
 
 fun isValidGitSha(sha: String): Boolean = gitShaRegex.matches(sha)
 
-fun determineVersion(): String {
-    val githubSha = System.getenv("GITHUB_SHA")
-    val sanitizedSha = githubSha?.takeIf(::isValidGitSha)
-    return System.getenv("VERSION")
-        ?: sanitizedSha?.let { "latest-commit-${it.take(SHORT_SHA_LENGTH)}" }
-        ?: "latest"
+fun Project.readGitSha(): String? = runCatching {
+    val process = ProcessBuilder("git", "rev-parse", "HEAD")
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start()
+    process.inputStream.bufferedReader().use { it.readText() }.trim().takeIf(::isValidGitSha)
+}.getOrNull()
+
+fun Project.determineVersion(): String {
+    System.getenv("VERSION")?.let { return it }
+    val sanitizedSha = System.getenv("GITHUB_SHA")?.takeIf(::isValidGitSha) ?: readGitSha()
+    return sanitizedSha?.let { "latest-commit-${it.take(SHORT_SHA_LENGTH)}" } ?: "latest"
 }
 
-version = determineVersion()
+version = project.determineVersion()
 
 repositories {
     mavenCentral()
@@ -41,6 +48,7 @@ kotlin {
     }
 
     // WASM target for JavaScript
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         binaries.executable()
         nodejs()
