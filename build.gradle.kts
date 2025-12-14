@@ -102,18 +102,12 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
     }
 
     doLast {
-        val repoPath = providers.gradleProperty("repoPath").orElse("MirrgieRiana/xarpeg-kotlin-peg-parser").get()
-        val iconUrl = "https://raw.githubusercontent.com/$repoPath/main/assets/xarpeg-icon.svg"
-        // Replace Dokka's default logo-icon.svg references (including relative prefixes) when they appear as quoted URLs.
-        val iconRegex = Regex("""(?<=['"])(?:\.\./)*images/logo-icon\.svg(?=['"])""")
-        outputDirectory.get().asFile
-            .walkTopDown()
-            .filter { it.isFile && (it.extension == "html" || it.name == "logo-styles.css") }
-            .forEach { file ->
-                val original = file.readText()
-                val replaced = iconRegex.replace(original, iconUrl)
-                if (replaced != original) file.writeText(replaced)
-            }
+        val iconSource = layout.projectDirectory.file("assets/xarpeg-icon.svg").asFile
+        val iconTarget = outputDirectory.get().asFile.resolve("images/logo-icon.svg")
+        if (iconSource.exists()) {
+            iconTarget.parentFile.mkdirs()
+            iconSource.copyTo(iconTarget, overwrite = true)
+        }
     }
 }
 
