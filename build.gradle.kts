@@ -41,6 +41,15 @@ kotlin {
         }
     }
 
+    // Native target for Linux ARM64
+    linuxArm64 {
+        binaries {
+            executable {
+                entryPoint = "io.github.mirrgieriana.xarpite.xarpeg.main"
+            }
+        }
+    }
+
     // Native target for Windows x64
     mingwX64 {
         binaries {
