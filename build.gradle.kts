@@ -100,6 +100,13 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
             suppress.set(false)
         }
     }
+
+    doLast {
+        val iconSource = layout.projectDirectory.file("assets/xarpeg-icon.svg").asFile
+        val iconTarget = outputDirectory.get().asFile.resolve("images/logo-icon.svg")
+        iconTarget.parentFile.mkdirs()
+        iconSource.copyTo(iconTarget, overwrite = true)
+    }
 }
 
 // Tuple generator task
