@@ -40,6 +40,8 @@ jobs:
       # dokkaHtml is the available Dokka task for this project (no dokkaHtmlMultiplatform task is registered)
       - name: Generate KDoc
         run: ./gradlew dokkaHtml --no-daemon --stacktrace
+        env:
+          GRADLE_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
 
       - name: Prepare Jekyll source
         run: |
