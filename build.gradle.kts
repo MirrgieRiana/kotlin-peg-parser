@@ -6,15 +6,15 @@ plugins {
 }
 
 group = "io.github.mirrgieriana.xarpite"
+val SHORT_SHA_LENGTH = 7
+
 fun determineVersion(): String {
-    val shortShaLength = 7
     return System.getenv("VERSION")
-        ?: System.getenv("GITHUB_SHA")?.let { "0.0.0-${it.take(shortShaLength)}-SNAPSHOT" }
+        ?: System.getenv("GITHUB_SHA")?.let { "0.0.0-${it.take(SHORT_SHA_LENGTH)}-SNAPSHOT" }
         ?: "0.0.0-latest"
 }
 
-val resolvedVersion = determineVersion()
-version = resolvedVersion
+version = determineVersion()
 
 repositories {
     mavenCentral()
