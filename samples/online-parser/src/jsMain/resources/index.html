@@ -33,6 +33,38 @@
             display: flex;
             justify-content: center;
         }
+        .hero-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+        .hero-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+        }
+        .hero-logo {
+            width: 78px;
+            height: auto;
+            filter: drop-shadow(0 8px 16px rgba(37, 99, 235, 0.25));
+        }
+        .hero-text {
+            display: grid;
+            gap: 0.2rem;
+        }
+        .eyebrow {
+            margin: 0;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: var(--accent-strong);
+        }
         main {
             width: min(960px, 100%);
             background: var(--surface);
@@ -45,6 +77,9 @@
             margin: 0 0 1rem;
             font-size: clamp(1.6rem, 3vw, 2rem);
             letter-spacing: 0.02em;
+        }
+        .hero-text h1 {
+            margin: 0;
         }
         p.lead { margin: 0 0 1.5rem; color: var(--muted); }
         label { font-weight: 700; color: var(--ink); }
@@ -108,6 +143,22 @@
             padding-bottom: 0.08rem;
         }
         .source:hover { color: var(--accent-strong-hover); }
+        .hero-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.55rem 1rem;
+            border-radius: 999px;
+            border: 1px solid var(--accent-strong);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(37, 99, 235, 0.22));
+            color: var(--accent-strong);
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.15);
+            letter-spacing: 0.01em;
+        }
+        .hero-link:hover { color: var(--accent-strong-hover); filter: brightness(1.03); }
+        .hero-link:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
         .code-block {
             margin: 0.4rem 0 0;
             padding: 1rem;
@@ -126,7 +177,16 @@
 </head>
     <body>
         <main>
-            <h1>Online Parser Sample</h1>
+            <div class="hero-header">
+                <div class="hero-brand">
+                    <img class="hero-logo" src="https://raw.githubusercontent.com/MirrgieRiana/xarpeg-kotlin-peg-parser/main/assets/xarpeg-logo.svg" alt="Xarpeg Kotlin PEG Parser logo">
+                    <div class="hero-text">
+                        <p class="eyebrow">Xarpeg Kotlin PEG Parser</p>
+                        <h1>Online Parser Sample</h1>
+                    </div>
+                </div>
+                <a class="hero-link" href="https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser">View on GitHub</a>
+            </div>
             <p class="lead">This hosted sample from the <a class="source" href="https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser">Xarpeg Kotlin PEG Parser</a> documentation runs an arithmetic expression parser inspired by the “Expressions” guide in Kotlin/JS. It adds whitespace and decimal support so you can try the grammar without building the project.</p>
 
             <div class="section">
