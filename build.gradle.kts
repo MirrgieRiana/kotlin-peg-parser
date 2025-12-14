@@ -137,6 +137,8 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
         }
         named("commonMain") {
             suppress.set(false)
+            // Explicitly include generated sources for Tuple classes
+            sourceRoots.from(layout.projectDirectory.dir("src/generated/kotlin"))
         }
     }
 
