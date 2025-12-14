@@ -8,8 +8,47 @@ plugins {
 group = "io.github.mirrgieriana.xarpite"
 version = System.getenv("VERSION") ?: "1.0.0-SNAPSHOT"
 
+val repoPath = providers.gradleProperty("repoPath").orElse("MirrgieRiana/xarpeg-kotlin-peg-parser")
+val repoName = providers.gradleProperty("repoName").orElse(repoPath.map { it.substringAfter('/') })
+
 repositories {
     mavenCentral()
+}
+
+tasks.register("propagateRepoName") {
+    description = "Propagates repository name/path from gradle.properties into documentation and site assets."
+    group = "help"
+
+    val repoPathValue = repoPath.get()
+    val repoNameValue = repoName.get()
+    val projectDir = layout.projectDirectory.asFile
+
+    inputs.property("repoPath", repoPathValue)
+    inputs.property("repoName", repoNameValue)
+
+    val targets = listOf(
+        "README.md",
+        "docs/index.md",
+        "docs/04-runtime.md",
+        "pages/_config.yml",
+        "pages/_layouts/default.html",
+        "pages/_includes/head-custom.html",
+        "samples/libs.versions.toml",
+        "samples/online-parser/src/jsMain/resources/index.html"
+    ).map { projectDir.resolve(it) }
+
+    doLast {
+        targets.forEach { file ->
+            val original = file.readText()
+            val updated = original
+                .replace("MirrgieRiana/xarpeg-kotlin-peg-parser", repoPathValue)
+                .replace("xarpeg-kotlin-peg-parser", repoNameValue)
+            if (updated != original) {
+                file.writeText(updated)
+                println("Updated ${file.relativeTo(projectDir)}")
+            }
+        }
+    }
 }
 
 kotlin {
@@ -94,7 +133,7 @@ tasks.register("writeKotlinMetadata") {
 
 // Dokka configuration for KDoc generation
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
-    moduleName.set("xarpeg-kotlin-peg-parser")
+    moduleName.set(repoName)
     outputDirectory.set(layout.buildDirectory.dir("dokka"))
     
     // Whitelist: Only process JVM source set by name
@@ -279,4 +318,8 @@ tasks.register("generateTuples") {
 // Ensure Kotlin compilation tasks depend on generateTuples
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile<*>>().configureEach {
     dependsOn("generateTuples")
+}
+
+tasks.named("check") {
+    dependsOn("propagateRepoName")
 }
