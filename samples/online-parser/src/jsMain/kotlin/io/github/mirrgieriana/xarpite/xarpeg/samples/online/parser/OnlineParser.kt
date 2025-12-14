@@ -13,9 +13,7 @@ private object ExpressionGrammar {
 
     private val number = +Regex("[0-9]+(?:\\.[0-9]+)?") map { it.value.toDouble() }
 
-    private val factor: Parser<Double> by lazy {
-        number + (-'(' * whitespace * parser { expression } * whitespace * -')')
-    }
+    private val factor: Parser<Double> = number + (-'(' * whitespace * parser { expression } * whitespace * -')')
 
     private val product = leftAssociative(factor, whitespace * (+'*' + +'/') * whitespace) { a, op, b ->
         when (op) {
@@ -25,15 +23,13 @@ private object ExpressionGrammar {
         }
     }
 
-    private val expression: Parser<Double> by lazy {
-         leftAssociative(product, whitespace * (+'+' + +'-') * whitespace) { a, op, b ->
-            when (op) {
-                '+' -> a + b
-                '-' -> a - b
-                else -> a
-            }
-        } * whitespace
-    }
+    private val expression: Parser<Double> = leftAssociative(product, whitespace * (+'+' + +'-') * whitespace) { a, op, b ->
+        when (op) {
+            '+' -> a + b
+            '-' -> a - b
+            else -> a
+        }
+    } * whitespace
 
     val root = whitespace * expression * whitespace
 }

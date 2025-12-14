@@ -107,7 +107,7 @@ class JsonParserTest {
             +"null" map { JsonValue.JsonNull }
 
         // JSON array parser (recursive)
-        private val jsonArray: Parser<JsonValue.JsonArray> by lazy {
+        private val jsonArray: Parser<JsonValue.JsonArray> = run {
             val element = parser { jsonValue }.trimmed()
             val elements = element.commaSeparated()
             -'[' * -ws * elements * -ws * -']' map { values ->
@@ -116,7 +116,7 @@ class JsonParserTest {
         }
 
         // JSON object parser (recursive)
-        private val jsonObject: Parser<JsonValue.JsonObject> by lazy {
+        private val jsonObject: Parser<JsonValue.JsonObject> = run {
             val key = jsonString.trimmed() map { it.value }
             val pair = key * -':' * -ws * parser { jsonValue }.trimmed() map { (k, v) ->
                 k to v
