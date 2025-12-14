@@ -58,7 +58,7 @@ jobs:
         run: |
           mkdir -p main/build/maven
           if [ -d maven/maven ]; then
-            rsync -av --delete --exclude '.git/' maven/maven/ main/build/maven/
+            rsync -av --delete --exclude '.git/' maven/ main/build/maven/
           fi
 
       - name: Publish artifacts
@@ -71,8 +71,7 @@ jobs:
 
       - name: Sync artifacts to maven branch
         run: |
-          mkdir -p maven/maven
-          rsync -av --delete --exclude '.git/' main/build/maven/ maven/maven/
+          rsync -av --delete --exclude '.git/' main/build/maven/ maven/
 
       - name: Commit and push artifacts
         working-directory: maven
