@@ -15,7 +15,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val expr: Parser<Int> = object {
     val number = +Regex("[0-9]+") map { it.value.toInt() }
-    val paren: Parser<Int> by lazy { -'(' * ref { root } * -')' map { value -> value } }
+    val paren: Parser<Int> = -'(' * ref { root } * -')' map { value -> value }
     val factor = number + paren
     val mul = leftAssociative(factor, -'*') { a, _, b -> a * b }
     val add = leftAssociative(mul, -'+') { a, _, b -> a + b }
@@ -28,9 +28,16 @@ fun main() {
 ```
 
 - Resolve forward references with `ref { ... }`, which creates a lazy reference to another parser.
-- Use `by lazy` for mutually recursive parsers or when you need to reference a parser before it's defined.
 - `leftAssociative` / `rightAssociative` take a term parser, an operator parser, and a combiner, saving you from hand-written recursive descent.
 - Operators are ordinary parsers, so handling whitespace or multi-character operators works the same way.
+
+## When you might need `by lazy`
+
+In most cases, `ref { ... }` is sufficient for recursive parsers. However, in some situations involving complex recursive definitions, you may encounter initialization errors. If this happens, wrapping the variable definition with `by lazy` can resolve the issue by deferring the initialization:
+
+    val paren: Parser<Int> by lazy { (-'(' * ref { root } * -')') map { value -> value } }
+
+This is an advanced workaround and is rarely needed in typical parser definitions.
 
 ## Extending the pattern
 
