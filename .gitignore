@@ -33,6 +33,9 @@ build/
 gradle-app.setting
 !gradle-wrapper.jar
 
+# Generated sources
+src/generated/
+
 # Kotlin/JS
 kotlin-js-store/
 node_modules/
