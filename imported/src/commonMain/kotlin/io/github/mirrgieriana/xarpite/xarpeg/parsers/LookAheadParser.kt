@@ -4,7 +4,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
 import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
 import io.github.mirrgieriana.xarpite.xarpeg.Parser
 
-class LookaheadParser<T : Any>(val parser: Parser<T>) : Parser<T> {
+class LookAheadParser<T : Any>(val parser: Parser<T>) : Parser<T> {
     override fun parseOrNull(context: ParseContext, start: Int): ParseResult<T>? {
         val result = context.parseOrNull(parser, start)
         if (result == null) return null
@@ -12,4 +12,4 @@ class LookaheadParser<T : Any>(val parser: Parser<T>) : Parser<T> {
     }
 }
 
-fun <T : Any> Parser<T>.lookahead() = LookaheadParser(this)
+val <T : Any> Parser<T>.lookAhead get() = LookAheadParser(this)
