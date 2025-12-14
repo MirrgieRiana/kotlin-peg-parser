@@ -436,4 +436,33 @@ class OnlineParserTest {
         val result = parseExpression("fib = (n) -> n <= 1 ? n : fib(n - 1) + fib(n - 2)\nfib(7)")
         assertEquals("13", result)
     }
+
+    // Stack trace tests
+    @Test
+    fun showsCallStackInRecursiveError() {
+        // Create a function that causes error in deep recursion
+        val result = parseExpression("crash = (n) -> n <= 0 ? 1 / 0 : crash(n - 1)\ncrash(3)")
+        assertTrue(result.startsWith("Error"))
+        assertTrue(result.contains("Call stack"))
+        assertTrue(result.contains("crash"))
+    }
+
+    @Test
+    fun showsCallStackWithMultipleFunctionCalls() {
+        // Create nested function calls that cause an error
+        val result = parseExpression("f = (x) -> g(x)\ng = (x) -> 1 / 0\nf(5)")
+        assertTrue(result.startsWith("Error"))
+        assertTrue(result.contains("Call stack"))
+        // Both functions should appear in the stack
+        assertTrue(result.contains("f"))
+        assertTrue(result.contains("g"))
+    }
+
+    @Test
+    fun showsCallStackWithLineAndColumn() {
+        // Test that position information is included in stack trace
+        val result = parseExpression("errorFunc = (x) -> 1 / 0\nerrorFunc(5)")
+        assertTrue(result.startsWith("Error"))
+        assertTrue(result.contains("line"))
+    }
 }
