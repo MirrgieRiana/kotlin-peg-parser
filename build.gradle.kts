@@ -94,7 +94,7 @@ tasks.register("writeKotlinMetadata") {
 
 // Dokka configuration for KDoc generation
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
-    moduleName.set("xarpeg-kotlin-peg-parser")
+    moduleName.set("Xarpeg KDoc")
     outputDirectory.set(layout.buildDirectory.dir("dokka"))
     
     // Whitelist: Only process JVM source set by name
