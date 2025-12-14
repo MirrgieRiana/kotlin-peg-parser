@@ -15,13 +15,13 @@
 
 **Lightweight PEG-style parser combinators for Kotlin Multiplatform**
 
-Xarpeg (/ˈʃɑrpɛɡ/) provides a compact, operator-driven parser combinator API. It targets JVM, JS (Node.js), and Native (Linux x64, Windows x64), works directly on raw input strings (no tokenizer), and ships with opt-in caching to keep backtracking predictable.
+Xarpeg (/ˈʃɑrpɛɡ/) provides a compact, operator-driven parser combinator API. It targets JVM, JS (Node.js), and Native (Linux x64, Linux ARM64, Windows x64), works directly on raw input strings (no tokenizer), and ships with opt-in caching to keep backtracking predictable.
 
 ---
 
 ## Features
 
-- **Kotlin Multiplatform** - JVM, JS (IR/Node.js), and Native (Linux x64, Windows x64)
+- **Kotlin Multiplatform** - JVM, JS (IR/Node.js), and Native (Linux x64, Linux ARM64, Windows x64)
 - **Operator-based DSL** - Unary `+` builds parsers from literals/regex, binary `+` expresses alternatives, `*` sequences tuples, `!` is negative lookahead, `-` ignores tokens
 - **Tuple-centric results** - Sequence results are `Tuple0..Tuple5` so you can explicitly keep or drop intermediate values
 - **Built-in cache** - Memoizes `(parser, position)` by default; toggle per parse call
@@ -72,27 +72,27 @@ Ready to build powerful parsers? Follow our structured tutorial guide to master 
 
 ### Step-by-Step Learning Path
 
-1. **🚀 [Quickstart](./docs/01-quickstart.md)** - Build your first parser  
+1. **🚀 [Quickstart](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/01-quickstart.html)** - Build your first parser  
    Start here with a minimal DSL example and learn how to run it immediately.
 
-2. **🔧 [Combinators](./docs/02-combinators.md)** - Combine parsers effectively  
+2. **🔧 [Combinators](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/02-combinators.html)** - Combine parsers effectively  
    Master sequences, choices, repetition, and other core patterns to build complex grammars.
 
-3. **🔁 [Expressions & Recursion](./docs/03-expressions.md)** - Handle recursive grammars  
+3. **🔁 [Expressions & Recursion](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/03-expressions.html)** - Handle recursive grammars  
    Learn to use `parser {}` / `by lazy` and leverage associativity helpers for expression parsing.
 
-4. **⚙️ [Runtime Behavior](./docs/04-runtime.md)** - Understand errors and performance  
+4. **⚙️ [Runtime Behavior](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/04-runtime.html)** - Understand errors and performance  
    Deep dive into exceptions, full consumption requirements, and cache control.
 
-5. **📍 [Parsing Positions](./docs/05-positions.md)** - Access position information  
+5. **📍 [Parsing Positions](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/05-positions.html)** - Access position information  
    Work with parsing positions using `mapEx` while keeping types simple.
 
-6. **🔗 [Template Strings](./docs/06-template-strings.md)** - Parse without tokenization  
+6. **🔗 [Template Strings](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/06-template-strings.html)** - Parse without tokenization  
    Discover how PEG parsers naturally handle template strings with embedded expressions.
 
 ### Additional Resources
 
-- **[Complete Tutorial Guide](./docs/index.md)** — Entry point for all tutorial content
+- **[Complete Tutorial Guide](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/index.html)** — Entry point for all tutorial content
 - **[GitHub Pages](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser)** — Published documentation site
 - **[GitHub Repository](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/)** — Source code and issue tracking
 
@@ -206,14 +206,7 @@ For **full multiplatform validation** (JVM, JS, Linux x64, Windows x64):
 
 Note: Native builds download Kotlin/Native toolchains from JetBrains (several hundred MB); ensure outbound network access when running Native tasks.
 
-### Running the Sample
-
-A small Hello World app is available for quick verification:
-
-```bash
-./gradlew jvmJar
-java -cp build/libs/xarpeg-kotlin-peg-parser-jvm-<latest-version>.jar mirrg.xarpite.peg.HelloWorldKt # replace with the version shown on Releases
-```
+### Running the Samples
 
 A standalone Gradle sample that consumes the library via its Maven coordinate lives under `samples/minimal-jvm-sample`:
 
