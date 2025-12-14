@@ -1,8 +1,8 @@
 package io.github.mirrgieriana.xarpite.xarpeg.samples.interpreter
 
-import mirrg.xarpite.parser.Parser
-import mirrg.xarpite.parser.parseAllOrThrow
-import mirrg.xarpite.parser.parsers.*
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 /**
  * A simple arithmetic interpreter that evaluates expressions with +, -, *, / and parentheses.
@@ -38,17 +38,14 @@ private object ArithmeticParser {
         LazyValue(result.start) { value }
     }
     
-    // Forward declaration for recursive grammar
-    val expr: Parser<LazyValue> by lazy { sum }
-    
     // Parse a grouped expression with parentheses
-    val grouped: Parser<LazyValue> by lazy { -'(' * parser { expr } * -')' }
+    val grouped: Parser<LazyValue> = -'(' * ref { expr } * -')'
     
     // Primary expression: number or grouped
     val primary: Parser<LazyValue> = number + grouped
     
     // Multiplication and division (higher precedence)
-    val product: Parser<LazyValue> by lazy {
+    val product: Parser<LazyValue> =
         leftAssociative(primary, (+'*' mapEx { _, r -> OperatorInfo(r.start, '*') }) + (+'/' mapEx { _, r -> OperatorInfo(r.start, '/') })) { a, op, b ->
             when (op.op) {
                 '*' -> LazyValue(op.position) { a.compute() * b.compute() }
@@ -67,10 +64,9 @@ private object ArithmeticParser {
                 else -> error("Unknown operator: ${op.op}")
             }
         }
-    }
     
     // Addition and subtraction (lower precedence)
-    val sum: Parser<LazyValue> by lazy {
+    val sum: Parser<LazyValue> =
         leftAssociative(product, +'+' + +'-') { a, op, b ->
             when (op) {
                 '+' -> LazyValue(a.position) { a.compute() + b.compute() }
@@ -78,7 +74,9 @@ private object ArithmeticParser {
                 else -> error("Unknown operator: $op")
             }
         }
-    }
+    
+    // Forward declaration for recursive grammar
+    val expr: Parser<LazyValue> = sum
 }
 
 /**
