@@ -47,6 +47,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             kotlin.srcDir("imported/src/commonMain/kotlin")
+            kotlin.srcDir("src/generated/kotlin")
         }
 
         val commonTest by getting {
@@ -103,7 +104,7 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
 
 // Tuple generator task
 tasks.register("generateTuples") {
-    description = "Generates tuple source files and verifies they match imported files"
+    description = "Generates tuple source files"
     group = "build"
     
     val outputDir = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg").asFile
@@ -258,6 +259,11 @@ tasks.register("generateTuples") {
         generatedTupleParserKt.writeText(tupleParserContent)
         println("Generated: ${generatedTupleParserKt.absolutePath}")
 
-        println("All tuple files generated and verified successfully!")
+        println("All tuple files generated successfully!")
     }
+}
+
+// Ensure Kotlin compilation tasks depend on generateTuples
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile<*>>().configureEach {
+    dependsOn("generateTuples")
 }
