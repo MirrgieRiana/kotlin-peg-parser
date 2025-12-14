@@ -402,6 +402,12 @@ x >= 10 ? 1 : 0</code>
                         <code class="example-code">factorial = (n) -> n <= 1 ? 1 : n * factorial(n - 1)
 factorial(5)</code>
                     </div>
+                    <div class="example-card" data-example="func1 = (a, b) -> a / b&#10;func2 = (a, b) -> func1(a + b, a - b)&#10;func2(10, 10)">
+                        <p class="example-title">Error Stack Trace</p>
+                        <code class="example-code">func1 = (a, b) -> a / b
+func2 = (a, b) -> func1(a + b, a - b)
+func2(10, 10)</code>
+                    </div>
                 </div>
             </div>
 
