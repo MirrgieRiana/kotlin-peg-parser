@@ -203,7 +203,10 @@ private object ExpressionGrammar {
 
     // Ternary operator: condition ? trueExpr : falseExpr
     private val ternary: Parser<() -> Value> by lazy {
-        ((parser { equalityComparison } * whitespace * -'?' * whitespace * parser { equalityComparison } * whitespace * -':' * whitespace * parser { equalityComparison }) map { (cond, trueExpr, falseExpr) ->
+        val ternaryExpr = parser { equalityComparison } * whitespace * -'?' * whitespace *
+            parser { equalityComparison } * whitespace * -':' * whitespace *
+            parser { equalityComparison }
+        (ternaryExpr map { (cond, trueExpr, falseExpr) ->
             {
                 val condVal = cond()
                 if (condVal !is Value.BooleanValue) throw EvaluationException("Condition in ternary operator must be a boolean")
