@@ -1,5 +1,4 @@
 
-
 plugins {
     kotlin("multiplatform") version "2.2.20"
     id("maven-publish")
