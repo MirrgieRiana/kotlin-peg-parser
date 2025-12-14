@@ -4,7 +4,6 @@ import io.github.mirrgieriana.xarpite.xarpeg.ParseException
 import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.mapEx
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.plus
@@ -40,11 +39,8 @@ class LazyArithmeticTest {
                 return@mapEx { throw PositionMarkerException("Position marker at index $position", position) }
             }
         
-        private val grouped: Parser<() -> Int> =
-            -'(' * ref { expr } * -')' map { value -> value }
-        
         private val primary: Parser<() -> Int> =
-            number + positionMarker + grouped
+            number + positionMarker + (-'(' * ref { expr } * -')')
         
         private val term: Parser<() -> Int> =
             leftAssociative(primary, +'*' + +'/') { a, op, b -> 
