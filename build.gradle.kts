@@ -80,10 +80,9 @@ publishing {
 }
 
 tasks.register("writeKotlinMetadata") {
-    val kotlinVersion =
-        providers.provider {
-            kotlin.coreLibrariesVersion ?: error("Kotlin core libraries version is not set")
-        }
+    val kotlinVersion = providers.provider {
+        kotlin.coreLibrariesVersion ?: error("Kotlin core libraries version is not set")
+    }
     val outputFile = layout.buildDirectory.file("maven/metadata/kotlin.json")
     inputs.property("kotlinVersion", kotlinVersion)
     outputs.file(outputFile)
@@ -102,7 +101,7 @@ tasks.register("writeKotlinMetadata") {
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
     moduleName.set("Xarpeg KDoc")
     outputDirectory.set(layout.buildDirectory.dir("dokka"))
-
+    
     // Whitelist: Only process JVM source set by name
     dokkaSourceSets {
         configureEach {
@@ -125,219 +124,156 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
 tasks.register("generateTuples") {
     description = "Generates tuple source files"
     group = "build"
-
+    
     val outputDir = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg").asFile
-    val outputDirParsers =
-        layout.projectDirectory.dir(
-            "src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg/parsers",
-        ).asFile
+    val outputDirParsers = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg/parsers").asFile
 
     val generatedTuplesKt = outputDir.resolve("Tuples.kt")
     val generatedTupleParserKt = outputDirParsers.resolve("TupleParser.kt")
-
+    
     doLast {
         // Configuration: Maximum tuple size to generate
         val maxTupleSize = 16
-
+        
         // Create output directories
         outputDir.mkdirs()
         outputDirParsers.mkdirs()
-
+        
         // Generate Tuples.kt programmatically
         val typeParams = (0 until maxTupleSize).map { index -> ('A'.code + index).toChar().toString() }
-        val tuplesContent =
-            buildString {
-                appendLine("package io.github.mirrgieriana.xarpite.xarpeg")
-                appendLine()
-                appendLine("object Tuple0")
-                for (n in 1..maxTupleSize) {
-                    val params = typeParams.take(n)
-                    val typeParamStr = params.joinToString(", ") { "out $it" }
-                    val paramStr = params.mapIndexed { i, p -> "val ${p.lowercase()}: $p" }.joinToString(", ")
-                    appendLine("data class Tuple$n<$typeParamStr>($paramStr)")
-                }
+        val tuplesContent = buildString {
+            appendLine("package io.github.mirrgieriana.xarpite.xarpeg")
+            appendLine()
+            appendLine("object Tuple0")
+            for (n in 1..maxTupleSize) {
+                val params = typeParams.take(n)
+                val typeParamStr = params.joinToString(", ") { "out $it" }
+                val paramStr = params.mapIndexed { i, p -> "val ${p.lowercase()}: $p" }.joinToString(", ")
+                appendLine("data class Tuple$n<$typeParamStr>($paramStr)")
             }
+        }
         generatedTuplesKt.writeText(tuplesContent)
         println("Generated: ${generatedTuplesKt.absolutePath}")
-
+        
         // Generate TupleParser.kt programmatically
-        val tupleParserContent =
-            buildString {
-                appendLine("package io.github.mirrgieriana.xarpite.xarpeg.parsers")
+        val tupleParserContent = buildString {
+            appendLine("package io.github.mirrgieriana.xarpite.xarpeg.parsers")
+            appendLine()
+            appendLine("import io.github.mirrgieriana.xarpite.xarpeg.ParseResult")
+            appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Parser")
+            appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Tuple0")
+            for (n in 1..maxTupleSize) {
+                appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Tuple$n")
+            }
+            appendLine("import kotlin.jvm.JvmName")
+            appendLine()
+            appendLine("// Parser to Tuple1Parser")
+            appendLine()
+            appendLine("operator fun <T : Any> Parser<T>.unaryPlus(): Parser<Tuple1<T>> = this map { a -> Tuple1(a) }")
+            appendLine()
+            appendLine()
+            appendLine("// Parser Combination")
+            appendLine()
+            appendLine("/** パーサーの結合は純粋関数ではなく、位置にマッチしたり解析位置を進めたりする副作用があることに注意。 */")
+            appendLine("fun <L : Any, R : Any, T : Any> combine(left: Parser<L>, right: Parser<R>, function: (L, R) -> T) = Parser { context, start ->")
+            appendLine("    val resultL = context.parseOrNull(left, start) ?: return@Parser null")
+            appendLine("    val resultR = context.parseOrNull(right, resultL.end) ?: return@Parser null")
+            appendLine("    ParseResult(function(resultL.value, resultR.value), resultL.start, resultR.end)")
+            appendLine("}")
+            appendLine()
+            appendLine()
+            appendLine("// Tuple0Parser vs Tuple0Parser = Tuple0Parser")
+            appendLine()
+            appendLine("@JvmName(\"times00\")")
+            appendLine("operator fun Parser<Tuple0>.times(other: Parser<Tuple0>) = combine(this, other) { _, _ -> Tuple0 }")
+            appendLine()
+            appendLine()
+            appendLine("// Tuple0Parser vs X = X")
+            appendLine()
+            appendLine("@JvmName(\"times0P\")")
+            appendLine("operator fun <A : Any> Parser<Tuple0>.times(other: Parser<A>) = combine(this, other) { _, b -> b }")
+            appendLine()
+            for (n in 1..maxTupleSize) {
+                val params = typeParams.take(n)
+                val typeParamStr = params.joinToString(", ") { "$it : Any" }
+                appendLine("@JvmName(\"times0$n\")")
+                appendLine("operator fun <$typeParamStr> Parser<Tuple0>.times(other: Parser<Tuple$n<${params.joinToString(", ")}>>) = combine(this, other) { _, b -> b }")
                 appendLine()
-                appendLine("import io.github.mirrgieriana.xarpite.xarpeg.ParseResult")
-                appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Parser")
-                appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Tuple0")
-                for (n in 1..maxTupleSize) {
-                    appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Tuple$n")
-                }
-                appendLine("import kotlin.jvm.JvmName")
+            }
+            appendLine()
+            appendLine("// X vs Tuple0Parser = X")
+            appendLine()
+            appendLine("@JvmName(\"timesP0\")")
+            appendLine("operator fun <A : Any> Parser<A>.times(other: Parser<Tuple0>) = combine(this, other) { a, _ -> a }")
+            appendLine()
+            for (n in 1..maxTupleSize) {
+                val params = typeParams.take(n)
+                val typeParamStr = params.joinToString(", ") { "$it : Any" }
+                appendLine("@JvmName(\"times${n}0\")")
+                appendLine("operator fun <$typeParamStr> Parser<Tuple$n<${params.joinToString(", ")}>>.times(other: Parser<Tuple0>) = combine(this, other) { a, _ -> a }")
                 appendLine()
-                appendLine("// Parser to Tuple1Parser")
+            }
+            appendLine()
+            appendLine("// Parser vs Parser = Tuple2Parser")
+            appendLine()
+            appendLine("@JvmName(\"timesPP\")")
+            appendLine("operator fun <A : Any, B : Any> Parser<A>.times(other: Parser<B>) = combine(this, other) { a, b -> Tuple2(a, b) }")
+            appendLine()
+            appendLine()
+            appendLine("// Parser vs TupleNParser = Tuple(N+1)Parser")
+            appendLine()
+            for (n in 1..(maxTupleSize - 1)) {
+                val resultN = n + 1
+                val rightParams = typeParams.subList(1, n + 1)  // B, C, D, E (skip A)
+                val resultParams = typeParams.take(resultN)
+                val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
+                val rightTupleAccess = (0 until n).map { i -> "b.${typeParams[i].lowercase()}" }.joinToString(", ")
+                appendLine("@JvmName(\"timesP$n\")")
+                appendLine("operator fun <$typeParamStr> Parser<A>.times(other: Parser<Tuple$n<${rightParams.joinToString(", ")}>>) = combine(this, other) { a, b -> Tuple$resultN(a, $rightTupleAccess) }")
                 appendLine()
-                appendLine(
-                    "operator fun <T : Any> Parser<T>.unaryPlus(): Parser<Tuple1<T>> = this map { a -> Tuple1(a) }",
-                )
+            }
+            appendLine()
+            appendLine("// TupleNParser vs Parser = Tuple(N+1)Parser")
+            appendLine()
+            for (n in 1..(maxTupleSize - 1)) {
+                val resultN = n + 1
+                val leftParams = typeParams.take(n)
+                val resultParams = typeParams.take(resultN)
+                val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
+                val leftTupleAccess = leftParams.mapIndexed { i, _ -> "a.${typeParams[i].lowercase()}" }.joinToString(", ")
+                appendLine("@JvmName(\"times${n}P\")")
+                appendLine("operator fun <$typeParamStr> Parser<Tuple$n<${leftParams.joinToString(", ")}>>.times(other: Parser<${typeParams[n]}>) = combine(this, other) { a, b -> Tuple$resultN($leftTupleAccess, b) }")
                 appendLine()
-                appendLine()
-                appendLine("// Parser Combination")
-                appendLine()
-                appendLine("/** パーサーの結合は純粋関数ではなく、位置にマッチしたり解析位置を進めたりする副作用があることに注意。 */")
-                val combineSig =
-                    "fun <L : Any, R : Any, T : Any> combine(" +
-                        "left: Parser<L>, right: Parser<R>, function: (L, R) -> T) = Parser { context, start ->"
-                appendLine(combineSig)
-                appendLine("    val resultL = context.parseOrNull(left, start) ?: return@Parser null")
-                appendLine("    val resultR = context.parseOrNull(right, resultL.end) ?: return@Parser null")
-                appendLine("    ParseResult(function(resultL.value, resultR.value), resultL.start, resultR.end)")
-                appendLine("}")
-                appendLine()
-                appendLine()
-                appendLine("// Tuple0Parser vs Tuple0Parser = Tuple0Parser")
-                appendLine()
-                appendLine("@JvmName(\"times00\")")
-                val times00 =
-                    "operator fun Parser<Tuple0>.times(other: Parser<Tuple0>) = " +
-                        "combine(this, other) { _, _ -> Tuple0 }"
-                appendLine(times00)
-                appendLine()
-                appendLine()
-                appendLine("// Tuple0Parser vs X = X")
-                appendLine()
-                appendLine("@JvmName(\"times0P\")")
-                val times0P =
-                    "operator fun <A : Any> Parser<Tuple0>.times(other: Parser<A>) = " +
-                        "combine(this, other) { _, b -> b }"
-                appendLine(times0P)
-                appendLine()
-                for (n in 1..maxTupleSize) {
-                    val params = typeParams.take(n)
-                    val typeParamStr = params.joinToString(", ") { "$it : Any" }
-                    appendLine("@JvmName(\"times0$n\")")
-                    appendLine(
-                        "operator fun <$typeParamStr> Parser<Tuple0>.times(other: Parser<Tuple$n<${params.joinToString(
-                            ", ",
-                        )}>>) = combine(this, other) { _, b -> b }",
-                    )
-                    appendLine()
-                }
-                appendLine()
-                appendLine("// X vs Tuple0Parser = X")
-                appendLine()
-                appendLine("@JvmName(\"timesP0\")")
-                val timesP0 =
-                    "operator fun <A : Any> Parser<A>.times(other: Parser<Tuple0>) = " +
-                        "combine(this, other) { a, _ -> a }"
-                appendLine(timesP0)
-                appendLine()
-                for (n in 1..maxTupleSize) {
-                    val params = typeParams.take(n)
-                    val typeParamStr = params.joinToString(", ") { "$it : Any" }
-                    appendLine("@JvmName(\"times${n}0\")")
-                    appendLine(
-                        "operator fun <$typeParamStr> Parser<Tuple$n<${params.joinToString(
-                            ", ",
-                        )}>>.times(other: Parser<Tuple0>) = combine(this, other) { a, _ -> a }",
-                    )
-                    appendLine()
-                }
-                appendLine()
-                appendLine("// Parser vs Parser = Tuple2Parser")
-                appendLine()
-                appendLine("@JvmName(\"timesPP\")")
-                val timesPP =
-                    "operator fun <A : Any, B : Any> Parser<A>.times(other: Parser<B>) = " +
-                        "combine(this, other) { a, b -> Tuple2(a, b) }"
-                appendLine(timesPP)
-                appendLine()
-                appendLine()
-                appendLine("// Parser vs TupleNParser = Tuple(N+1)Parser")
-                appendLine()
-                for (n in 1..(maxTupleSize - 1)) {
-                    val resultN = n + 1
-                    val rightParams = typeParams.subList(1, n + 1) // B, C, D, E (skip A)
-                    val resultParams = typeParams.take(resultN)
-                    val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
-                    val rightTupleAccess = (0 until n).map { i -> "b.${typeParams[i].lowercase()}" }.joinToString(", ")
-                    appendLine("@JvmName(\"timesP$n\")")
-                    appendLine(
-                        "operator fun <$typeParamStr> Parser<A>.times(other: Parser<Tuple$n<${rightParams.joinToString(
-                            ", ",
-                        )}>>) = combine(this, other) { a, b -> Tuple$resultN(a, $rightTupleAccess) }",
-                    )
-                    appendLine()
-                }
-                appendLine()
-                appendLine("// TupleNParser vs Parser = Tuple(N+1)Parser")
-                appendLine()
-                for (n in 1..(maxTupleSize - 1)) {
-                    val resultN = n + 1
-                    val leftParams = typeParams.take(n)
-                    val resultParams = typeParams.take(resultN)
-                    val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
-                    val leftTupleAccess =
-                        leftParams.mapIndexed {
-                                i,
-                                _,
-                            ->
-                            "a.${typeParams[i].lowercase()}"
-                        }.joinToString(", ")
-                    appendLine("@JvmName(\"times${n}P\")")
-                    val leftParamsStr = leftParams.joinToString(", ")
-                    val timesOperator = "operator fun <$typeParamStr> Parser<Tuple$n<$leftParamsStr>>."
-                    val timesBody =
-                        "times(other: Parser<${typeParams[n]}>) = " +
-                            "combine(this, other) { a, b -> Tuple$resultN($leftTupleAccess, b) }"
-                    appendLine(timesOperator + timesBody)
-                    appendLine()
-                }
-                appendLine()
-                appendLine("// TupleNParser vs TupleMParser = Tuple(N+M)Parser")
-                appendLine()
-                val combinations = mutableListOf<Triple<Int, Int, Int>>()
-                for (leftN in 1..(maxTupleSize - 1)) {
-                    for (rightN in 1..(maxTupleSize - 1)) {
-                        val resultN = leftN + rightN
-                        if (resultN <= maxTupleSize) {
-                            combinations.add(Triple(leftN, rightN, resultN))
-                        }
-                    }
-                }
-                combinations.forEachIndexed { index, (leftN, rightN, resultN) ->
-                    val leftParams = typeParams.take(leftN)
-                    val rightParams = typeParams.subList(leftN, leftN + rightN)
-                    val resultParams = typeParams.take(resultN)
-                    val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
-                    val leftTupleAccess =
-                        leftParams.mapIndexed {
-                                i,
-                                _,
-                            ->
-                            "a.${typeParams[i].lowercase()}"
-                        }.joinToString(", ")
-                    val rightTupleAccess =
-                        rightParams.mapIndexed {
-                                i,
-                                _,
-                            ->
-                            "b.${typeParams[i].lowercase()}"
-                        }.joinToString(", ")
-                    appendLine("@JvmName(\"times${leftN}_${rightN}\")")
-                    append(
-                        "operator fun <$typeParamStr> Parser<Tuple$leftN<${leftParams.joinToString(
-                            ", ",
-                        )}>>.times(other: Parser<Tuple$rightN<${rightParams.joinToString(
-                            ", ",
-                        )}>>) = combine(this, other) { a, b -> Tuple$resultN($leftTupleAccess, $rightTupleAccess) }",
-                    )
-                    if (index < combinations.size - 1) {
-                        appendLine()
-                        appendLine()
-                    } else {
-                        appendLine()
+            }
+            appendLine()
+            appendLine("// TupleNParser vs TupleMParser = Tuple(N+M)Parser")
+            appendLine()
+            val combinations = mutableListOf<Triple<Int, Int, Int>>()
+            for (leftN in 1..(maxTupleSize - 1)) {
+                for (rightN in 1..(maxTupleSize - 1)) {
+                    val resultN = leftN + rightN
+                    if (resultN <= maxTupleSize) {
+                        combinations.add(Triple(leftN, rightN, resultN))
                     }
                 }
             }
+            combinations.forEachIndexed { index, (leftN, rightN, resultN) ->
+                val leftParams = typeParams.take(leftN)
+                val rightParams = typeParams.subList(leftN, leftN + rightN)
+                val resultParams = typeParams.take(resultN)
+                val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
+                val leftTupleAccess = leftParams.mapIndexed { i, _ -> "a.${typeParams[i].lowercase()}" }.joinToString(", ")
+                val rightTupleAccess = rightParams.mapIndexed { i, _ -> "b.${typeParams[i].lowercase()}" }.joinToString(", ")
+                appendLine("@JvmName(\"times${leftN}_${rightN}\")")
+                append("operator fun <$typeParamStr> Parser<Tuple$leftN<${leftParams.joinToString(", ")}>>.times(other: Parser<Tuple$rightN<${rightParams.joinToString(", ")}>>) = combine(this, other) { a, b -> Tuple$resultN($leftTupleAccess, $rightTupleAccess) }")
+                if (index < combinations.size - 1) {
+                    appendLine()
+                    appendLine()
+                } else {
+                    appendLine()
+                }
+            }
+        }
         generatedTupleParserKt.writeText(tupleParserContent)
         println("Generated: ${generatedTupleParserKt.absolutePath}")
 

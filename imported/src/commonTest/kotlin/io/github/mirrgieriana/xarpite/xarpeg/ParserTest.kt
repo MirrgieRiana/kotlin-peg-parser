@@ -1,5 +1,15 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
+import kotlin.coroutines.cancellation.CancellationException
+import io.github.mirrgieriana.xarpite.xarpeg.ExtraCharactersParseException
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple0
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple1
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple2
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple5
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple16
+import io.github.mirrgieriana.xarpite.xarpeg.UnmatchedInputParseException
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.list
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
@@ -16,7 +26,6 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryMinus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unit
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.zeroOrMore
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -24,6 +33,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.fail
 
 class ParserTest {
+
     @Test
     fun parse() {
         val parser = +'a'
@@ -70,6 +80,7 @@ class ParserTest {
 
     @Test
     fun tupleParsers() {
+
         // Tuple5
         run {
             val parser = +'a' * +'b' * +'c' * +'d' * +'e'
@@ -107,10 +118,12 @@ class ParserTest {
             val parser = (+'a' map { Tuple0 }) * (+'b' map { Tuple0 })
             assertEquals(Tuple0, parser.parseAllOrThrow("ab")) // マッチする文字列で成功
         }
+
     }
 
     @Test
     fun listParser() {
+
         // zeroOrMore
         run {
             val parser = (+'a').zeroOrMore
@@ -143,10 +156,12 @@ class ParserTest {
             val parser1 = (+'a').list(min = 2, max = 2).list(min = 2, max = 2)
             assertEquals(listOf(listOf('a', 'a'), listOf('a', 'a')), parser1.parseAllOrThrow("aaaa"))
         }
+
     }
 
     @Test
     fun optionalParser() {
+
         // 単体
         run {
             val parser = (+'a').optional
@@ -161,10 +176,12 @@ class ParserTest {
             assertEquals(Tuple2(Tuple1('a'), 'b'), parser.parseAllOrThrow("ab")) // マッチする場合に成功
             assertEquals(Tuple2(Tuple1(null), 'b'), parser.parseAllOrThrow("b")) // 省略された場合に成功
         }
+
     }
 
     @Test
     fun orParser() {
+
         // 0項
         run {
             val parser = or<Char>()
@@ -186,6 +203,7 @@ class ParserTest {
             assertEquals('b', parser.parseAllOrThrow("b")) // 2番目の選択肢にマッチ
             assertUnmatchedInput { parser.parseAllOrThrow("c") }
         }
+
     }
 
     @Test
@@ -211,15 +229,14 @@ class ParserTest {
 
     @Test
     fun delegationParser() {
-        val parser =
-            object {
-                val number = +Regex("[0-9]+") map { it.value.toInt() }
-                val brackets: Parser<Int> by lazy { -'(' * parser { root } * -')' }
-                val factor = number + brackets
-                val mul = leftAssociative(factor, -'*') { a, _, b -> a * b }
-                val add = leftAssociative(mul, -'+') { a, _, b -> a + b }
-                val root = add
-            }.root
+        val parser = object {
+            val number = +Regex("[0-9]+") map { it.value.toInt() }
+            val brackets: Parser<Int> by lazy { -'(' * parser { root } * -')' }
+            val factor = number + brackets
+            val mul = leftAssociative(factor, -'*') { a, _, b -> a * b }
+            val add = leftAssociative(mul, -'+') { a, _, b -> a + b }
+            val root = add
+        }.root
 
         assertEquals(26, parser.parseAllOrThrow("2*3+4*5")) // まずはデリゲート使わない
         assertEquals(70, parser.parseAllOrThrow("2*(3+4)*5")) // デリゲートを使う
@@ -228,33 +245,32 @@ class ParserTest {
 
     @Test
     fun cache() {
-        val language =
-            object {
-                var counter = 0
+        val language = object {
+            var counter = 0
 
-                // 評価する度に評価された回数をカウントして多すぎる場合に例外を出すパーサー
-                val a =
-                    -"a" map {
-                        counter++
-                        // 入力文字列に対してこのパーサーを1000回も呼び出す時点でおかしい
-                        if (counter >= 1000) throw CancellationException(null, null)
-                        1
-                    }
-                val aa = -"aa" map { 2 }
-
-                // 入力されたaを分割する全パターンを試そうとするパーサー
-                val root: Parser<Int> by lazy {
-                    or(
-                        // bの位置で確定で失敗し、次の選択肢に進む
-                        // bより前に自分自身が居るので、rootが評価される度にrootが合計2回呼ばれる
-                        // これにより入力されたaの長さに対して指数関数的に計算時間が伸びる
-                        a * parser { root } * -"b" map { it.a + it.b },
-                        aa * parser { root } map { it.a + it.b },
-                        // 成功ケース用の終端
-                        unit(0),
-                    )
-                }
+            // 評価する度に評価された回数をカウントして多すぎる場合に例外を出すパーサー
+            val a = -"a" map {
+                counter++
+                // 入力文字列に対してこのパーサーを1000回も呼び出す時点でおかしい
+                if (counter >= 1000) throw CancellationException(null, null)
+                1
             }
+            val aa = -"aa" map { 2 }
+
+            // 入力されたaを分割する全パターンを試そうとするパーサー
+            val root: Parser<Int> by lazy {
+                or(
+                    // bの位置で確定で失敗し、次の選択肢に進む
+                    // bより前に自分自身が居るので、rootが評価される度にrootが合計2回呼ばれる
+                    // これにより入力されたaの長さに対して指数関数的に計算時間が伸びる
+                    a * parser { root } * -"b" map { it.a + it.b },
+                    aa * parser { root } map { it.a + it.b },
+
+                    // 成功ケース用の終端
+                    unit(0),
+                )
+            }
+        }
         val parser = language.root
 
         // キャッシュを使わない場合、計算回数が指数関数的に増加するのでキャンセルを踏む
@@ -269,10 +285,12 @@ class ParserTest {
         // キャッシュを使うことで計算回数が下がり成功するようになる
         language.counter = 0
         assertEquals(40, parser.parseAllOrThrow("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", useCache = true))
+
     }
 
     @Test
     fun associative() {
+
         // leftAssociative
         run {
             val number = +Regex("[0-9]+") map { it.value }
@@ -294,9 +312,11 @@ class ParserTest {
             assertEquals("1", add.parseAllOrThrow("1")) // 0回の場合
             assertUnmatchedInput { add.parseAllOrThrow("") } // どれも来ない場合は失敗
         }
+
     }
 
     companion object {
+
         private fun assertExtraCharacters(block: () -> Unit) {
             try {
                 block()
@@ -318,5 +338,6 @@ class ParserTest {
                 fail("Expected UnmatchedInputParseException, but got ${e::class}", e)
             }
         }
+
     }
 }

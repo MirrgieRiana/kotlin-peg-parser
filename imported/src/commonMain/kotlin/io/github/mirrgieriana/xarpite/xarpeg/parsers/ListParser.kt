@@ -5,10 +5,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
 import io.github.mirrgieriana.xarpite.xarpeg.Parser
 
 class ListParser<out T : Any>(val parser: Parser<T>, val min: Int, val max: Int) : Parser<List<T>> {
-    override fun parseOrNull(
-        context: ParseContext,
-        start: Int,
-    ): ParseResult<List<T>>? {
+    override fun parseOrNull(context: ParseContext, start: Int): ParseResult<List<T>>? {
         val results = mutableListOf<T>()
         var nextIndex = start
         while (true) {
@@ -22,10 +19,6 @@ class ListParser<out T : Any>(val parser: Parser<T>, val min: Int, val max: Int)
     }
 }
 
-fun <T : Any> Parser<T>.list(
-    min: Int = 0,
-    max: Int = Int.MAX_VALUE,
-) = ListParser(this, min, max)
-
+fun <T : Any> Parser<T>.list(min: Int = 0, max: Int = Int.MAX_VALUE) = ListParser(this, min, max)
 val <T : Any> Parser<T>.zeroOrMore get() = this.list()
 val <T : Any> Parser<T>.oneOrMore get() = this.list(min = 1)

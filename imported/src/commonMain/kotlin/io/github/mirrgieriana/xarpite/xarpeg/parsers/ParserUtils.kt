@@ -5,11 +5,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.Parser
 
 fun String.normalize() = this.replace("\r\n", "\n").replace("\r", "\n")
 
-fun <T : Any, O : Any> leftAssociative(
-    term: Parser<T>,
-    operator: Parser<O>,
-    combinator: (T, O, T) -> T,
-) = Parser { context, start ->
+fun <T : Any, O : Any> leftAssociative(term: Parser<T>, operator: Parser<O>, combinator: (T, O, T) -> T) = Parser { context, start ->
     var result = context.parseOrNull(term, start) ?: return@Parser null
     while (true) {
         val operatorResult = context.parseOrNull(operator, result.end) ?: break
@@ -19,11 +15,7 @@ fun <T : Any, O : Any> leftAssociative(
     result
 }
 
-fun <T : Any, O : Any> rightAssociative(
-    term: Parser<T>,
-    operator: Parser<O>,
-    combinator: (T, O, T) -> T,
-) = Parser { context, start ->
+fun <T : Any, O : Any> rightAssociative(term: Parser<T>, operator: Parser<O>, combinator: (T, O, T) -> T) = Parser { context, start ->
     val termResults = mutableListOf<ParseResult<T>>()
     val operatorResults = mutableListOf<ParseResult<O>>()
     val leftResult = context.parseOrNull(term, start) ?: return@Parser null

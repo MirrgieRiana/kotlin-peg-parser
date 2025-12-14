@@ -1,7 +1,19 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
+import io.github.mirrgieriana.xarpite.xarpeg.ExtraCharactersParseException
+import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
+import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple0
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple1
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple5
+import io.github.mirrgieriana.xarpite.xarpeg.UnmatchedInputParseException
+import io.github.mirrgieriana.xarpite.xarpeg.isNative
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.text
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.list
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.mapEx
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.not
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.or
@@ -9,17 +21,20 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.parser
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.plus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.rightAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.toParser
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryMinus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unit
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.zeroOrMore
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
+import kotlin.test.assertFailsWith
 
 class ImportedParserCoverageTest {
+
     @Test
     fun stringParserCachesInstanceWhenNotFrozen() {
         if (isNative) return
@@ -43,11 +58,10 @@ class ImportedParserCoverageTest {
     @Test
     fun delegationParserInvokesGetterOnlyOnce() {
         var invoked = 0
-        val delegating =
-            parser {
-                invoked++
-                +'x'
-            }
+        val delegating = parser {
+            invoked++
+            +'x'
+        }
 
         assertEquals('x', delegating.parseAllOrThrow("x"))
         assertEquals('x', delegating.parseAllOrThrow("x"))
@@ -57,11 +71,10 @@ class ImportedParserCoverageTest {
     @Test
     fun parseContextCachesNullResults() {
         var counter = 0
-        val countingParser =
-            Parser<Int> { _, _ ->
-                counter++
-                null
-            }
+        val countingParser = Parser<Int> { _, _ ->
+            counter++
+            null
+        }
         val context = ParseContext("abc", useCache = true)
 
         assertNull(context.parseOrNull(countingParser, 0))
@@ -72,12 +85,11 @@ class ImportedParserCoverageTest {
     @Test
     fun parseContextCacheSeparatesByStartIndex() {
         var counter = 0
-        val countingParser =
-            Parser<Int> { _, start ->
-                counter++
-                if (start >= 3) return@Parser null
-                ParseResult(start, start, start + 1)
-            }
+        val countingParser = Parser<Int> { _, start ->
+            counter++
+            if (start >= 3) return@Parser null
+            ParseResult(start, start, start + 1)
+        }
         val context = ParseContext("abcd", useCache = true)
 
         assertEquals(0, context.parseOrNull(countingParser, 0)?.value)
@@ -112,10 +124,9 @@ class ImportedParserCoverageTest {
 
     @Test
     fun mapExPreservesOffsetsAwayFromZero() {
-        val parser =
-            (+"cd") mapEx { ctx, result ->
-                "${result.start}-${result.end}-${result.text(ctx)}"
-            }
+        val parser = (+"cd") mapEx { ctx, result ->
+            "${result.start}-${result.end}-${result.text(ctx)}"
+        }
         val context = ParseContext("xxcdyy", useCache = true)
 
         val result = parser.parseOrNull(context, 2)
@@ -237,11 +248,10 @@ class ImportedParserCoverageTest {
     @Test
     fun parseContextWithoutCacheInvokesParserEachTime() {
         var counter = 0
-        val countingParser =
-            Parser<Int> { _, start ->
-                counter++
-                ParseResult(start, start, start + 1)
-            }
+        val countingParser = Parser<Int> { _, start ->
+            counter++
+            ParseResult(start, start, start + 1)
+        }
         val context = ParseContext("aaa", useCache = false)
 
         assertNotNull(context.parseOrNull(countingParser, 0))

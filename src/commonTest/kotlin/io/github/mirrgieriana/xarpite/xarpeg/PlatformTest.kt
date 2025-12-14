@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertSame
 
 class PlatformTest {
+
     @Test
     fun stringParserCachesOnNonNativePlatforms() {
         if (isNative) return
