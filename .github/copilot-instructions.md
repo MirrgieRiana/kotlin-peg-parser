@@ -10,13 +10,13 @@
 
 In issues, you must communicate in the same natural language as the initial message.
 
-In pull requests, you must communicate in the same natural language as the "Original prompt" written in the initial message, if it is not provided, or the title.
+In pull requests, you must communicate in the same natural language as the "Original prompt" written in the initial message. If the original prompt is not provided, use the natural language of the title.
 
-When launching the Agent from GitHub to create a pull request, you must initialize the pull request title and initial comment in the same natural language as user's.
+When launching the Agent from GitHub to create a pull request, you must initialize the pull request title and initial comment in the same natural language as the user's.
 
 ## Write documents in English
 
-You musr write all project documentation (such as `README.md` and contents under `docs/`) in English.
+You must write all project documentation (such as `README.md` and contents under `docs/`) in English.
 
 ## Domain blocking
 
