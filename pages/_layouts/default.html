@@ -11,12 +11,17 @@
 </head>
 <body>
   <header class="page-header" role="banner">
-    <h1 class="project-name">
-      <a href="{{ '/' | relative_url }}" style="color: white; text-decoration: none; border: none;">
-        {{ site.title }}
-      </a>
-    </h1>
-    <h2 class="project-tagline">{{ site.description }}</h2>
+    <div class="project-brand">
+      <img class="project-logo" src="https://raw.githubusercontent.com/MirrgieRiana/xarpeg-kotlin-peg-parser/main/assets/xarpeg-logo.svg" alt="{{ site.title }} logo">
+      <div>
+        <h1 class="project-name">
+          <a href="{{ '/' | relative_url }}" style="color: white; text-decoration: none; border: none;">
+            {{ site.title }}
+          </a>
+        </h1>
+        <h2 class="project-tagline">{{ site.description }}</h2>
+      </div>
+    </div>
     
     <nav class="header-nav" style="margin-top: 1.5rem;">
       <a href="{{ '/' | relative_url }}" class="btn">Home</a>
