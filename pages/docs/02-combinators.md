@@ -84,6 +84,48 @@ fun main() {
 
 Both parsers return `Tuple0` and consume no input, so they compose cleanly: `Tuple0 * X = X`.
 
+Here's an example showing how whitespace affects matching with boundary parsers:
+
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+val spaces = +Regex("\\s*") map { it.value }
+val word = +Regex("[a-z]+") map { it.value }
+
+// Pattern: optional spaces, then word must be at start and end
+val strictWord = spaces * startOfInput * word * endOfInput * spaces map { it.b }
+
+fun main() {
+    // No whitespace - matches because word is at position 0 and ends at input end
+    val result1 = strictWord.parseAllOrThrow("hello")
+    println("No spaces: $result1") // => "hello"
+    
+    // Leading whitespace - fails because after consuming spaces, not at start
+    try {
+        strictWord.parseAllOrThrow("  hello")
+    } catch (e: UnmatchedInputParseException) {
+        println("Leading spaces: failed (not at start after consuming spaces)")
+    }
+    
+    // Trailing whitespace - fails because after matching word, not at end
+    try {
+        strictWord.parseAllOrThrow("hello  ")
+    } catch (e: UnmatchedInputParseException) {
+        println("Trailing spaces: failed (not at end before consuming trailing spaces)")
+    }
+    
+    // Both leading and trailing - fails
+    try {
+        strictWord.parseAllOrThrow("  hello  ")
+    } catch (e: UnmatchedInputParseException) {
+        println("Both spaces: failed")
+    }
+}
+```
+
+This demonstrates that `startOfInput` and `endOfInput` check the current position, not the original input boundaries. After consuming characters (like whitespace), you're no longer at the start or end.
+
 > **Note**: When using `parseAllOrThrow`, these boundary checks are redundant because it already starts at position 0 and verifies the entire input is consumed. These parsers are most useful with `parseOrNull` or within complex grammars where you parse sub-expressions.
 
 Next, handle recursion and associativity to build expression parsers with less code.  
