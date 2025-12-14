@@ -7,7 +7,7 @@ plugins {
 
 group = "io.github.mirrgieriana.xarpite"
 val SHORT_SHA_LENGTH = 7
-val gitShaRegex = Regex("^[0-9a-fA-F]{${SHORT_SHA_LENGTH},}$")
+val gitShaRegex = Regex("^[0-9a-fA-F]{${SHORT_SHA_LENGTH},40}$")
 
 fun isValidGitSha(sha: String): Boolean = gitShaRegex.matches(sha)
 
