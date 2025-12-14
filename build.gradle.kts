@@ -264,6 +264,6 @@ tasks.register("generateTuples") {
 }
 
 // Ensure Kotlin compilation tasks depend on generateTuples
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile<*>>().configureEach {
     dependsOn("generateTuples")
 }
