@@ -22,9 +22,9 @@ tasks.register("propagateRepoName") {
     group = "help"
 
     val projectDir = layout.projectDirectory.asFile
-    val replacementPattern = Regex(
-        "(?<![\\w-])${Regex.escape(defaultRepoPath)}(?![\\w-])|(?<![\\w-])${Regex.escape(defaultRepoName)}(?![\\w-])"
-    )
+    // Match the default repo path/name only when they are not embedded in longer tokens
+    val repoPathPattern = Regex("(?<![\\w-])${Regex.escape(defaultRepoPath)}(?![\\w-])")
+    val repoNamePattern = Regex("(?<![\\w-])${Regex.escape(defaultRepoName)}(?![\\w-])")
 
     inputs.property("repoPath") { repoPath.get() }
     inputs.property("repoName") { repoName.get() }
@@ -48,7 +48,10 @@ tasks.register("propagateRepoName") {
         val replacementsRequired = repoPathValue != defaultRepoPath || repoNameValue != defaultRepoName
 
         fun needsReplacement(content: String): Boolean =
-            replacementsRequired && replacementPattern.containsMatchIn(content)
+            replacementsRequired && (
+                (repoPathValue != defaultRepoPath && repoPathPattern.containsMatchIn(content)) ||
+                    (repoNameValue != defaultRepoName && repoNamePattern.containsMatchIn(content))
+            )
 
         targets.forEach { file ->
             if (!file.isFile) return@forEach
@@ -56,9 +59,10 @@ tasks.register("propagateRepoName") {
             val original = file.readText()
             if (!needsReplacement(original)) return@forEach
 
-            val updated = replacementPattern.replace(original) { match ->
-                if (match.value.contains("/")) repoPathValue else repoNameValue
-            }
+            val updated = repoNamePattern.replace(
+                repoPathPattern.replace(original, repoPathValue),
+                repoNameValue
+            )
             if (updated != original) {
                 file.writeText(updated)
                 println("Updated ${file.relativeTo(projectDir)}")
