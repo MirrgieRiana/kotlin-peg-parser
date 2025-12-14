@@ -9,13 +9,12 @@
   --primary-color: #ffb300;
   --secondary-color: #ff8f00;
   --accent-color: #ffd54f;
-  --text-color: #1a0f00; /* Contrast checked on light amber backgrounds */
+  --text-color: #1a0f00; /* Contrast ~17.8:1 vs #fff8e1 (AAA) */
   --muted-text-color: #5c4730;
   --code-bg: #fff8e1;
   --border-color: #f0c67f;
   --link-color: #ffb300;
   --link-hover: #ff6f00;
-  --text-shadow-color: rgba(255, 255, 255, 0.25);
 }
 
 /* Enhanced typography */
@@ -181,7 +180,6 @@ tr:hover {
   opacity: 0.9;
   font-size: 1.1rem;
   color: var(--text-color);
-  text-shadow: 0 1px 2px var(--text-shadow-color);
 }
 
 .project-brand .project-tagline {
