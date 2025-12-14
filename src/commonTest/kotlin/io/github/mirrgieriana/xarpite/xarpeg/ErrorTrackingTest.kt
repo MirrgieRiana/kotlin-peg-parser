@@ -7,6 +7,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -102,13 +103,13 @@ class ErrorTrackingTest {
         // 位置1で失敗したパーサーのみが残る(以前のparser1はクリアされる)
         assertTrue(context.suggestedParsers.isNotEmpty())
         // parser1はもう含まれていない
-        assertTrue(!context.suggestedParsers.contains(parser1))
+        assertFalse(context.suggestedParsers.contains(parser1))
     }
 
     @Test
     fun errorPositionWithNestedParsers() {
         // ネストされたパーサーでの失敗位置を追跡
-        val digit = +Regex("[0-9]") map { it.value[0] }
+        val digit = +Regex("[0-9]") map { it.value.first() }  // Regex [0-9] always matches exactly one digit
         val twoDigits = digit * digit
         val parser = +'(' * twoDigits * +')'
         
