@@ -14,9 +14,9 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
 /**
  * Creates a reference parser that lazily evaluates the parser getter.
  * This is useful for creating recursive parsers.
- * 
+ *
  * This is an alias for the [ref] function for backwards compatibility.
- * 
+ *
  * Example:
  * ```
  * val expr: Parser<Int> by lazy {

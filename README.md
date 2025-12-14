@@ -120,7 +120,7 @@ Ready to build powerful parsers? Follow our structured tutorial guide to master 
 
 ### Error Handling
 
-- `UnmatchedInputParseException` — no parser matched at the current position.
+- `UnmatchedInputParseException` — No parser matched at the current position.
 - `ExtraCharactersParseException` — parsing succeeded but did not consume all input (reports the trailing position).
 
 ---
