@@ -6,9 +6,14 @@ plugins {
 }
 
 group = "io.github.mirrgieriana.xarpite"
-val resolvedVersion = System.getenv("VERSION")
-    ?: System.getenv("GITHUB_SHA")?.let { "0.0.0-${it.take(7)}-SNAPSHOT" }
-    ?: "0.0.0-latest"
+fun determineVersion(): String {
+    val shortShaLength = 7
+    return System.getenv("VERSION")
+        ?: System.getenv("GITHUB_SHA")?.let { "0.0.0-${it.take(shortShaLength)}-SNAPSHOT" }
+        ?: "0.0.0-latest"
+}
+
+val resolvedVersion = determineVersion()
 version = resolvedVersion
 
 repositories {
