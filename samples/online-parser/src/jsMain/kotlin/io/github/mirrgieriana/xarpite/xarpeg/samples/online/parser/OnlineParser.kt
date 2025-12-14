@@ -96,9 +96,6 @@ private object ExpressionGrammar {
     var functionCallCount = 0
     private const val MAX_FUNCTION_CALLS = 100
 
-    // Forward declarations
-    val expression: Parser<(EvaluationContext) -> Value> by lazy { assignment }
-
     // Variable reference
     private val variableRef: Parser<(EvaluationContext) -> Value> = identifier map { name ->
         { ctx -> 
@@ -205,7 +202,7 @@ private object ExpressionGrammar {
             (-'(' * whitespace * ref { expression } * whitespace * -')')
     }
 
-    private val factor: Parser<(EvaluationContext) -> Value> by lazy { primary }
+    private val factor: Parser<(EvaluationContext) -> Value> = primary
 
     private val product: Parser<(EvaluationContext) -> Value> = leftAssociative(factor, whitespace * (+'*' + +'/') * whitespace) { a, op, b ->
         { ctx ->
@@ -260,11 +257,10 @@ private object ExpressionGrammar {
     }
 
     // Equality comparison operators: ==, !=
-    private val equalityComparison: Parser<(EvaluationContext) -> Value> by lazy {
-        leftAssociative(
-            orderingComparison,
-            whitespace * (+Regex("==|!=") map { it.value }) * whitespace
-        ) { a, op, b ->
+    private val equalityComparison: Parser<(EvaluationContext) -> Value> = leftAssociative(
+        orderingComparison,
+        whitespace * (+Regex("==|!=") map { it.value }) * whitespace
+    ) { a, op, b ->
             { ctx ->
                 val aVal = a(ctx)
                 val bVal = b(ctx)
@@ -288,7 +284,7 @@ private object ExpressionGrammar {
                 Value.BooleanValue(result)
             }
         }
-    }
+    
 
     // Ternary operator: condition ? trueExpr : falseExpr
     private val ternary: Parser<(EvaluationContext) -> Value> by lazy {
@@ -316,6 +312,9 @@ private object ExpressionGrammar {
             evalFunc
         }) + ternary
     }
+
+    // Root expression parser
+    val expression: Parser<(EvaluationContext) -> Value> = assignment
 
     val root = whitespace * expression * whitespace
 }

@@ -6,11 +6,12 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 private val expression: Parser<Int> = object {
     val number = +Regex("[0-9]+") map { match -> match.value.toInt() }
-    val grouped: Parser<Int> by lazy { -'(' * ref { sum } * -')' }
-    val factor: Parser<Int> = number + grouped
-    val product = leftAssociative(factor, -'*') { a, _, b -> a * b }
-    val sum: Parser<Int> = leftAssociative(product, -'+') { a, _, b -> a + b }
-}.sum
+    val brackets: Parser<Int> = -'(' * ref { root } * -')' map { value -> value }
+    val factor = number + brackets
+    val mul = leftAssociative(factor, -'*') { a, _, b -> a * b }
+    val add = leftAssociative(mul, -'+') { a, _, b -> a + b }
+    val root = add
+}.root
 
 fun main() {
     val input = "2*(3+4)+5"
