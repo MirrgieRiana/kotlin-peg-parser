@@ -7,6 +7,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.Tuple0
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple1
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple2
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple5
+import io.github.mirrgieriana.xarpite.xarpeg.Tuple16
 import io.github.mirrgieriana.xarpite.xarpeg.UnmatchedInputParseException
 import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
@@ -96,6 +97,20 @@ class ParserTest {
             assertUnmatchedInput { parser.parseAllOrThrow("abfff") }
             assertUnmatchedInput { parser.parseAllOrThrow("abcff") }
             assertUnmatchedInput { parser.parseAllOrThrow("abcdf") }
+        }
+
+        // Tuple16
+        run {
+            val parser =
+                +'a' * +'b' * +'c' * +'d' *
+                    +'e' * +'f' * +'g' * +'h' *
+                    +'i' * +'j' * +'k' * +'l' *
+                    +'m' * +'n' * +'o' * +'p'
+
+            assertEquals(
+                Tuple16('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p'),
+                parser.parseAllOrThrow("abcdefghijklmnop"),
+            )
         }
 
         // Tuple0同士の結合でも副作用は適用される
