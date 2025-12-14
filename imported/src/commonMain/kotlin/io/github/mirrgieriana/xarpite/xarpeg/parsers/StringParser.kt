@@ -6,7 +6,10 @@ import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.isNative
 
 class StringParser(val string: String) : Parser<String> {
-    override fun parseOrNull(context: ParseContext, start: Int): ParseResult<String>? {
+    override fun parseOrNull(
+        context: ParseContext,
+        start: Int,
+    ): ParseResult<String>? {
         val nextIndex = start + string.length
         if (nextIndex > context.src.length) return null
         var index = 0
@@ -23,6 +26,9 @@ class StringParser(val string: String) : Parser<String> {
 }
 
 fun String.toParser() = if (isNative) StringParser(this) else StringParser.cache.getOrPut(this) { StringParser(this) }
+
 operator fun String.unaryPlus() = this.toParser()
+
 operator fun String.unaryMinus() = -+this
+
 operator fun String.not() = !+this

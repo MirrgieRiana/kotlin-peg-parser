@@ -1,7 +1,5 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
-import io.github.mirrgieriana.xarpite.xarpeg.Parser
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.parser
@@ -17,50 +15,52 @@ import kotlin.test.assertEquals
  * Tests for examples from the template strings tutorial (docs/06-template-strings.md)
  */
 class TemplateStringTutorialTest {
-
     // Define the result types
     sealed class TemplateElement
+
     data class StringPart(val text: String) : TemplateElement()
+
     data class ExpressionPart(val value: Int) : TemplateElement()
 
-    val templateStringParser: Parser<String> = object {
-        // Expression parser (reusing from earlier tutorials)
-        val number = +Regex("[0-9]+") map { it.value.toInt() }
-        val grouped: Parser<Int> by lazy { -'(' * parser { sum } * -')' }
-        val factor: Parser<Int> = number + grouped
-        val product = leftAssociative(factor, -'*') { a, _, b -> a * b }
-        val sum: Parser<Int> = leftAssociative(product, -'+') { a, _, b -> a + b }
-        val expression = sum
+    val templateStringParser: Parser<String> =
+        object {
+            // Expression parser (reusing from earlier tutorials)
+            val number = +Regex("[0-9]+") map { it.value.toInt() }
+            val grouped: Parser<Int> by lazy { -'(' * parser { sum } * -')' }
+            val factor: Parser<Int> = number + grouped
+            val product = leftAssociative(factor, -'*') { a, _, b -> a * b }
+            val sum: Parser<Int> = leftAssociative(product, -'+') { a, _, b -> a + b }
+            val expression = sum
 
-        // String parts: match everything except $( and closing "
-        // The key insight: use a regex that stops before template markers
-        val stringPart: Parser<TemplateElement> =
-            +Regex("""[^"$]+|\$(?!\()""") map { match ->
-                StringPart(match.value)
-            }
+            // String parts: match everything except $( and closing "
+            // The key insight: use a regex that stops before template markers
+            val stringPart: Parser<TemplateElement> =
+                +Regex("""[^"$]+|\$(?!\()""") map { match ->
+                    StringPart(match.value)
+                }
 
-        // Expression part: $(...)
-        val expressionPart: Parser<TemplateElement> =
-            -Regex("""\$\(""") * expression * -')' map { value ->
-                ExpressionPart(value)
-            }
+            // Expression part: $(...)
+            val expressionPart: Parser<TemplateElement> =
+                -Regex("""\$\(""") * expression * -')' map { value ->
+                    ExpressionPart(value)
+                }
 
-        // Template elements can be string parts or expression parts
-        val templateElement = expressionPart + stringPart
+            // Template elements can be string parts or expression parts
+            val templateElement = expressionPart + stringPart
 
-        // A complete template string: "..." with any number of elements
-        val templateString: Parser<String> =
-            -'"' * templateElement.zeroOrMore * -'"' map { elements ->
-                elements.joinToString("") { element ->
-                    when (element) {
-                        is StringPart -> element.text
-                        is ExpressionPart -> element.value.toString()
+            // A complete template string: "..." with any number of elements
+            val templateString: Parser<String> =
+                -'"' * templateElement.zeroOrMore * -'"' map { elements ->
+                    elements.joinToString("") { element ->
+                        when (element) {
+                            is StringPart -> element.text
+                            is ExpressionPart -> element.value.toString()
+                        }
                     }
                 }
-            }
 
-        val root = templateString
-    }.root
+            val root = templateString
+        }.root
 
     @Test
     fun simpleString() {

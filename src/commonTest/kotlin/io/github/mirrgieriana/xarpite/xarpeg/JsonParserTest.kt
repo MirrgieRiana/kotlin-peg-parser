@@ -1,7 +1,5 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
-import io.github.mirrgieriana.xarpite.xarpeg.Parser
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.optional
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.parser
@@ -15,7 +13,7 @@ import kotlin.test.assertEquals
 
 /**
  * Complete JSON parser implementation example.
- * 
+ *
  * This demonstrates how to build a full-featured parser for a real-world format using
  * the Xarpeg PEG parser library. The JSON parser handles all JSON data types:
  * - Strings with escape sequences
@@ -26,26 +24,30 @@ import kotlin.test.assertEquals
  * - Objects (with recursive nesting)
  */
 class JsonParserTest {
-
     /**
      * Sealed class representing all possible JSON values
      */
     sealed class JsonValue {
         data class JsonString(val value: String) : JsonValue()
+
         data class JsonNumber(val value: Double) : JsonValue()
+
         data class JsonBoolean(val value: Boolean) : JsonValue()
+
         data object JsonNull : JsonValue()
+
         data class JsonArray(val values: List<JsonValue>) : JsonValue()
+
         data class JsonObject(val properties: Map<String, JsonValue>) : JsonValue()
     }
 
     companion object {
         // Whitespace parser
         private val ws = +Regex("[ \t\r\n]*")
-        
+
         // Helper to wrap parsers with optional whitespace
         private fun <T : Any> Parser<T>.trimmed(): Parser<T> = -ws * this * -ws
-        
+
         // Helper to parse comma-separated lists
         private fun <T : Any> Parser<T>.commaSeparated(): Parser<List<T>> {
             val first = this
@@ -60,39 +62,44 @@ class JsonParserTest {
         }
 
         // JSON string parser with escape sequences
-        private val jsonString: Parser<JsonValue.JsonString> = object {
-            // Parse escape sequences - each branch returns a String
-            val escapeQuote = +'\"' map { "\"" }
-            val escapeBackslash = +"\\\\" map { "\\" }
-            val escapeSlash = +'/' map { "/" }
-            val escapeB = +'b' map { "\b" }
-            val escapeF = +'f' map { "\u000c" }
-            val escapeN = +'n' map { "\n" }
-            val escapeR = +'r' map { "\r" }
-            val escapeT = +'t' map { "\t" }
-            val escapeUnicode = +'u' * +Regex("[0-9a-fA-F]{4}") map { (_, hex) ->
-                hex.value.toInt(16).toChar().toString()
-            }
-            val escape = +'\\' * (
-                escapeQuote + escapeBackslash + escapeSlash + 
-                escapeB + escapeF + escapeN + escapeR + escapeT + 
-                escapeUnicode
-            ) map { (_, str) -> str }
-            
-            // Regular characters (not backslash or quote)
-            val charContent = +Regex("[^\\\\\"]+") map { it.value }
-            
-            // String content is a sequence of escape sequences or regular characters
-            val stringContent = (escape + charContent).zeroOrMore map { chars ->
-                chars.joinToString("")
-            }
-            val parser = -'\"' * stringContent * -'\"' map { content ->
-                JsonValue.JsonString(content)
-            }
-        }.parser
+        private val jsonString: Parser<JsonValue.JsonString> =
+            object {
+                // Parse escape sequences - each branch returns a String
+                val escapeQuote = +'\"' map { "\"" }
+                val escapeBackslash = +"\\\\" map { "\\" }
+                val escapeSlash = +'/' map { "/" }
+                val escapeB = +'b' map { "\b" }
+                val escapeF = +'f' map { "\u000c" }
+                val escapeN = +'n' map { "\n" }
+                val escapeR = +'r' map { "\r" }
+                val escapeT = +'t' map { "\t" }
+                val escapeUnicode =
+                    +'u' * +Regex("[0-9a-fA-F]{4}") map { (_, hex) ->
+                        hex.value.toInt(16).toChar().toString()
+                    }
+                val escape =
+                    +'\\' * (
+                        escapeQuote + escapeBackslash + escapeSlash +
+                            escapeB + escapeF + escapeN + escapeR + escapeT +
+                            escapeUnicode
+                    ) map { (_, str) -> str }
+
+                // Regular characters (not backslash or quote)
+                val charContent = +Regex("[^\\\\\"]+") map { it.value }
+
+                // String content is a sequence of escape sequences or regular characters
+                val stringContent =
+                    (escape + charContent).zeroOrMore map { chars ->
+                        chars.joinToString("")
+                    }
+                val parser =
+                    -'\"' * stringContent * -'\"' map { content ->
+                        JsonValue.JsonString(content)
+                    }
+            }.parser
 
         // JSON number parser (supports integers and floating-point)
-        private val jsonNumber: Parser<JsonValue.JsonNumber> = 
+        private val jsonNumber: Parser<JsonValue.JsonNumber> =
             +Regex("-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?") map { match ->
                 JsonValue.JsonNumber(match.value.toDouble())
             }
@@ -100,7 +107,7 @@ class JsonParserTest {
         // JSON boolean parser
         private val jsonBoolean: Parser<JsonValue.JsonBoolean> =
             (+"true" map { JsonValue.JsonBoolean(true) }) +
-            (+"false" map { JsonValue.JsonBoolean(false) })
+                (+"false" map { JsonValue.JsonBoolean(false) })
 
         // JSON null parser
         private val jsonNull: Parser<JsonValue.JsonNull> =
@@ -118,9 +125,10 @@ class JsonParserTest {
         // JSON object parser (recursive)
         private val jsonObject: Parser<JsonValue.JsonObject> by lazy {
             val key = jsonString.trimmed() map { it.value }
-            val pair = key * -':' * -ws * parser { jsonValue }.trimmed() map { (k, v) ->
-                k to v
-            }
+            val pair =
+                key * -':' * -ws * parser { jsonValue }.trimmed() map { (k, v) ->
+                    k to v
+                }
             val pairs = pair.commaSeparated()
             -'{' * -ws * pairs * -ws * -'}' map { properties ->
                 JsonValue.JsonObject(properties.toMap())
@@ -130,11 +138,11 @@ class JsonParserTest {
         // Main JSON value parser (combines all types)
         val jsonValue: Parser<JsonValue> =
             jsonString +
-            jsonNumber +
-            jsonBoolean +
-            jsonNull +
-            jsonArray +
-            jsonObject
+                jsonNumber +
+                jsonBoolean +
+                jsonNull +
+                jsonArray +
+                jsonObject
     }
 
     @Test
@@ -205,10 +213,10 @@ class JsonParserTest {
                 listOf(
                     JsonValue.JsonNumber(1.0),
                     JsonValue.JsonNumber(2.0),
-                    JsonValue.JsonNumber(3.0)
-                )
+                    JsonValue.JsonNumber(3.0),
+                ),
             ),
-            result
+            result,
         )
     }
 
@@ -221,10 +229,10 @@ class JsonParserTest {
                     JsonValue.JsonNumber(1.0),
                     JsonValue.JsonString("hello"),
                     JsonValue.JsonBoolean(true),
-                    JsonValue.JsonNull
-                )
+                    JsonValue.JsonNull,
+                ),
             ),
-            result
+            result,
         )
     }
 
@@ -241,16 +249,17 @@ class JsonParserTest {
             JsonValue.JsonObject(
                 mapOf(
                     "name" to JsonValue.JsonString("John"),
-                    "age" to JsonValue.JsonNumber(30.0)
-                )
+                    "age" to JsonValue.JsonNumber(30.0),
+                ),
             ),
-            result
+            result,
         )
     }
 
     @Test
     fun testJsonNestedObject() {
-        val json = """
+        val json =
+            """
             {
                 "person": {
                     "name": "Alice",
@@ -258,22 +267,23 @@ class JsonParserTest {
                 },
                 "active": true
             }
-        """.trimIndent()
-        
+            """.trimIndent()
+
         val result = jsonValue.parseAllOrThrow(json)
         assertEquals(
             JsonValue.JsonObject(
                 mapOf(
-                    "person" to JsonValue.JsonObject(
-                        mapOf(
-                            "name" to JsonValue.JsonString("Alice"),
-                            "age" to JsonValue.JsonNumber(25.0)
-                        )
-                    ),
-                    "active" to JsonValue.JsonBoolean(true)
-                )
+                    "person" to
+                        JsonValue.JsonObject(
+                            mapOf(
+                                "name" to JsonValue.JsonString("Alice"),
+                                "age" to JsonValue.JsonNumber(25.0),
+                            ),
+                        ),
+                    "active" to JsonValue.JsonBoolean(true),
+                ),
             ),
-            result
+            result,
         )
     }
 
@@ -285,16 +295,17 @@ class JsonParserTest {
                 listOf(
                     JsonValue.JsonArray(listOf(JsonValue.JsonNumber(1.0), JsonValue.JsonNumber(2.0))),
                     JsonValue.JsonArray(listOf(JsonValue.JsonNumber(3.0), JsonValue.JsonNumber(4.0))),
-                    JsonValue.JsonArray(listOf(JsonValue.JsonNumber(5.0)))
-                )
+                    JsonValue.JsonArray(listOf(JsonValue.JsonNumber(5.0))),
+                ),
             ),
-            result
+            result,
         )
     }
 
     @Test
     fun testComplexJsonStructure() {
-        val json = """
+        val json =
+            """
             {
                 "name": "Product Catalog",
                 "version": 1.5,
@@ -319,20 +330,20 @@ class JsonParserTest {
                     "count": 2
                 }
             }
-        """.trimIndent()
-        
+            """.trimIndent()
+
         val result = jsonValue.parseAllOrThrow(json)
-        
+
         // Verify structure exists and is correct type
         when (result) {
             is JsonValue.JsonObject -> {
                 assertEquals(4, result.properties.size)
                 assertEquals(JsonValue.JsonString("Product Catalog"), result.properties["name"])
                 assertEquals(JsonValue.JsonNumber(1.5), result.properties["version"])
-                
+
                 val items = result.properties["items"] as JsonValue.JsonArray
                 assertEquals(2, items.values.size)
-                
+
                 val metadata = result.properties["metadata"] as JsonValue.JsonObject
                 assertEquals(2, metadata.properties.size)
             }
@@ -342,22 +353,23 @@ class JsonParserTest {
 
     @Test
     fun testJsonWithWhitespace() {
-        val json = """
+        val json =
+            """
             {
               "key1"  :  "value1"  ,
               "key2"  :  42
             }
-        """.trimIndent()
-        
+            """.trimIndent()
+
         val result = jsonValue.parseAllOrThrow(json)
         assertEquals(
             JsonValue.JsonObject(
                 mapOf(
                     "key1" to JsonValue.JsonString("value1"),
-                    "key2" to JsonValue.JsonNumber(42.0)
-                )
+                    "key2" to JsonValue.JsonNumber(42.0),
+                ),
             ),
-            result
+            result,
         )
     }
 }

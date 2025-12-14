@@ -6,7 +6,10 @@ import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple1
 
 class OptionalParser<out T : Any>(val parser: Parser<T>) : Parser<Tuple1<T?>> {
-    override fun parseOrNull(context: ParseContext, start: Int): ParseResult<Tuple1<T?>> {
+    override fun parseOrNull(
+        context: ParseContext,
+        start: Int,
+    ): ParseResult<Tuple1<T?>> {
         val result = context.parseOrNull(parser, start)
         return if (result != null) {
             ParseResult(Tuple1(result.value), result.start, result.end)

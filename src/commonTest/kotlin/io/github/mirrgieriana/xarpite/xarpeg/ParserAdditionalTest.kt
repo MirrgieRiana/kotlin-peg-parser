@@ -1,10 +1,5 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
-import io.github.mirrgieriana.xarpite.xarpeg.assertExtraCharacters
-import io.github.mirrgieriana.xarpite.xarpeg.assertUnmatchedInput
-import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
-import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.not
@@ -27,7 +22,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class ParserAdditionalTest {
-
     @Test
     fun charParserFailsOnEmpty() {
         val parser = +'a'
@@ -104,15 +98,16 @@ class ParserAdditionalTest {
 
     @Test
     fun delegationParserAllowsMutualRecursion() {
-        val language = object {
-            val number = +Regex("[0-9]+") map { it.value.toInt() }
-            val term: Parser<Int> by lazy {
-                number + (-'(' * parser { expr } * -')')
+        val language =
+            object {
+                val number = +Regex("[0-9]+") map { it.value.toInt() }
+                val term: Parser<Int> by lazy {
+                    number + (-'(' * parser { expr } * -')')
+                }
+                val expr: Parser<Int> by lazy {
+                    leftAssociative(term, -'+') { a, _, b -> a + b }
+                }
             }
-            val expr: Parser<Int> by lazy {
-                leftAssociative(term, -'+') { a, _, b -> a + b }
-            }
-        }
         assertEquals(6, language.expr.parseAllOrThrow("1+2+3"))
         assertEquals(9, language.expr.parseAllOrThrow("(4+5)"))
     }
@@ -127,7 +122,7 @@ class ParserAdditionalTest {
     @Test
     fun rightAssociativeConsumesChain() {
         val num = +Regex("[0-9]+") map { it.value }
-        val pow = rightAssociative(num, -'^') { a, _, b -> "${a}^$b" }
+        val pow = rightAssociative(num, -'^') { a, _, b -> "$a^$b" }
         assertEquals("1^2^3", pow.parseAllOrThrow("1^2^3"))
     }
 

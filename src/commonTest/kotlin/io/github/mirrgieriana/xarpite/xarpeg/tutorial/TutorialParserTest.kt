@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class ParserTest {
+class TutorialParserTest {
     @Test
     fun parseSingleA() {
         val result = parseA("a")

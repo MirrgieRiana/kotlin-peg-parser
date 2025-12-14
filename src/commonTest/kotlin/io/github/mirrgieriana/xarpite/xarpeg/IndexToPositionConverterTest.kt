@@ -2,13 +2,11 @@ package io.github.mirrgieriana.xarpite.xarpeg
 
 import io.github.mirrgieriana.xarpite.xarpeg.impl.MatrixPosition
 import io.github.mirrgieriana.xarpite.xarpeg.impl.createIndexToPositionConverter
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class IndexToPositionConverterTest {
-
     @Test
     fun singleLine() {
         val converter = createIndexToPositionConverter("abc")

@@ -5,7 +5,10 @@ import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
 import io.github.mirrgieriana.xarpite.xarpeg.Parser
 
 object NothingParser : Parser<Nothing> {
-    override fun parseOrNull(context: ParseContext, start: Int): ParseResult<Nothing>? {
+    override fun parseOrNull(
+        context: ParseContext,
+        start: Int,
+    ): ParseResult<Nothing>? {
         return null
     }
 }
