@@ -24,7 +24,7 @@ fun Project.readGitSha(): String? = runCatching {
 
 fun Project.determineVersion(): String {
     System.getenv("VERSION")?.let { return it }
-    val sanitizedSha = System.getenv("GITHUB_SHA")?.takeIf(::isValidGitSha) ?: readGitSha()
+    val sanitizedSha = readGitSha()
     return sanitizedSha?.let { "latest-commit-${it.take(SHORT_SHA_LENGTH)}" } ?: "latest"
 }
 
