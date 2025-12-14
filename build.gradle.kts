@@ -146,6 +146,9 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
         iconTarget.parentFile.mkdirs()
         iconSource.copyTo(iconTarget, overwrite = true)
     }
+    
+    // Ensure generated sources are available before Dokka runs
+    dependsOn("generateTuples")
 }
 
 // Tuple generator task
