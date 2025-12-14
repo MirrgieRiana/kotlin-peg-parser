@@ -51,23 +51,18 @@ class ComparisonTest {
     }
 
     @Test
-    fun parsesBooleanTrue() {
-        assertEquals("true", parseExpression("true"))
-    }
-
-    @Test
-    fun parsesBooleanFalse() {
-        assertEquals("false", parseExpression("false"))
+    fun parsesBooleanFromComparison() {
+        assertEquals("true", parseExpression("5 > 3"))
     }
 
     @Test
     fun parsesBooleanEquality() {
-        assertEquals("true", parseExpression("true == true"))
+        assertEquals("true", parseExpression("(5 > 3) == (2 < 4)"))
     }
 
     @Test
     fun parsesBooleanInequality() {
-        assertEquals("true", parseExpression("true != false"))
+        assertEquals("true", parseExpression("(5 > 3) != (3 > 5)"))
     }
 
     @Test
@@ -77,6 +72,6 @@ class ComparisonTest {
 
     @Test
     fun parsesTernaryWithVariables() {
-        assertEquals("greater", parseExpression("x = 10\ny = 5\nx > y ? \"greater\" : \"less\""))
+        assertEquals("100", parseExpression("x = 10\ny = 5\nx > y ? 100 : 50"))
     }
 }

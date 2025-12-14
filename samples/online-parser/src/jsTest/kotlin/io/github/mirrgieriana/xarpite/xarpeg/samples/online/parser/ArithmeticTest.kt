@@ -32,7 +32,7 @@ class ArithmeticTest {
 
     @Test
     fun respectsOperatorPrecedenceDivisionFirst() {
-        assertEquals("5", parseExpression("10 / 2 + 3"))
+        assertEquals("8", parseExpression("10 / 2 + 3"))
     }
 
     @Test
