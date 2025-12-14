@@ -104,10 +104,8 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
     doLast {
         val iconSource = layout.projectDirectory.file("assets/xarpeg-icon.svg").asFile
         val iconTarget = outputDirectory.get().asFile.resolve("images/logo-icon.svg")
-        if (iconSource.exists()) {
-            iconTarget.parentFile.mkdirs()
-            iconSource.copyTo(iconTarget, overwrite = true)
-        }
+        iconTarget.parentFile.mkdirs()
+        iconSource.copyTo(iconTarget, overwrite = true)
     }
 }
 
