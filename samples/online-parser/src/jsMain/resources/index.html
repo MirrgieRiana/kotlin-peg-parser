@@ -173,6 +173,133 @@
             white-space: pre;
             overflow-x: auto;
         }
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .secondary-button {
+            appearance: none;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--ink);
+            padding: 0.55rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 120ms ease;
+        }
+        .secondary-button:hover {
+            background: var(--textarea-bg);
+            border-color: var(--accent);
+        }
+        .secondary-button:active {
+            transform: translateY(1px);
+        }
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+        .example-card {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: var(--textarea-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+        .example-card:hover {
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+        .example-card:active {
+            transform: translateY(0);
+        }
+        .example-title {
+            font-weight: 700;
+            color: var(--ink);
+            margin: 0 0 0.25rem 0;
+            font-size: 0.9rem;
+        }
+        .example-code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin: 0;
+        }
+        .output-container {
+            position: relative;
+        }
+        .output-error {
+            background: #fff5f5;
+            border-color: #feb2b2;
+            color: #c53030;
+        }
+        .output-success {
+            background: var(--textarea-bg);
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 120ms ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .output-container:hover .copy-button {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .copy-button:hover {
+            background: var(--accent);
+            color: var(--button-text);
+            border-color: var(--accent);
+        }
+        .copy-button.copied {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+        .keyboard-hint {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+        kbd {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.1rem 0.4rem;
+            font-family: inherit;
+            font-size: 0.85em;
+        }
+        @media (max-width: 640px) {
+            main {
+                padding: 1.5rem 1rem;
+            }
+            .hero-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .button-group {
+                width: 100%;
+            }
+            button, .secondary-button {
+                flex: 1;
+                min-width: 0;
+            }
+        }
     </style>
 </head>
     <body>
@@ -187,19 +314,65 @@
                 </div>
                 <a class="hero-link" href="https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser">View on GitHub</a>
             </div>
-            <p class="lead">This hosted sample from the <a class="source" href="https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser">Xarpeg Kotlin PEG Parser</a> documentation runs an arithmetic expression parser inspired by the “Expressions” guide in Kotlin/JS. It adds whitespace and decimal support so you can try the grammar without building the project.</p>
+            <p class="lead">This hosted sample from the <a class="source" href="https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser">Xarpeg Kotlin PEG Parser</a> documentation runs an expression parser with support for arithmetic operations, variables, lambda expressions, and function calls.</p>
 
             <div class="section">
                 <label for="input">Input</label>
-                <textarea id="input" rows="3"></textarea>
+                <textarea id="input" rows="4"></textarea>
+                <p class="keyboard-hint">Tip: Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> (or <kbd>Cmd</kbd>+<kbd>Enter</kbd> on Mac) to evaluate</p>
             </div>
 
             <div class="section">
                 <div class="section-header">
                     <label for="output">Output</label>
-                    <button id="parse">Evaluate</button>
+                    <div class="button-group">
+                        <button id="parse">Evaluate</button>
+                        <button id="clear" class="secondary-button">Clear</button>
+                    </div>
                 </div>
-                <textarea id="output" rows="3" readonly></textarea>
+                <div class="output-container">
+                    <textarea id="output" rows="5" readonly class="output-success"></textarea>
+                    <button id="copy" class="copy-button">Copy</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Try Examples</label>
+                <p class="muted-text">Click any example below to try it in the parser:</p>
+                <div class="examples-grid">
+                    <div class="example-card" data-example="2 * (3 + 4)">
+                        <p class="example-title">Basic Arithmetic</p>
+                        <code class="example-code">2 * (3 + 4)</code>
+                    </div>
+                    <div class="example-card" data-example="x = 5 + 10">
+                        <p class="example-title">Variable Assignment</p>
+                        <code class="example-code">x = 5 + 10</code>
+                    </div>
+                    <div class="example-card" data-example="add = (a, b) -> a + b">
+                        <p class="example-title">Lambda Function</p>
+                        <code class="example-code">add = (a, b) -> a + b</code>
+                    </div>
+                    <div class="example-card" data-example="double = (x) -> x * 2">
+                        <p class="example-title">Single Parameter Lambda</p>
+                        <code class="example-code">double = (x) -> x * 2</code>
+                    </div>
+                    <div class="example-card" data-example="result = (10 + 5) * 2 - 8">
+                        <p class="example-title">Complex Expression</p>
+                        <code class="example-code">result = (10 + 5) * 2 - 8</code>
+                    </div>
+                    <div class="example-card" data-example="calc = (x, y) -> (x + y) * 2">
+                        <p class="example-title">Multi-param Lambda</p>
+                        <code class="example-code">calc = (x, y) -> (x + y) * 2</code>
+                    </div>
+                    <div class="example-card" data-example="pi = 3.14159">
+                        <p class="example-title">Decimal Numbers</p>
+                        <code class="example-code">pi = 3.14159</code>
+                    </div>
+                    <div class="example-card" data-example="my_var_123 = 42">
+                        <p class="example-title">Identifier with Numbers</p>
+                        <code class="example-code">my_var_123 = 42</code>
+                    </div>
+                </div>
             </div>
 
             <div class="section">
@@ -209,20 +382,29 @@
                         <a class="source" href="https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/">Documentation home</a>
                     </div>
                 </div>
-                <p class="muted-text">The parser evaluates a simple arithmetic grammar with operator precedence, whitespace handling, and decimal numbers.</p>
+                <p class="muted-text">The parser evaluates expressions with arithmetic operations, variables, lambda expressions, and function calls. Stack traces are shown for runtime errors.</p>
                 <ul class="muted-list">
                     <li>Enter expressions using <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, and parentheses.</li>
-                    <li>See the evaluated result update as you type, or read the error message when parsing fails.</li>
-                    <li>Use this page as a quick playground without running Gradle locally.</li>
+                    <li>Assign variables: <code>x = 10</code></li>
+                    <li>Define lambdas: <code>add = (a, b) -&gt; a + b</code></li>
+                    <li>Call functions: <code>add(5, 3)</code></li>
+                    <li>Identifiers can use letters, digits, and underscore (but cannot start with a digit).</li>
+                    <li>See the evaluated result or read error messages with stack traces.</li>
                 </ul>
             </div>
 
             <div class="section">
                 <label>Grammar (PEG)</label>
-                <p class="muted-text">This grammar follows the “Expressions” documentation chapter but includes whitespace and decimal support for interactive use.</p>
-                <pre class="code-block"><code>Expression  &lt;- _ Product (_ ('+' / '-') _ Product)* _
+                <p class="muted-text">This grammar includes arithmetic operations, variables, lambda expressions, and function calls.</p>
+                <pre class="code-block"><code>Expression  &lt;- _ Assignment _
+Assignment  &lt;- (Identifier _ '=' _ Assignment) / Sum
+Sum         &lt;- Product (_ ('+' / '-') _ Product)*
 Product     &lt;- Factor (_ ('*' / '/') _ Factor)*
-Factor      &lt;- Number / '(' _ Expression _ ')'
+Factor      &lt;- Lambda / FunctionCall / Variable / Number / '(' _ Expression _ ')'
+Lambda      &lt;- '(' _ (Identifier _ (',' _ Identifier _)*)? ')' _ '-&gt;' _ Expression
+FunctionCall&lt;- Identifier _ '(' _ (Expression _ (',' _ Expression _)*)? ')'
+Variable    &lt;- Identifier
+Identifier  &lt;- [a-zA-Z_][a-zA-Z0-9_]*
 Number      &lt;- [0-9]+ ('.' [0-9]+)?
 _           &lt;- [ \t\r\n]*</code></pre>
         </div>
@@ -233,11 +415,24 @@ _           &lt;- [ \t\r\n]*</code></pre>
 
         const input = document.getElementById("input");
         const output = document.getElementById("output");
-        const button = document.getElementById("parse");
-        const defaultInput = "2*(3+4)+5";
+        const parseButton = document.getElementById("parse");
+        const clearButton = document.getElementById("clear");
+        const copyButton = document.getElementById("copy");
+        const exampleCards = document.querySelectorAll(".example-card");
+        const defaultInput = "x = 10";
 
         const updateOutput = () => {
-            output.value = parseExpression(input.value);
+            const result = parseExpression(input.value);
+            output.value = result;
+            
+            // Update output styling based on result type
+            if (result.startsWith("Error")) {
+                output.classList.remove("output-success");
+                output.classList.add("output-error");
+            } else {
+                output.classList.remove("output-error");
+                output.classList.add("output-success");
+            }
         };
 
         const updateUrlQuery = () => {
@@ -246,10 +441,60 @@ _           &lt;- [ \t\r\n]*</code></pre>
             window.history.replaceState(null, "", url);
         };
 
-        button.addEventListener("click", updateOutput);
+        const clearInput = () => {
+            input.value = "";
+            output.value = "";
+            input.focus();
+            updateUrlQuery();
+        };
+
+        const copyOutput = async () => {
+            try {
+                await navigator.clipboard.writeText(output.value);
+                copyButton.textContent = "Copied!";
+                copyButton.classList.add("copied");
+                setTimeout(() => {
+                    copyButton.textContent = "Copy";
+                    copyButton.classList.remove("copied");
+                }, 2000);
+            } catch (err) {
+                console.error("Failed to copy:", err);
+            }
+        };
+
+        const loadExample = (exampleText) => {
+            input.value = exampleText;
+            updateUrlQuery();
+            updateOutput();
+            input.focus();
+            // Scroll to input
+            input.scrollIntoView({ behavior: "smooth", block: "center" });
+        };
+
+        // Event listeners
+        parseButton.addEventListener("click", updateOutput);
+        clearButton.addEventListener("click", clearInput);
+        copyButton.addEventListener("click", copyOutput);
+
         input.addEventListener("input", () => {
             updateUrlQuery();
             updateOutput();
+        });
+
+        // Keyboard shortcuts
+        input.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                updateOutput();
+            }
+        });
+
+        // Example card click handlers
+        exampleCards.forEach(card => {
+            card.addEventListener("click", () => {
+                const example = card.getAttribute("data-example");
+                loadExample(example);
+            });
         });
 
         // Set default input value only if input is empty on page load
