@@ -1,9 +1,9 @@
 package io.github.mirrgieriana.xarpite.xarpeg.parsers
 
-import hasFreeze
 import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
 import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
 import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.isNative
 
 class CharParser(val char: Char) : Parser<Char> {
     override fun parseOrNull(context: ParseContext, start: Int): ParseResult<Char>? {
@@ -17,7 +17,7 @@ class CharParser(val char: Char) : Parser<Char> {
     }
 }
 
-fun Char.toParser() = if (hasFreeze()) CharParser(this) else CharParser.cache.getOrPut(this) { CharParser(this) }
+fun Char.toParser() = if (isNative) CharParser(this) else CharParser.cache.getOrPut(this) { CharParser(this) }
 operator fun Char.unaryPlus() = this.toParser()
 operator fun Char.unaryMinus() = -+this
 operator fun Char.not() = !+this

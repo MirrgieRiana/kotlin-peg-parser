@@ -8,6 +8,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.Tuple0
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple1
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple5
 import io.github.mirrgieriana.xarpite.xarpeg.UnmatchedInputParseException
+import io.github.mirrgieriana.xarpite.xarpeg.isNative
 import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.text
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
@@ -36,6 +37,8 @@ class ImportedParserCoverageTest {
 
     @Test
     fun stringParserCachesInstanceWhenNotFrozen() {
+        if (isNative) return
+
         val first = +"cache"
         val second = +"cache"
 
@@ -44,6 +47,8 @@ class ImportedParserCoverageTest {
 
     @Test
     fun charParserCachesInstanceWhenNotFrozen() {
+        if (isNative) return
+
         val first = +'c'
         val second = +'c'
 

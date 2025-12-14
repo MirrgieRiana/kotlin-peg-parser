@@ -1,1 +1,0 @@
-fun hasFreeze(): Boolean = false
