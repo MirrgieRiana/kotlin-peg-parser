@@ -24,11 +24,13 @@ tasks.register("propagateRepoName") {
     val repoPathValue = repoPath.get()
     val repoNameValue = repoName.get()
     val projectDir = layout.projectDirectory.asFile
-    val replacementPattern = Regex("MirrgieRiana/xarpeg-kotlin-peg-parser|xarpeg-kotlin-peg-parser")
+    val replacementPattern = Regex("${Regex.escape(defaultRepoPath)}|${Regex.escape(defaultRepoName)}")
+    val replacementsRequired = repoPathValue != defaultRepoPath || repoNameValue != defaultRepoName
 
     fun needsReplacement(content: String): Boolean =
-        (repoPathValue != defaultRepoPath && content.contains(defaultRepoPath)) ||
-            (repoNameValue != defaultRepoName && content.contains(defaultRepoName))
+        replacementsRequired &&
+            ((repoPathValue != defaultRepoPath && content.contains(defaultRepoPath)) ||
+                (repoNameValue != defaultRepoName && content.contains(defaultRepoName)))
 
     inputs.property("repoPath", repoPathValue)
     inputs.property("repoName", repoNameValue)
@@ -46,6 +48,7 @@ tasks.register("propagateRepoName") {
 
     outputs.files(targets)
     outputs.upToDateWhen {
+        if (!replacementsRequired) return@upToDateWhen true
         targets.none { file ->
             file.isFile && needsReplacement(file.readText())
         }
