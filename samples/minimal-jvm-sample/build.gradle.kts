@@ -3,14 +3,10 @@ plugins {
     application
 }
 
-apply(from = "../repoPath.gradle.kts")
-
-val repoPath: String by extra
-
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url = uri("https://raw.githubusercontent.com/$repoPath/maven/maven") }
+    maven { url = uri("https://raw.githubusercontent.com/MirrgieRiana/xarpeg-kotlin-peg-parser/maven/maven") }
 }
 
 group = "mirrg.xarpite.samples"

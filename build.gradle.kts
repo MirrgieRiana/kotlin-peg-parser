@@ -30,13 +30,11 @@ tasks.register("propagateRepoName") {
     inputs.property("repoName") { repoName.get() }
 
     val targets = listOf(
-        "README.md",
         "docs/index.md",
         "docs/04-runtime.md",
         "pages/_config.yml",
         "pages/_layouts/default.html",
         "pages/_includes/head-custom.html",
-        "samples/libs.versions.toml",
         "samples/online-parser/src/jsMain/resources/index.html"
     ).map { projectDir.resolve(it) }
 
