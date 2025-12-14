@@ -46,38 +46,45 @@ Drop delimiters or unneeded values with `-parser` to keep tuple arity small.
 
 ## Input boundary matchers
 
-Use `startOfInput` and `endOfInput` to assert position at input boundaries:
+Use `startOfInput` and `endOfInput` to check position boundaries within a larger grammar. These are useful when parsing sub-expressions or when you need boundary checks in the middle of parsing:
 
 ```kotlin
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-// Match only at the beginning of input
-val mustStartAtBeginning = startOfInput * +"hello"
+// Parse a word that may appear anywhere in the input
+val word = +Regex("[a-z]+") map { it.value }
 
-// Reject trailing characters
-val noTrailingGarbage = +"hello" * endOfInput
+// Parse a word only at the start of input
+val wordAtStart = startOfInput * word
 
-// Match exact input with no prefix or suffix
-val exactMatch = startOfInput * +"hello" * endOfInput
+// Parse a word only at the end of input
+val wordAtEnd = word * endOfInput
 
 fun main() {
-    // These succeed
-    noTrailingGarbage.parseAllOrThrow("hello")
-    exactMatch.parseAllOrThrow("hello")
+    val context = ParseContext("hello world", useCache = true)
     
-    // These fail with UnmatchedInputParseException
-    // val parser1 = startOfInput * +"hello"
-    // parser1.parseOrNull(ParseContext("  hello", true), 2)  // not at start
-    // 
-    // val parser2 = +"hello" * endOfInput
-    // parser2.parseOrNull(ParseContext("hello!", true), 0)   // not at end
+    // wordAtStart succeeds at position 0
+    val result1 = wordAtStart.parseOrNull(context, 0)
+    println(result1?.value) // => "hello"
+    
+    // wordAtStart fails at position 6 (not at start)
+    val result2 = wordAtStart.parseOrNull(context, 6)
+    println(result2) // => null
+    
+    // wordAtEnd fails at position 0 (not at end after matching)
+    val result3 = wordAtEnd.parseOrNull(context, 0)
+    println(result3) // => null
+    
+    // wordAtEnd succeeds at position 6 (at end after matching)
+    val result4 = wordAtEnd.parseOrNull(context, 6)
+    println(result4?.value) // => "world"
 }
 ```
 
 Both parsers return `Tuple0` and consume no input, so they compose cleanly: `Tuple0 * X = X`.
 
-> **Note**: `parseAllOrThrow` already enforces that the entire input is consumed, so `endOfInput` is mainly useful when you need this check as part of a larger grammar or when using `parseOrNull` directly.
+> **Note**: When using `parseAllOrThrow`, these boundary checks are redundant because it already starts at position 0 and verifies the entire input is consumed. These parsers are most useful with `parseOrNull` or within complex grammars where you parse sub-expressions.
 
 Next, handle recursion and associativity to build expression parsers with less code.  
 → [Step 3: Handle expressions and recursion](03-expressions.md)
