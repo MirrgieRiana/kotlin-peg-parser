@@ -24,7 +24,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
  * }
  * ```
  */
-inline fun <T : Any> parser(crossinline getter: () -> Parser<T>) = ref { getter() }
+fun <T : Any> parser(getter: () -> Parser<T>) = ref(getter)
 
 // Parser extension properties
 
