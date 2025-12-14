@@ -2,11 +2,34 @@
 
 package io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser
 
+import mirrg.xarpite.parser.ParseContext
+import mirrg.xarpite.parser.ParseResult
 import mirrg.xarpite.parser.Parser
 import mirrg.xarpite.parser.parseAllOrThrow
 import mirrg.xarpite.parser.parsers.*
+import mirrg.xarpite.parser.text
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
+
+// Evaluation context that holds call stack information
+data class EvaluationContext(val callStack: List<CallFrame> = emptyList()) {
+    fun pushFrame(functionName: String, callPosition: SourcePosition): EvaluationContext {
+        return copy(callStack = callStack + CallFrame(functionName, callPosition))
+    }
+}
+
+// Represents a single call frame in the stack
+data class CallFrame(val functionName: String, val position: SourcePosition)
+
+// Represents a position in the source code
+data class SourcePosition(val start: Int, val end: Int, val text: String) {
+    fun formatLineColumn(source: String): String {
+        val beforeStart = source.substring(0, start)
+        val line = beforeStart.count { it == '\n' } + 1
+        val column = start - (beforeStart.lastIndexOf('\n') + 1) + 1
+        return "line $line, column $column"
+    }
+}
 
 // Value types that can be stored in variables
 sealed class Value {
@@ -16,12 +39,44 @@ sealed class Value {
     data class BooleanValue(val value: Boolean) : Value() {
         override fun toString() = value.toString()
     }
-    data class LambdaValue(val params: List<String>, val body: () -> Value, val capturedVars: MutableMap<String, Value>) : Value() {
+    data class LambdaValue(
+        val params: List<String>,
+        val body: (EvaluationContext) -> Value,
+        val capturedVars: MutableMap<String, Value>,
+        val name: String? = null,
+        val definitionPosition: SourcePosition? = null
+    ) : Value() {
         override fun toString() = "<lambda(${params.joinToString(", ")})>"
     }
 }
 
-class EvaluationException(message: String, cause: Throwable? = null) : Exception(message, cause)
+// Custom exception that includes call stack
+class EvaluationException(
+    message: String,
+    val context: EvaluationContext? = null,
+    val sourceCode: String? = null,
+    cause: Throwable? = null
+) : Exception(message, cause) {
+    fun formatWithCallStack(): String {
+        val sb = StringBuilder()
+        sb.append("Error: $message\n")
+        
+        if (context != null && context.callStack.isNotEmpty()) {
+            sb.append("\nCall stack:\n")
+            context.callStack.asReversed().forEachIndexed { index, frame ->
+                val location = if (sourceCode != null) {
+                    frame.position.formatLineColumn(sourceCode)
+                } else {
+                    "position ${frame.position.start}-${frame.position.end}"
+                }
+                sb.append("  ${index + 1}. ${frame.functionName} at $location\n")
+                sb.append("     Code: ${frame.position.text}\n")
+            }
+        }
+        
+        return sb.toString()
+    }
+}
 
 private object ExpressionGrammar {
     private val whitespace = -Regex("[ \\t\\r\\n]*")
@@ -39,12 +94,12 @@ private object ExpressionGrammar {
     private const val MAX_FUNCTION_CALLS = 100
 
     // Forward declarations
-    val expression: Parser<() -> Value> by lazy { assignment }
+    val expression: Parser<(EvaluationContext) -> Value> by lazy { assignment }
 
     // Variable reference
-    private val variableRef: Parser<() -> Value> = identifier map { name ->
-        { 
-            variables[name] ?: throw EvaluationException("Undefined variable: $name")
+    private val variableRef: Parser<(EvaluationContext) -> Value> = identifier map { name ->
+        { ctx -> 
+            variables[name] ?: throw EvaluationException("Undefined variable: $name", ctx, null)
         }
     }
 
@@ -60,71 +115,92 @@ private object ExpressionGrammar {
         -'(' * whitespace * (identifierList + (whitespace map { emptyList<String>() })) * whitespace * -')'
 
     // Lambda expression: (param1, param2, ...) -> body
-    private val lambda: Parser<() -> Value> by lazy {
-        (paramList * whitespace * -Regex("->") * whitespace * parser { expression }) map { (params, bodyParser) ->
-            {
+    private val lambda: Parser<(EvaluationContext) -> Value> by lazy {
+        (paramList * whitespace * -Regex("->") * whitespace * parser { expression }) mapEx { parseCtx, result ->
+            val (params, bodyParser) = result.value
+            val lambdaText = result.text(parseCtx)
+            val position = SourcePosition(result.start, result.end, lambdaText)
+            { ctx: EvaluationContext ->
                 // Don't capture variables - use dynamic scoping to allow recursion
                 // The lambda will see whatever is in scope when it's called
-                Value.LambdaValue(params, bodyParser, mutableMapOf())
+                Value.LambdaValue(params, bodyParser, mutableMapOf(), definitionPosition = position)
             }
         }
     }
 
     // Helper to parse comma-separated list of expressions
-    private val exprList: Parser<List<() -> Value>> by lazy {
+    private val exprList: Parser<List<(EvaluationContext) -> Value>> by lazy {
         val restItem = whitespace * -',' * whitespace * parser { expression }
         (parser { expression } * restItem.zeroOrMore) map { (first, rest) -> listOf(first) + rest }
     }
 
     // Argument list for function calls: (arg1, arg2) or ()
     // The alternative (whitespace map { emptyList() }) handles empty argument lists: ()
-    private val argList: Parser<List<() -> Value>> by lazy {
-        -'(' * whitespace * (exprList + (whitespace map { emptyList<() -> Value>() })) * whitespace * -')'
+    private val argList: Parser<List<(EvaluationContext) -> Value>> by lazy {
+        -'(' * whitespace * (exprList + (whitespace map { emptyList<(EvaluationContext) -> Value>() })) * whitespace * -')'
     }
 
     // Function call: identifier(arg1, arg2, ...)
-    private val functionCall: Parser<() -> Value> by lazy {
-        (identifier * whitespace * argList) map { (name, args) ->
-            {
-                val func = variables[name] ?: throw EvaluationException("Undefined function: $name")
+    private val functionCall: Parser<(EvaluationContext) -> Value> by lazy {
+        (identifier * whitespace * argList) mapEx { parseCtx, result ->
+            val (name, args) = result.value
+            val callText = result.text(parseCtx)
+            val callPosition = SourcePosition(result.start, result.end, callText)
+            { ctx: EvaluationContext ->
+                val func = variables[name] ?: throw EvaluationException("Undefined function: $name", ctx, parseCtx.src)
                 when (func) {
                     is Value.LambdaValue -> {
                         if (args.size != func.params.size) {
-                            throw EvaluationException("Function $name expects ${func.params.size} arguments, but got ${args.size}")
+                            throw EvaluationException(
+                                "Function $name expects ${func.params.size} arguments, but got ${args.size}",
+                                ctx,
+                                parseCtx.src
+                            )
                         }
                         // Check function call limit before making the call
                         functionCallCount++
                         if (functionCallCount >= MAX_FUNCTION_CALLS) {
-                            throw EvaluationException("Maximum function call limit ($MAX_FUNCTION_CALLS) exceeded")
+                            throw EvaluationException(
+                                "Maximum function call limit ($MAX_FUNCTION_CALLS) exceeded",
+                                ctx,
+                                parseCtx.src
+                            )
                         }
+                        
+                        // Push call frame onto the stack
+                        val newContext = ctx.pushFrame(name, callPosition)
+                        
                         // Save current variables
                         val savedVariables = variables.toMutableMap()
                         try {
                             // Use current variables (dynamic scoping) to enable recursion
                             // Just add parameters on top of current scope
                             func.params.zip(args).forEach { (param, argParser) ->
-                                variables[param] = argParser()
+                                variables[param] = argParser(ctx)
                             }
-                            func.body()
+                            func.body(newContext)
+                        } catch (e: EvaluationException) {
+                            // Re-throw with updated context
+                            throw e
                         } finally {
                             // Restore variables
                             variables.clear()
                             variables.putAll(savedVariables)
                         }
                     }
-                    else -> throw EvaluationException("$name is not a function")
+                    else -> throw EvaluationException("$name is not a function", ctx, parseCtx.src)
                 }
             }
         }
     }
 
     // Primary expression: number, variable reference, function call, lambda, or grouped expression
-    private val primary: Parser<() -> Value> by lazy {
-        lambda + functionCall + variableRef + (number map { v -> { v } }) + 
+    private val primary: Parser<(EvaluationContext) -> Value> by lazy {
+        lambda + functionCall + variableRef + (number map { v -> { _: EvaluationContext -> v } }) + 
             (-'(' * whitespace * parser { expression } * whitespace * -')')
     }
 
-    private val factor: Parser<() -> Value> by lazy { primary }
+    private val factor: Parser<(EvaluationContext) -> Value> by lazy { primary }
 
     private val product: Parser<() -> Value> = leftAssociative(factor, whitespace * (+'*' + +'/') * whitespace) { a, op, b ->
         {
