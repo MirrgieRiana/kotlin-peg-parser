@@ -8,74 +8,15 @@ plugins {
 group = "io.github.mirrgieriana.xarpite"
 version = System.getenv("VERSION") ?: "1.0.0-SNAPSHOT"
 
-val defaultOwnerName = "MirrgieRiana"
-val defaultRepositoryName = "xarpeg-kotlin-peg-parser"
-val ownerName = providers.gradleProperty("ownerName").orElse(defaultOwnerName)
-val repositoryName = providers.gradleProperty("repositoryName").orElse(defaultRepositoryName)
+val ownerName = providers.gradleProperty("ownerName")
+val repositoryName = providers.gradleProperty("repositoryName")
 val repoPath = ownerName.zip(repositoryName) { owner, repo -> "$owner/$repo" }
-val repoName = repositoryName
 
 repositories {
     mavenCentral()
 }
 
-tasks.register("propagateRepoName") {
-    description = "Propagates repository name/path from gradle.properties into documentation and site assets."
-    group = "help"
-
-    val projectDir = layout.projectDirectory.asFile
-    // Match the default repo path/name only when they are not embedded in longer tokens
-    val repoPathPattern = Regex("(?<![\\w-])${Regex.escape("$defaultOwnerName/$defaultRepositoryName")}(?![\\w-])")
-    val repoNamePattern = Regex("(?<![\\w-])${Regex.escape(defaultRepositoryName)}(?![\\w-])")
-
-    inputs.property("repoPath") { repoPath.get() }
-    inputs.property("repoName") { repoName.get() }
-
-    val targets = listOf(
-        "docs/index.md",
-        "docs/04-runtime.md",
-        "pages/_config.yml",
-        "pages/_layouts/default.html",
-        "pages/_includes/head-custom.html",
-        "samples/online-parser/src/jsMain/resources/index.html"
-    ).map { projectDir.resolve(it) }
-
-    outputs.files(targets)
-
-    doLast {
-        val repoPathValue = repoPath.get()
-        val repoNameValue = repoName.get()
-        val replacementsRequired = repoPathValue != "$defaultOwnerName/$defaultRepositoryName" || repoNameValue != defaultRepositoryName
-
-        fun needsReplacement(content: String): Boolean =
-            replacementsRequired && (
-                (repoPathValue != "$defaultOwnerName/$defaultRepositoryName" && repoPathPattern.containsMatchIn(content)) ||
-                    (repoNameValue != defaultRepositoryName && repoNamePattern.containsMatchIn(content))
-            )
-
-        targets.forEach { file ->
-            if (!file.isFile) return@forEach
-
-            val original = file.readText()
-            if (!needsReplacement(original)) return@forEach
-
-            val updated = repoNamePattern.replace(
-                repoPathPattern.replace(original, repoPathValue),
-                repoNameValue
-            )
-            if (updated != original) {
-                file.writeText(updated)
-                println("Updated ${file.relativeTo(projectDir)}")
-            }
-        }
-    }
-}
-
-project(":doc-test") {
-    tasks.matching { it.name == "generateSrc" }.configureEach {
-        dependsOn(rootProject.tasks.named("propagateRepoName"))
-    }
-}
+// No repository metadata propagation needed; URLs are fixed in docs and samples.
 
 kotlin {
     // JVM target
@@ -92,6 +33,7 @@ kotlin {
     }
 
     // WASM target for JavaScript
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         binaries.executable()
         nodejs()
@@ -159,7 +101,7 @@ tasks.register("writeKotlinMetadata") {
 
 // Dokka configuration for KDoc generation
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
-    moduleName.set(repoName)
+    moduleName.set(repositoryName)
     outputDirectory.set(layout.buildDirectory.dir("dokka"))
     
     // Whitelist: Only process JVM source set by name
@@ -344,8 +286,4 @@ tasks.register("generateTuples") {
 // Ensure Kotlin compilation tasks depend on generateTuples
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile<*>>().configureEach {
     dependsOn("generateTuples")
-}
-
-tasks.named("check") {
-    dependsOn("propagateRepoName")
 }

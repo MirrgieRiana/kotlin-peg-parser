@@ -1,2 +1,2 @@
-rootProject.name = providers.gradleProperty("repositoryName").orElse("xarpeg-kotlin-peg-parser").get()
+rootProject.name = providers.gradleProperty("repositoryName").get()
 include("doc-test")
