@@ -33,11 +33,9 @@ fun main() {
 
 ## When you might need `by lazy`
 
-In most cases, `ref { ... }` or `parser { ... }` are sufficient for recursive parsers. However, in some situations involving complex recursive definitions, you may encounter initialization errors. If this happens, wrapping the variable definition with `by lazy` can resolve the issue:
+In most cases, `ref { ... }` or `parser { ... }` are sufficient for recursive parsers. However, in some situations involving complex recursive definitions, you may encounter initialization errors. If this happens, wrapping the variable definition with `by lazy` can resolve the issue by deferring the initialization:
 
-```kotlin
-val paren: Parser<Int> by lazy { (-'(' * ref { root } * -')') map { value -> value } }
-```
+    val paren: Parser<Int> by lazy { (-'(' * ref { root } * -')') map { value -> value } }
 
 This is an advanced workaround and is rarely needed in typical parser definitions.
 
