@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.mirrgieriana.xarpite"
-version = System.getenv("VERSION") ?: "1.0.0-SNAPSHOT"
+version = System.getenv("VERSION") ?: "latest-commit"
 
 repositories {
     mavenCentral()
