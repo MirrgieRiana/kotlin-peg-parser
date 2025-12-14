@@ -2,22 +2,45 @@
 
 package io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser
 
-import mirrg.xarpite.parser.ParseContext
-import mirrg.xarpite.parser.ParseResult
-import mirrg.xarpite.parser.Parser
-import mirrg.xarpite.parser.parseAllOrThrow
-import mirrg.xarpite.parser.parsers.*
-import mirrg.xarpite.parser.text
+import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
+import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
+import io.github.mirrgieriana.xarpite.xarpeg.Parser
+import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+import io.github.mirrgieriana.xarpite.xarpeg.text
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
-// Evaluation context that holds call stack information
+// Variable table with inheritance (parent scope lookup)
+data class VariableTable(
+    val variables: MutableMap<String, Value> = mutableMapOf(),
+    val parent: VariableTable? = null
+) {
+    fun get(name: String): Value? {
+        return variables[name] ?: parent?.get(name)
+    }
+    
+    fun set(name: String, value: Value) {
+        variables[name] = value
+    }
+    
+    fun createChild(): VariableTable {
+        return VariableTable(mutableMapOf(), this)
+    }
+}
+
+// Evaluation context that holds call stack information and variable scope
 data class EvaluationContext(
     val callStack: List<CallFrame> = emptyList(),
-    val sourceCode: String? = null
+    val sourceCode: String? = null,
+    val variableTable: VariableTable = VariableTable()
 ) {
     fun pushFrame(functionName: String, callPosition: SourcePosition): EvaluationContext {
         return copy(callStack = callStack + CallFrame(functionName, callPosition))
+    }
+    
+    fun withNewScope(): EvaluationContext {
+        return copy(variableTable = variableTable.createChild())
     }
 }
 
@@ -86,21 +109,15 @@ private object ExpressionGrammar {
     private val identifier = +Regex("[a-zA-Z_][a-zA-Z0-9_]*") map { it.value }
 
     private val number = +Regex("[0-9]+(?:\\.[0-9]+)?") map { Value.NumberValue(it.value.toDouble()) }
-
-    // Variable table for storing values
-    val variables = mutableMapOf<String, Value>()
     
     // Function call counter to prevent infinite recursion
     var functionCallCount = 0
     private const val MAX_FUNCTION_CALLS = 100
 
-    // Forward declarations
-    val expression: Parser<(EvaluationContext) -> Value> by lazy { assignment }
-
     // Variable reference
     private val variableRef: Parser<(EvaluationContext) -> Value> = identifier map { name ->
         { ctx -> 
-            variables[name] ?: throw EvaluationException("Undefined variable: $name", ctx, ctx.sourceCode)
+            ctx.variableTable.get(name) ?: throw EvaluationException("Undefined variable: $name", ctx, ctx.sourceCode)
         }
     }
 
@@ -117,7 +134,7 @@ private object ExpressionGrammar {
 
     // Lambda expression: (param1, param2, ...) -> body
     private val lambda: Parser<(EvaluationContext) -> Value> by lazy {
-        ((paramList * whitespace * -Regex("->") * whitespace * parser { expression }) mapEx { parseCtx, result ->
+        ((paramList * whitespace * -Regex("->") * whitespace * ref { expression }) mapEx { parseCtx, result ->
             val (params, bodyParser) = result.value
             val lambdaText = result.text(parseCtx)
             val position = SourcePosition(result.start, result.end, lambdaText)
@@ -132,8 +149,8 @@ private object ExpressionGrammar {
 
     // Helper to parse comma-separated list of expressions
     private val exprList: Parser<List<(EvaluationContext) -> Value>> by lazy {
-        val restItem = whitespace * -',' * whitespace * parser { expression }
-        (parser { expression } * restItem.zeroOrMore) map { (first, rest) -> listOf(first) + rest }
+        val restItem = whitespace * -',' * whitespace * ref { expression }
+        (ref { expression } * restItem.zeroOrMore) map { (first, rest) -> listOf(first) + rest }
     }
 
     // Argument list for function calls: (arg1, arg2) or ()
@@ -149,7 +166,7 @@ private object ExpressionGrammar {
             val callText = result.text(parseCtx)
             val callPosition = SourcePosition(result.start, result.end, callText)
             val evalFunc: (EvaluationContext) -> Value = { ctx: EvaluationContext ->
-                val func = variables[name] ?: throw EvaluationException("Undefined function: $name", ctx, ctx.sourceCode)
+                val func = ctx.variableTable.get(name) ?: throw EvaluationException("Undefined function: $name", ctx, ctx.sourceCode)
                 when (func) {
                     is Value.LambdaValue -> {
                         if (args.size != func.params.size) {
@@ -169,26 +186,17 @@ private object ExpressionGrammar {
                             )
                         }
                         
-                        // Push call frame onto the stack
-                        val newContext = ctx.pushFrame(name, callPosition)
+                        // Create a new scope for the function call
+                        // Push call frame onto the stack and create new variable scope
+                        val newContext = ctx.pushFrame(name, callPosition).withNewScope()
                         
-                        // Save current variables
-                        val savedVariables = variables.toMutableMap()
-                        try {
-                            // Use current variables (dynamic scoping) to enable recursion
-                            // Just add parameters on top of current scope
-                            func.params.zip(args).forEach { (param, argParser) ->
-                                variables[param] = argParser(ctx)
-                            }
-                            func.body(newContext)
-                        } catch (e: EvaluationException) {
-                            // Re-throw with updated context
-                            throw e
-                        } finally {
-                            // Restore variables
-                            variables.clear()
-                            variables.putAll(savedVariables)
+                        // Evaluate arguments in the caller's context and bind to parameters in the new scope
+                        func.params.zip(args).forEach { (param, argParser) ->
+                            newContext.variableTable.set(param, argParser(ctx))
                         }
+                        
+                        // Execute function body in the new context
+                        func.body(newContext)
                     }
                     else -> throw EvaluationException("$name is not a function", ctx, ctx.sourceCode)
                 }
@@ -200,10 +208,10 @@ private object ExpressionGrammar {
     // Primary expression: number, variable reference, function call, lambda, or grouped expression
     private val primary: Parser<(EvaluationContext) -> Value> by lazy {
         lambda + functionCall + variableRef + (number map { v -> { _: EvaluationContext -> v } }) + 
-            (-'(' * whitespace * parser { expression } * whitespace * -')')
+            (-'(' * whitespace * ref { expression } * whitespace * -')')
     }
 
-    private val factor: Parser<(EvaluationContext) -> Value> by lazy { primary }
+    private val factor: Parser<(EvaluationContext) -> Value> = primary
 
     private val product: Parser<(EvaluationContext) -> Value> by lazy {
         val opParser = whitespace * (+'*' + +'/') * whitespace
@@ -357,13 +365,12 @@ private object ExpressionGrammar {
                 result
             }
         }
-    }
 
     // Ternary operator: condition ? trueExpr : falseExpr
     private val ternary: Parser<(EvaluationContext) -> Value> by lazy {
-        val ternaryExpr = parser { equalityComparison } * whitespace * -'?' * whitespace *
-            parser { equalityComparison } * whitespace * -':' * whitespace *
-            parser { equalityComparison }
+        val ternaryExpr = ref { equalityComparison } * whitespace * -'?' * whitespace *
+            ref { equalityComparison } * whitespace * -':' * whitespace *
+            ref { equalityComparison }
         ((ternaryExpr mapEx { parseCtx, result ->
             val (cond, trueExpr, falseExpr) = result.value
             val ternaryText = result.text(parseCtx)
@@ -382,15 +389,18 @@ private object ExpressionGrammar {
 
     // Assignment: variable = expression
     private val assignment: Parser<(EvaluationContext) -> Value> by lazy {
-        ((identifier * whitespace * -'=' * whitespace * parser { expression }) map { (name, valueParser) ->
+        ((identifier * whitespace * -'=' * whitespace * ref { expression }) map { (name, valueParser) ->
             val evalFunc: (EvaluationContext) -> Value = { ctx: EvaluationContext ->
                 val value = valueParser(ctx)
-                variables[name] = value
+                ctx.variableTable.set(name, value)
                 value
             }
             evalFunc
         }) + ternary
     }
+
+    // Root expression parser
+    val expression: Parser<(EvaluationContext) -> Value> = assignment
 
     val root = whitespace * expression * whitespace
 }
@@ -398,11 +408,10 @@ private object ExpressionGrammar {
 @JsExport
 fun parseExpression(input: String): String {
     return try {
-        // Reset variables and function call counter for each evaluation to ensure each call is independent
-        ExpressionGrammar.variables.clear()
+        // Reset function call counter for each evaluation to ensure each call is independent
         ExpressionGrammar.functionCallCount = 0
         
-        // Create initial evaluation context with empty call stack and source code
+        // Create initial evaluation context with empty call stack, source code, and fresh variable table
         val initialContext = EvaluationContext(sourceCode = input)
         
         // Try to parse as a single expression first
