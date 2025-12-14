@@ -8,9 +8,7 @@ plugins {
 group = "io.github.mirrgieriana.xarpite"
 version = System.getenv("VERSION") ?: "1.0.0-SNAPSHOT"
 
-val ownerName = providers.gradleProperty("ownerName")
 val repositoryName = providers.gradleProperty("repositoryName")
-val repoPath = ownerName.zip(repositoryName) { owner, repo -> "$owner/$repo" }
 
 repositories {
     mavenCentral()
