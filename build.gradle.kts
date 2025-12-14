@@ -115,14 +115,14 @@ tasks.register("generateTuples") {
     
     doLast {
         // Configuration: Maximum tuple size to generate
-        val maxTupleSize = 5
+        val maxTupleSize = 16
         
         // Create output directories
         outputDir.mkdirs()
         outputDirParsers.mkdirs()
         
         // Generate Tuples.kt programmatically
-        val typeParams = listOf("A", "B", "C", "D", "E")
+        val typeParams = (0 until maxTupleSize).map { index -> ('A'.code + index).toChar().toString() }
         val tuplesContent = buildString {
             appendLine("package io.github.mirrgieriana.xarpite.xarpeg")
             appendLine()
@@ -246,7 +246,7 @@ tasks.register("generateTuples") {
                 val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
                 val leftTupleAccess = leftParams.mapIndexed { i, _ -> "a.${typeParams[i].lowercase()}" }.joinToString(", ")
                 val rightTupleAccess = rightParams.mapIndexed { i, _ -> "b.${typeParams[i].lowercase()}" }.joinToString(", ")
-                appendLine("@JvmName(\"times$leftN$rightN\")")
+                appendLine("@JvmName(\"times${leftN}_${rightN}\")")
                 append("operator fun <$typeParamStr> Parser<Tuple$leftN<${leftParams.joinToString(", ")}>>.times(other: Parser<Tuple$rightN<${rightParams.joinToString(", ")}>>) = combine(this, other) { a, b -> Tuple$resultN($leftTupleAccess, $rightTupleAccess) }")
                 if (index < combinations.size - 1) {
                     appendLine()
