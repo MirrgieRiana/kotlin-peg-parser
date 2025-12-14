@@ -39,10 +39,11 @@ class LazyArithmeticTest {
                 return@mapEx { throw PositionMarkerException("Position marker at index $position", position) }
             }
         
-        private val primary: Parser<() -> Int> =
+        private val primary: Parser<() -> Int> by lazy {
             number + positionMarker + (-'(' * ref { expr } * -')')
+        }
         
-        private val term: Parser<() -> Int> =
+        private val term: Parser<() -> Int> by lazy {
             leftAssociative(primary, +'*' + +'/') { a, op, b -> 
                 when (op) {
                     '*' -> ({ a() * b() })
@@ -50,8 +51,9 @@ class LazyArithmeticTest {
                     else -> error("Unknown operator: $op")
                 }
             }
+        }
         
-        val expr: Parser<() -> Int> =
+        val expr: Parser<() -> Int> by lazy {
             leftAssociative(term, +'+' + +'-') { a, op, b -> 
                 when (op) {
                     '+' -> ({ a() + b() })
@@ -59,6 +61,7 @@ class LazyArithmeticTest {
                     else -> error("Unknown operator: $op")
                 }
             }
+        }
     }
 
     @Test

@@ -106,10 +106,12 @@ class ParserAdditionalTest {
     fun referenceParserAllowsMutualRecursion() {
         val language = object {
             val number = +Regex("[0-9]+") map { it.value.toInt() }
-            val term: Parser<Int> =
+            val term: Parser<Int> by lazy {
                 number + (-'(' * ref { expr } * -')')
-            val expr: Parser<Int> =
+            }
+            val expr: Parser<Int> by lazy {
                 leftAssociative(term, -'+') { a, _, b -> a + b }
+            }
         }
         assertEquals(6, language.expr.parseAllOrThrow("1+2+3"))
         assertEquals(9, language.expr.parseAllOrThrow("(4+5)"))
