@@ -3,6 +3,7 @@ plugins {
     kotlin("multiplatform") version "2.2.20"
     id("maven-publish")
     id("org.jetbrains.dokka") version "2.0.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 group = "io.github.mirrgieriana.xarpite"
@@ -293,4 +294,37 @@ tasks.register("generateTuples") {
 // Ensure Kotlin compilation tasks depend on generateTuples
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile<*>>().configureEach {
     dependsOn("generateTuples")
+}
+
+// Detekt configuration
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(file("$projectDir/detekt.yml"))
+
+    source.setFrom(
+        "src/commonMain/kotlin",
+        "src/commonTest/kotlin",
+        "src/jvmMain/kotlin",
+        "src/jvmTest/kotlin",
+        "src/jsMain/kotlin",
+        "src/jsTest/kotlin",
+        "imported/src/commonMain/kotlin",
+        "imported/src/commonTest/kotlin"
+    )
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        txt.required.set(false)
+        sarif.required.set(false)
+        md.required.set(true)
+    }
+}
+
+// Add detekt to the check task
+tasks.named("check") {
+    dependsOn("detekt")
 }
