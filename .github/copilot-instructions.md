@@ -33,3 +33,7 @@ When you invoke Chrome (for example, to analyze HTML files), specify the followi
 If you encounter an error while running a Gradle task that says access to a specific domain is blocked, your correct response is to suggest adding an allowance for that domain via chat, by providing the following URL:
 
 https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/settings/copilot/coding_agent/allowlist
+
+## Declaration of Compliance with this Instructions
+
+If you comply with the contents of this file, you must declare that you comply with this file when posting your first message in a conversation.
