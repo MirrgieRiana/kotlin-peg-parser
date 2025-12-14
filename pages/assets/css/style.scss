@@ -203,7 +203,7 @@ tr:hover {
   gap: 1rem;
   margin: 2rem 0;
   padding: 1.5rem;
-  background: rgba(155, 182, 214, 0.25);
+  background: #eef2f8;
   border-radius: 8px;
   border-left: 4px solid var(--accent-color);
 }
@@ -214,6 +214,7 @@ tr:hover {
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   transition: all 0.2s ease;
+  color: var(--text-color);
 }
 
 .doc-nav-item:hover {
