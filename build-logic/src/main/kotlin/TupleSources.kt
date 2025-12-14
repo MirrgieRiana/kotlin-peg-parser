@@ -9,7 +9,7 @@ fun getTupleSrc(maxElementCount: Int): String {
         for (n in 1..maxElementCount) {
             val params = typeParams.take(n)
             val typeParamStr = params.joinToString(", ") { "out $it" }
-            val paramStr = params.mapIndexed { _, p -> "val ${p.lowercase()}: $p" }.joinToString(", ")
+            val paramStr = params.mapIndexed { _, param -> "val ${param.lowercase()}: $param" }.joinToString(", ")
             appendLine("data class Tuple$n<$typeParamStr>($paramStr)")
         }
     }
@@ -85,7 +85,7 @@ fun getTupleParserSrc(maxElementCount: Int): String {
         appendLine()
         for (n in 1..(maxElementCount - 1)) {
             val resultN = n + 1
-            val rightParams = typeParams.subList(1, n + 1) // B, C, D, E (skip A)
+            val rightParams = typeParams.subList(1, n + 1) // skip A
             val resultParams = typeParams.take(resultN)
             val typeParamStr = resultParams.joinToString(", ") { "$it : Any" }
             val rightTupleAccess = (0 until n).map { i -> "b.${typeParams[i].lowercase()}" }.joinToString(", ")
