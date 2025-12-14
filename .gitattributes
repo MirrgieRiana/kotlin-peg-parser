@@ -12,8 +12,9 @@
 *.properties text eol=lf
 *.toml text eol=lf
 *.html text eol=lf
+google*.html binary
 *.scss text eol=lf
-*.svg text eol=lf
+*.svg binary
 LICENSE text eol=lf
 gradlew text eol=lf
 
