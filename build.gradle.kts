@@ -277,8 +277,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile<*>>().con
 detekt {
     buildUponDefaultConfig = true
     allRules = false
-    config.setFrom(files("$projectDir/detekt.yml"))
-    
+    config.setFrom(file("$projectDir/detekt.yml"))
+
     source.setFrom(
         "src/commonMain/kotlin",
         "src/commonTest/kotlin",
