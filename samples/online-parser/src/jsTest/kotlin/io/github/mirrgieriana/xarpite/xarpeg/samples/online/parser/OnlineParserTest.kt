@@ -1,17 +1,53 @@
 package io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser
 
-/**
- * Legacy test file kept for compatibility.
- * Tests have been organized into separate files:
- * - ArithmeticTest.kt: Arithmetic operations and precedence
- * - ComparisonTest.kt: Comparison and equality operators
- * - FunctionTest.kt: Lambda expressions and function calls
- * - ErrorTest.kt: Error handling and stack traces
- * - GeneralTest.kt: Variables, assignments, and ternary operator
- */
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
 class OnlineParserTest {
-    // Tests moved to organized files
-}
+
+    @Test
+    fun parsesExpressionWithWhitespaceAroundPlus() {
+        assertEquals("3", parseExpression("1 + 2"))
+    }
+
+    @Test
+    fun parsesExpressionWithWhitespaceAroundStar() {
+        assertEquals("14", parseExpression("2 * ( 3 + 4 )"))
+    }
+
+    @Test
+    fun parsesExpressionWithLeadingWhitespace() {
+        assertEquals("3", parseExpression(" 1+2"))
+    }
+
+    @Test
+    fun parsesExpressionWithTrailingWhitespace() {
+        assertEquals("3", parseExpression("1+2 "))
+    }
+
+    @Test
+    fun parsesExpressionWithBothLeadingAndTrailingWhitespace() {
+        assertEquals("3", parseExpression(" 1+2 "))
+    }
+
+    @Test
+    fun parsesVariableAssignment() {
+        assertEquals("5", parseExpression("x = 5"))
+    }
+
+    @Test
+    fun parsesVariableReference() {
+        assertEquals("10", parseExpression("y = 10"))
+    }
+
+    @Test
+    fun parsesLambdaExpression() {
+        val result = parseExpression("add = (a, b) -> a + b")
+        assertTrue(result.contains("lambda"))
+    }
+
+    @Test
     fun parsesFunctionCall() {
         // This would need multiple statements, which we don't support in single expression
         // So we test error case
