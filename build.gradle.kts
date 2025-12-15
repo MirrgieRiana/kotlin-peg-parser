@@ -55,7 +55,7 @@ kotlin {
     }
 
     // WASM target for JavaScript
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    // Note: WASM support in Kotlin 1.9.20 doesn't require ExperimentalWasmDsl
     wasmJs {
         binaries.executable()
         nodejs()
