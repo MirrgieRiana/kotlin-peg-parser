@@ -45,6 +45,12 @@ When making changes to the codebase, you must always ensure that code, tests, an
 
 ## Execution
 
+### Gradle Build
+
+This repository has multiple Gradle build configurations.
+
+You must understand that tasks must be executed in the Gradle build configuration that contains the code you are editing.
+
 ### Domain blocking
 
 When you invoke Chrome (for example, to analyze HTML files), specify the following options to suppress Chrome's own background network activity and prevent connection attempts to disallowed domains:
