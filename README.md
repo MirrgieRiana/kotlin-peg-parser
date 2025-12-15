@@ -15,31 +15,28 @@
 
 **Lightweight PEG-style parser combinators for Kotlin Multiplatform**
 
-Xarpeg (/ˈʃɑrpɛɡ/) provides a compact, operator-driven parser combinator API. It targets JVM, JS (Node.js), and Native (Linux x64, Linux ARM64, Windows x64), works directly on raw input strings (no tokenizer), and ships with opt-in caching to keep backtracking predictable.
+Xarpeg (/ˈʃɑrpɛɡ/) is a compact, operator-driven parser combinator library for Kotlin. It targets JVM, JS (Node.js), and Native platforms (Linux x64, Linux ARM64, Windows x64), works directly on raw input strings without tokenization, and includes built-in memoization for predictable backtracking performance.
+
+## Why Xarpeg?
+
+- **🎯 Intuitive DSL** - Operator-based syntax feels natural: `+` for literals/regex/choice, `*` for sequences, `-` to ignore tokens
+- **📦 Multiplatform** - Write once, run on JVM, JS (IR/Node.js), and Native (Linux/Windows)
+- **🔧 No Tokenizer Needed** - Parse directly from strings using character, string, and regex parsers
+- **⚡ Built-in Memoization** - Automatic caching keeps backtracking predictable; disable for lower memory use
+- **🎨 Type-Safe Results** - Sequences yield `Tuple0..Tuple16` so you explicitly control what's kept or dropped
 
 ---
 
-## Features
+## Quick Example
 
-- **Kotlin Multiplatform** - JVM, JS (IR/Node.js), and Native (Linux x64, Linux ARM64, Windows x64)
-- **Operator-based DSL** - Unary `+` builds parsers from literals/regex, binary `+` expresses alternatives, `*` sequences tuples, `!` is negative lookahead, `-` ignores tokens
-- **Tuple-centric results** - Sequence results are `Tuple0..Tuple16` so you can explicitly keep or drop intermediate values
-- **Built-in cache** - Memoizes `(parser, position)` by default; toggle per parse call
-- **No tokenizer** - Consume the source `String` directly with character, string, or regex parsers
-
----
-
-## Quick Start
-
-The API lives under `io.github.mirrgieriana.xarpite.xarpeg` and its `parsers` helpers. Operator overloads keep grammars short while remaining explicit about what is kept or ignored.
+Here's a complete arithmetic expression parser in just a few lines:
 
 ```kotlin
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-// Simple arithmetic expression parser.
 val expr: Parser<Int> = object {
-    val number = +Regex("[0-9]+") map { match -> match.value.toInt() } named "number"
+    val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
     val brackets: Parser<Int> = -'(' * ref { root } * -')'
     val factor = number + brackets
     val mul = leftAssociative(factor, -'*') { a, _, b -> a * b }
@@ -48,124 +45,129 @@ val expr: Parser<Int> = object {
 }.root
 
 fun main() {
-    check(expr.parseAllOrThrow("2*(3+4)") == 14)
+    check(expr.parseAllOrThrow("2*(3+4)") == 14)  // ✓ Evaluates to 14
 }
 ```
 
-Key points in the example:
+**Key concepts:**
+- `+'x'` / `+"xyz"` / `+Regex("...")` create parsers from literals or patterns
+- `*` sequences parsers, returning typed tuples
+- `-parser` matches but ignores the result (useful for delimiters)
+- `+` (binary) tries alternatives in order
+- `named` improves error messages
+- `ref { }` enables recursive grammars
+- `leftAssociative` handles operator precedence without manual recursion
 
-- The wildcard `parsers.*` import brings all operator overloads (`+`, `-`, `*`, `!`, `map`, `named`, etc.) into scope.
-- `+'a'`, `+"abc"`, and `+Regex("...")` create parsers for characters, strings, and regex matches (`MatchResult`)—map them to the shape you need.
-- `-parser` (for example, `-'('`) ignores the matched token and yields `Tuple0`, so you can drop delimiters.
-- `*` sequences parsers and returns tuples (`Tuple0..Tuple16`), preserving the parts you care about.
-- `leftAssociative`/`rightAssociative` build operator chains without manual recursion.
-- `ref { }` creates a forward reference for recursive grammars. Properties using `ref` should have explicit type declarations for type resolution.
-- `parser named "name"` assigns a name to a parser for better error messages and debugging.
-- `parseAllOrThrow` requires the entire input to be consumed; it throws on unmatched input or trailing characters.
-
-> 💡 **Want to learn more?** Check out the [Tutorial section](#-tutorial---learn-step-by-step) below for a complete step-by-step guide!
+> 💡 **New to parser combinators?** Start with our [step-by-step tutorial](#-learn-xarpeg-step-by-step)!
 
 ---
 
-## 📚 Tutorial - Learn Step by Step
+## 📚 Learn Xarpeg Step by Step
 
-Ready to build powerful parsers? Follow our structured tutorial guide to master Xarpeg from basics to advanced techniques:
+Follow our comprehensive tutorial to master parser combinators:
 
-### Step-by-Step Learning Path
+1. **[Quickstart](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/01-quickstart.html)** - Your first parser in minutes
+2. **[Combinators](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/02-combinators.html)** - Sequences, choices, repetition, and naming
+3. **[Expressions & Recursion](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/03-expressions.html)** - Build recursive grammars with `ref { }`
+4. **[Runtime Behavior](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/04-runtime.html)** - Errors, exceptions, and caching
+5. **[Parsing Positions](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/05-positions.html)** - Extract location information with `mapEx`
+6. **[Template Strings](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/06-template-strings.html)** - Parse embedded expressions naturally
 
-1. **🚀 [Quickstart](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/01-quickstart.html)** - Build your first parser  
-   Start here with a minimal DSL example and learn how to run it immediately.
-
-2. **🔧 [Combinators](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/02-combinators.html)** - Combine parsers effectively  
-   Master sequences, choices, repetition, and other core patterns to build complex grammars.
-
-3. **🔁 [Expressions & Recursion](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/03-expressions.html)** - Handle recursive grammars  
-   Learn to use `ref { }` and leverage associativity helpers for expression parsing.
-
-4. **⚙️ [Runtime Behavior](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/04-runtime.html)** - Understand errors and performance  
-   Deep dive into exceptions, full consumption requirements, and cache control.
-
-5. **📍 [Parsing Positions](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/05-positions.html)** - Access position information  
-   Work with parsing positions using `mapEx` while keeping types simple.
-
-6. **🔗 [Template Strings](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/06-template-strings.html)** - Parse without tokenization  
-   Discover how PEG parsers naturally handle template strings with embedded expressions.
-
-### Additional Resources
-
-- **[Complete Tutorial Guide](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/)** — Entry point for all tutorial content
-- **[GitHub Pages](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser)** — Published documentation site
-- **[GitHub Repository](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/)** — Source code and issue tracking
+**→ [Start the Tutorial](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/)**
 
 ---
 
-## 🎮 Try the Online Parser Sample
+## 🎮 Try It Live
 
-Want to see Xarpeg in action? Try the **Online Parser Sample** — a live, interactive demonstration built with Xarpeg that runs directly in your browser.
+**[🚀 Launch Online Parser Demo](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/online-parser/)**
 
-**[🚀 Launch Online Parser Sample](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/online-parser/)**
-
-This sample showcases what you can build with Xarpeg:
-- Real-time parsing with instant feedback
-- Interactive expression evaluation
-- Client-side parsing with Kotlin/JS
-- Practical demonstration of the library's capabilities
-
-The Online Parser Sample is a working example of Xarpeg powering a complete browser-based application, demonstrating the library's versatility and performance in real-world scenarios.
+Interactive browser-based parser that demonstrates:
+- Real-time parsing and evaluation
+- Error reporting with suggestions
+- Kotlin/JS multiplatform capabilities
 
 ---
 
-## Core Concepts & Combinators
+## API Quick Reference
 
-- **Parser<T>**: `fun interface` with `parseOrNull(context, start)`; parse helpers pass a `ParseContext` that handles caching.
-- **Total parsing**: `parseAllOrThrow(src, useCache = true)` returns the parsed value or throws `UnmatchedInputParseException` (no match at start) / `ExtraCharactersParseException` (trailing input).
-- **Sequences and tuples**: `*` chains parsers and returns `Tuple0..Tuple16`. Ignored pieces (`-parser`) collapse out of the tuple.
-- **Alternatives**: `parserA + parserB` (or `or(...)`) tries options in order.
-- **Repetition**: `parser.zeroOrMore`, `parser.oneOrMore`, or `parser.list(min, max)` collect results into `List<T>`.
-- **Optional**: `parser.optional` yields `Tuple1<T?>` without consuming input on absence.
-- **Mapping**: `parser map { ... }` transforms the parsed value; `parser mapEx { ctx, result -> ... }` provides access to context and position.
-- **Lookahead**: `!parser` succeeds only when the inner parser fails (does not consume input).
-- **Input boundaries**: `startOfInput` and `endOfInput` match at position boundaries without consuming input.
-- **Recursion**: `ref { ... }` creates forward references for self-referential grammars. Properties using `ref` should have explicit type declarations. Avoid `by lazy` for recursive parsers as it causes infinite recursion; only use it as a last resort for resolving rare initialization errors in non-recursive contexts.
+### Core Combinators
 
----
+| Operation | Syntax | Description |
+|-----------|--------|-------------|
+| **Literals** | `+'x'`, `+"xyz"`, `+Regex("...")` | Create parsers from characters, strings, or regex |
+| **Sequence** | `parserA * parserB` | Match parsers in order, return typed tuple |
+| **Choice** | `parserA + parserB` | Try alternatives; first match wins |
+| **Ignore** | `-parser` | Match but drop result from tuple |
+| **Repetition** | `.zeroOrMore`, `.oneOrMore`, `.list(min, max)` | Collect matches into `List<T>` |
+| **Optional** | `.optional` | Try to match; rewind on failure |
+| **Transform** | `.map { ... }` | Convert parsed value to another type |
+| **Position** | `.mapEx { ctx, result -> ... }` | Access context and position info |
+| **Lookahead** | `!parser` | Succeed if parser fails (zero width) |
+| **Naming** | `parser named "name"` | Assign name for error messages |
+| **Recursion** | `ref { parser }` | Forward reference for recursive grammars |
+| **Associativity** | `leftAssociative(...)`, `rightAssociative(...)` | Build operator chains |
+| **Boundaries** | `startOfInput`, `endOfInput` | Match at position boundaries |
 
-### Memoization and Performance
+### Parsing Methods
 
-`ParseContext` caches results per `(parser, position)` when `useCache = true` (the default in `parseAllOrThrow`). Disable caching with `useCache = false` if you need to reduce memory and your grammar does not backtrack heavily.
-
----
+- **`parseAllOrThrow(input, useCache = true)`** - Parse entire input or throw exception
+- **`parseOrNull(context, start)`** - Attempt parse at position; return `ParseResult<T>?`
 
 ### Error Handling
 
-- `UnmatchedInputParseException` — No parser matched at the current position.
-- `ExtraCharactersParseException` — parsing succeeded but did not consume all input (reports the trailing position).
+- **`UnmatchedInputParseException`** - No parser matched at the current position
+- **`ExtraCharactersParseException`** - Trailing input remains after successful parse
+- Both exceptions provide `context` with `errorPosition` and `suggestedParsers` for detailed error reporting
+
+### Performance
+
+- **Memoization** - Enabled by default (`useCache = true`); disable with `useCache = false` for lower memory usage
+- **Backtracking** - Cached results make repeated attempts predictable; alternatives backtrack automatically
 
 ---
 
-## Real-World Examples
+## Examples & Use Cases
 
-### Xarpite
+### Complete Examples
 
-**[Xarpite](https://github.com/MirrgieRiana/Xarpite)** is a practical application built using Xarpeg. It demonstrates how this library can be used in real-world scenarios to parse complex grammars efficiently.
+- **[JSON Parser](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/blob/main/src/commonTest/kotlin/JsonParserTest.kt)** - Full JSON implementation with escape sequences, numbers, arrays, and nested objects
+- **[Arithmetic Interpreter](samples/interpreter/)** - Expression parser with evaluation and error reporting
+- **[Online Parser Demo](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/online-parser/)** - Interactive browser-based parser ([source](samples/online-parser/))
 
-Xarpite serves as both:
-- A **working example** of the parser library in action
-- The **original project** from which this parser was extracted and generalized
+### Real-World Usage
 
-The parser component that powers Xarpite was refined over time and eventually extracted into this standalone library to make it reusable across different Kotlin Multiplatform projects.
+**[Xarpite](https://github.com/MirrgieRiana/Xarpite)** - The original project from which Xarpeg was extracted. Demonstrates:
+- Large-scale grammar design and organization
+- Integration into a complete application
+- Performance optimization with caching
+- Complex parsing scenarios in production
 
-Exploring the Xarpite source code can provide additional insights into:
-- Structuring larger parser grammars
-- Integrating the parser into a complete application
-- Performance optimization techniques with caching
-- Handling complex parsing scenarios
+### Running the Samples
+
+Try the samples locally to see Xarpeg in action:
+
+**Minimal JVM Sample:**
+```bash
+./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishJvmPublicationToMavenLocal
+cd samples/minimal-jvm-sample && ./gradlew run
+```
+
+**Online Parser Sample:**
+```bash
+cd samples/online-parser && ./gradlew build
+# Open samples/online-parser/build/site/index.html in your browser
+```
+
+**Arithmetic Interpreter:**
+```bash
+cd samples/interpreter && ./gradlew run --args='-e "2*(3+4)"'
+```
 
 ---
 
 ## Installation
 
-Gradle coordinates follow the project metadata (`group = "io.github.mirrgieriana.xarpite"`, `version = "<latest-version>"`). Check [Releases](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases) for the current value. Add the dependency as usual:
+Add Xarpeg to your project using Gradle. Replace `<latest-version>` with the version from [Releases](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases).
 
 ### Gradle (Kotlin DSL)
 
@@ -191,67 +193,34 @@ dependencies {
 }
 ```
 
----
-
-## Versioning
-
-Use the latest version from [Releases](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases) (replace `<latest-version>` in the snippets with the number shown there); the API may evolve while iterating on the operator-based DSL. Pin an explicit version when depending on this library.
+> **Note:** The API may evolve as we refine the DSL. Pin a specific version for production use.
 
 ---
 
-## Contributing to the Project
+## Contributing
 
-### Prerequisites
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development setup and workflow
+- Building and testing across platforms
+- Running samples and examples
+- Code style guidelines
 
-- JDK 11 or higher
-- Gradle 9.2.1 (provided via the wrapper)
+---
 
-### Building & Testing
+## Resources
 
-For **day-to-day development**, run JVM tests only to avoid downloading large native toolchains:
-
-```bash
-./gradlew jvmTest
-```
-
-For **full multiplatform validation** (JVM, JS, Linux x64, Windows x64):
-
-```bash
-./gradlew check
-```
-
-Note: Native builds download Kotlin/Native toolchains from JetBrains (several hundred MB); ensure outbound network access when running Native tasks.
-
-### Running the Samples
-
-A standalone Gradle sample that consumes the library via its Maven coordinate lives under `samples/minimal-jvm-sample`:
-
-```bash
-./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishJvmPublicationToMavenLocal
-(cd samples/minimal-jvm-sample && ./gradlew run)
-```
-
-A browser-based online parser sample lives under `samples/online-parser`. Build it to emit `build/site/index.html` that imports the JS module:
-
-```bash
-(cd samples/online-parser && ./gradlew build)
-# Open samples/online-parser/build/site/index.html in a browser
-```
-
-View the hosted version at https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/online-parser/.
+- **[Documentation](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/)** - Complete tutorial
+- **[API Reference](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/tree/main/src/importedMain/kotlin/io/github/mirrgieriana/xarpite/xarpeg)** - Browse source for KDoc
+- **[Examples](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/tree/main/samples)** - Sample applications
+- **[Issues](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/issues)** - Bug reports and feature requests
+- **[Releases](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/releases)** - Version history
 
 ---
 
 ## License
 
-Xarpeg is distributed under the MIT License. See the [LICENSE](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/blob/main/LICENSE) file for details.
+MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-## About
-
-This library began as a parser component inside the [Xarpite](https://github.com/MirrgieRiana/Xarpite) project and was extracted into a standalone, reusable PEG-style parser toolkit for Kotlin Multiplatform.
-
----
-
-The repository logo uses [Monaspace](https://github.com/githubnext/monaspace).
+<sub>Logo uses [Monaspace](https://github.com/githubnext/monaspace)</sub>
