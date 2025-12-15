@@ -32,9 +32,9 @@ data class ExpressionPart(val value: Int) : TemplateElement()
 
 val templateStringParser: Parser<String> = object {
     // Expression parser (reusing from earlier tutorials)
-    val number = +Regex("[0-9]+") map { it.value.toInt() }
+    val number = (+Regex("[0-9]+") map { it.value.toInt() }) named "number"
     val grouped: Parser<Int> = -'(' * ref { sum } * -')'
-    val factor: Parser<Int> = number + grouped
+    val factor: Parser<Int> = (number + grouped) named "factor"
     val product = leftAssociative(factor, -'*') { a, _, b -> a * b }
     val sum: Parser<Int> = leftAssociative(product, -'+') { a, _, b -> a + b }
     val expression = sum
@@ -42,29 +42,29 @@ val templateStringParser: Parser<String> = object {
     // String parts: match everything except $( and closing "
     // The key insight: use a regex that stops before template markers
     val stringPart: Parser<TemplateElement> =
-        +Regex("""[^"$]+|\$(?!\()""") map { match ->
+        (+Regex("""[^"$]+|\$(?!\()""") map { match ->
             StringPart(match.value)
-        }
+        }) named "string_part"
 
     // Expression part: $(...)
     val expressionPart: Parser<TemplateElement> =
-        -Regex("""\$\(""") * expression * -')' map { value ->
+        (-Regex("""\$\(""") * expression * -')' map { value ->
             ExpressionPart(value)
-        }
+        }) named "expression_part"
 
     // Template elements can be string parts or expression parts
     val templateElement = expressionPart + stringPart
 
     // A complete template string: "..." with any number of elements
     val templateString: Parser<String> =
-        -'"' * templateElement.zeroOrMore * -'"' map { elements ->
+        (-'"' * templateElement.zeroOrMore * -'"' map { elements ->
             elements.joinToString("") { element ->
                 when (element) {
                     is StringPart -> element.text
                     is ExpressionPart -> element.value.toString()
                 }
             }
-        }
+        }) named "template_string"
     
     val root = templateString
 }.root
@@ -90,7 +90,7 @@ The key to this parser is the `stringPart` regex:
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val stringPartRegexParser = +Regex("""[^"$]+|\$(?!\()""")
+val stringPartRegexParser = (+Regex("""[^"$]+|\$(?!\()""")) named "string_part"
 
 fun main() {
     stringPartRegexParser.parseAllOrThrow("hello")
@@ -118,32 +118,32 @@ data class StringPart(val text: String) : TemplateElement()
 data class ExpressionPart(val value: Int) : TemplateElement()
 
 object TemplateWithNestedStrings {
-    val number = +Regex("[0-9]+") map { it.value.toInt() }
+    val number = (+Regex("[0-9]+") map { it.value.toInt() }) named "number"
     val grouped: Parser<Int> = -'(' * ref { sum } * -')'
 
     val stringPart: Parser<TemplateElement> =
-        +Regex("""[^"$]+|\$(?!\()""") map { match -> StringPart(match.value) }
+        (+Regex("""[^"$]+|\$(?!\()""") map { match -> StringPart(match.value) }) named "string_part"
 
     val expressionPart: Parser<TemplateElement> =
-        -Regex("""\$\(""") * ref { sum } * -')' map { value ->
+        (-Regex("""\$\(""") * ref { sum } * -')' map { value ->
             ExpressionPart(value)
-        }
+        }) named "expression_part"
 
     val templateElement = expressionPart + stringPart
 
     val templateString: Parser<String> = ref {
-        -'"' * templateElement.zeroOrMore * -'"' map { elements ->
+        (-'"' * templateElement.zeroOrMore * -'"' map { elements ->
             elements.joinToString("") { element ->
                 when (element) {
                     is StringPart -> element.text
                     is ExpressionPart -> element.value.toString()
                 }
             }
-        }
+        }) named "template_string"
     }
 
     // Now expressions can contain template strings
-    val factor: Parser<Int> = number + grouped + (templateString map { it.length })
+    val factor: Parser<Int> = (number + grouped + (templateString map { it.length })) named "factor"
     val sum: Parser<Int> = leftAssociative(factor, -'+') { a, _, b -> a + b }
 }
 
