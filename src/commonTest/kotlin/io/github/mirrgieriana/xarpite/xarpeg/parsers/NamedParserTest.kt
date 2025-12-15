@@ -80,7 +80,7 @@ class NamedParserTest {
         val result1 = parser.parseAllOrThrow("a")
         assertNotNull(result1.a)
         assertEquals('a', result1.a)
-        
+
         val result2 = parser.parseAllOrThrow("")
         assertNull(result2.a)
     }
@@ -97,7 +97,7 @@ class NamedParserTest {
         val digit = (+Regex("[0-9]")) named "digit" map { it.value.toInt() }
         val operator = (+'+' + +'-') named "operator" map { it }
         val expression = digit * operator * digit
-        
+
         val result = expression.parseAllOrThrow("3+5")
         assertEquals(3, result.a)
         assertEquals('+', result.b)
@@ -121,7 +121,7 @@ class NamedParserTest {
         val context1 = ParseContext("b", useCache = true)
         val result1 = parser.parseOrNull(context1, 0)
         assertNotNull(result1)
-        
+
         val context2 = ParseContext("a", useCache = true)
         val result2 = parser.parseOrNull(context2, 0)
         assertNull(result2)
@@ -133,7 +133,7 @@ class NamedParserTest {
         val lparen = -'('
         val rparen = -')'
         val expr = lparen * number * rparen
-        
+
         val result = expr.parseAllOrThrow("(42)")
         assertEquals(42, result)
     }
@@ -146,10 +146,10 @@ class NamedParserTest {
             val rparen = -')'
             val expr: Parser<Int> = ((digit) + (lparen * ref { expr } * rparen)) named "expression"
         }
-        
+
         val result1 = grammar.expr.parseAllOrThrow("5")
         assertEquals(5, result1)
-        
+
         val result2 = grammar.expr.parseAllOrThrow("((3))")
         assertEquals(3, result2)
     }
@@ -160,10 +160,10 @@ class NamedParserTest {
         val letter = (+Regex("[a-z]")) named "letter" map { it.value }
         val digit = (+Regex("[0-9]")) named "digit" map { it.value }
         val identifier = letter * (letter + digit).zeroOrMore
-        
+
         val context = ParseContext("1abc", useCache = true)
         val result = identifier.parseOrNull(context, 0)
-        
+
         assertNull(result)
         assertEquals(0, context.errorPosition)
         // Should suggest "letter" at position 0
@@ -173,11 +173,11 @@ class NamedParserTest {
     @Test
     fun namedParserCaching() {
         val parser = (+Regex("[a-z]+")) named "word" map { it.value }
-        
+
         // Test with cache enabled
         val result1 = parser.parseAllOrThrow("hello", useCache = true)
         assertEquals("hello", result1)
-        
+
         // Test with cache disabled
         val result2 = parser.parseAllOrThrow("world", useCache = false)
         assertEquals("world", result2)
@@ -196,7 +196,7 @@ class NamedParserTest {
         val base = +'a'
         val named1 = base named "first_name"
         val named2 = named1 named "second_name"
-        
+
         assertEquals("second_name", named2.name)
         val result = named2.parseAllOrThrow("a")
         assertEquals('a', result)
@@ -207,19 +207,19 @@ class NamedParserTest {
         // Test that when a composite parser is named, its constituent tokens are not enumerated
         val parserA = (+'a') named "letter_a"
         val parserB = (+'b') named "letter_b"
-        
+
         // Create a composite parser (sequence) and give it a name
         val composite = (parserA * parserB) named "ab_sequence"
-        
+
         // Try to parse with input that doesn't match
         // Important: Call through context.parseOrNull to get proper named parser handling
         val context = ParseContext("c", useCache = true)
         val result = context.parseOrNull(composite, 0)
-        
+
         // The parse should fail
         assertNull(result)
         assertEquals(0, context.errorPosition)
-        
+
         // The suggested parsers should only contain the composite parser, not its constituents
         // When a named parser fails, only the named parser itself is suggested
         assertEquals(1, context.suggestedParsers.size)
@@ -234,18 +234,18 @@ class NamedParserTest {
         // Test that when a composite parser is NOT named, its constituent tokens ARE enumerated
         val parserA = (+'a') named "letter_a"
         val parserB = (+'b') named "letter_b"
-        
+
         // Create a composite parser (sequence) WITHOUT a name
         val composite = parserA * parserB
-        
+
         // Try to parse with input that doesn't match
         val context = ParseContext("c", useCache = true)
         val result = composite.parseOrNull(context, 0)
-        
+
         // The parse should fail
         assertNull(result)
         assertEquals(0, context.errorPosition)
-        
+
         // The suggested parsers should contain the constituent parser that failed (letter_a)
         // Since the composite parser is unnamed, constituent parsers are suggested
         assertTrue(context.suggestedParsers.any { it.name == "letter_a" })

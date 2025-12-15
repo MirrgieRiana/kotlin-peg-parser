@@ -15,11 +15,11 @@ import kotlin.test.assertFailsWith
 
 /**
  * Tests demonstrating how to use error context information from ParseContext.
- * 
+ *
  * When parsing fails, the ParseContext provides:
  * - errorPosition: The position in the input where parsing failed (the furthest position reached)
  * - suggestedParsers: A set of parsers that failed at the errorPosition
- * 
+ *
  * These features are especially useful for providing helpful error messages to users.
  */
 class ErrorContextTest {
@@ -30,7 +30,7 @@ class ErrorContextTest {
         val parser = +"hello"
         val context = ParseContext("help", useCache = true)
         val result = parser.parseOrNull(context, 0)
-        
+
         assertNull(result)
         // Parser was attempted at position 0 and failed
         assertEquals(0, context.errorPosition)
@@ -42,7 +42,7 @@ class ErrorContextTest {
         val parser = (+"hello" + +"world")
         val context = ParseContext("help", useCache = true)
         val result = parser.parseOrNull(context, 0)
-        
+
         assertNull(result)
         // Both alternatives attempted at position 0 and failed
         assertEquals(0, context.errorPosition)
@@ -55,11 +55,11 @@ class ErrorContextTest {
         val space = +" "
         val world = +"world"
         val parser = hello * space * world
-        
+
         val context = ParseContext("hello world!", useCache = true)
         // Note: This will succeed
         assertNotNull(parser.parseOrNull(context, 0))
-        
+
         // Now test a failing case - sequence succeeds up to "hello " then fails
         val context2 = ParseContext("hello goodbye", useCache = true)
         val result2 = parser.parseOrNull(context2, 0)
@@ -74,10 +74,10 @@ class ErrorContextTest {
         val letter = (+Regex("[a-z]")) named "letter" map { it.value }
         val digit = (+Regex("[0-9]")) named "digit" map { it.value }
         val parser = letter + digit
-        
+
         val context = ParseContext("@invalid", useCache = true)
         val result = parser.parseOrNull(context, 0)
-        
+
         assertNull(result)
         assertEquals(0, context.errorPosition)
         // Both parsers failed at position 0, both should be suggested
@@ -92,10 +92,10 @@ class ErrorContextTest {
         val digit = (+Regex("[0-9]")) named "digit" map { it.value }
         val underscore = (+'_') named "underscore"
         val parser = letter + digit + underscore
-        
+
         val context = ParseContext("@invalid", useCache = true)
         val result = parser.parseOrNull(context, 0)
-        
+
         assertNull(result)
         assertEquals(0, context.errorPosition)
         // All three parsers failed at position 0
@@ -112,10 +112,10 @@ class ErrorContextTest {
         val space = +" "
         val world = (+"world") named "world"
         val parser = hello * space * world
-        
+
         val context = ParseContext("hello test", useCache = true)
         val result = parser.parseOrNull(context, 0)
-        
+
         assertNull(result)
         // Parsing succeeded up to "hello ", then "world" was attempted at position 6
         assertEquals(6, context.errorPosition)
@@ -131,10 +131,10 @@ class ErrorContextTest {
         val letter = (+Regex("[a-zA-Z]")) named "letter" map { it.value }
         val letterOrDigit = (+Regex("[a-zA-Z0-9]")) named "letter_or_digit" map { it.value }
         val identifier = letter * letterOrDigit.zeroOrMore
-        
+
         val context = ParseContext("123abc", useCache = true)
         val result = identifier.parseOrNull(context, 0)
-        
+
         assertNull(result)
         assertEquals(0, context.errorPosition)
         // Should suggest "letter" at the start
@@ -148,15 +148,15 @@ class ErrorContextTest {
         val lparen = (+'(') named "left_paren"
         val rparen = (+')') named "right_paren"
         val plus = (+'+') named "plus"
-        
+
         // Simplified expression: number or (number + number)
         val simple = number
         val complex = lparen * number * plus * number * rparen map { it.b }
         val expr = simple + complex
-        
+
         val context = ParseContext("(42+", useCache = true)
         val result = expr.parseOrNull(context, 0)
-        
+
         assertNull(result)
         // Should fail after "(42+"
         assertEquals(4, context.errorPosition)
@@ -170,15 +170,15 @@ class ErrorContextTest {
         val letter = (+Regex("[a-z]")) named "lowercase_letter" map { it.value }
         val digit = (+Regex("[0-9]")) named "digit" map { it.value }
         val parser = letter * digit
-        
+
         val context = ParseContext("a@", useCache = true)
         val result = parser.parseOrNull(context, 0)
-        
+
         assertNull(result)
-        
+
         // Build an error message using context information
         val errorMessage = buildErrorMessage(context)
-        
+
         // Check that the error message contains useful information
         assertTrue(errorMessage.contains("position 1"))
         assertTrue(errorMessage.contains("digit"))
@@ -189,11 +189,11 @@ class ErrorContextTest {
         // When using parseAllOrThrow, you can catch the exception and inspect its context
         val letter = (+Regex("[a-z]")) named "letter" map { it.value }
         val parser = letter
-        
+
         val exception = assertFailsWith<UnmatchedInputParseException> {
             parser.parseAllOrThrow("123")
         }
-        
+
         // Exception contains the context with error information
         assertNotNull(exception.context)
         assertEquals(0, exception.context.errorPosition)
@@ -207,11 +207,11 @@ class ErrorContextTest {
     fun errorContextWithExtraCharacters() {
         // ExtraCharactersParseException also provides context
         val parser = (+"hello") named "greeting"
-        
+
         val exception = assertFailsWith<ExtraCharactersParseException> {
             parser.parseAllOrThrow("helloworld")
         }
-        
+
         // Exception contains the context
         assertNotNull(exception.context)
         assertEquals(5, exception.position) // Position where extra characters start
@@ -223,7 +223,7 @@ class ErrorContextTest {
         val parser = +"hello" * +"world"
         val context = ParseContext("hellotest", useCache = true)
         val result = parser.parseOrNull(context, 0)
-        
+
         assertNull(result)
         assertEquals(5, context.errorPosition)
         // suggestedParsers will contain unnamed parsers
@@ -235,20 +235,20 @@ class ErrorContextTest {
         // Each ParseContext is independent
         val hello = (+"hello") named "greeting"
         val world = (+"world") named "farewell"
-        
+
         // Test with partial match advancing error position
         val parser = hello * +" " * world
-        
+
         val context1 = ParseContext("hello test", useCache = true)
         parser.parseOrNull(context1, 0)
         // Failed at position 6 (after "hello ")
         assertEquals(6, context1.errorPosition)
-        
+
         val context2 = ParseContext("goodbye", useCache = true)
         parser.parseOrNull(context2, 0)
         // Failed at position 0 (first parser didn't match)
         assertEquals(0, context2.errorPosition)
-        
+
         // The two contexts are independent
         assertEquals(6, context1.errorPosition)
         assertEquals(0, context2.errorPosition)
@@ -261,7 +261,7 @@ class ErrorContextTest {
             .distinct()
             .sorted()
             .joinToString(", ")
-        
+
         return if (suggestions.isNotEmpty()) {
             "Failed to parse at position ${context.errorPosition}. Expected: $suggestions"
         } else {

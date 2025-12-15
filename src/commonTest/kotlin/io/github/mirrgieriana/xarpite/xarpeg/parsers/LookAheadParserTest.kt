@@ -83,13 +83,13 @@ class LookAheadParserTest {
         val keyword = +"if"
         val notWordChar = +Regex("[^a-zA-Z0-9_]")
         val ifKeyword = keyword * notWordChar.lookAhead map { tuple -> tuple.a }
-        
+
         val context1 = ParseContext("if ", useCache = true)
         val result1 = ifKeyword.parseOrNull(context1, 0)
         assertNotNull(result1)
         assertEquals("if", result1.value)
         assertEquals(2, result1.end)
-        
+
         val context2 = ParseContext("ifx", useCache = true)
         val result2 = ifKeyword.parseOrNull(context2, 0)
         assertNull(result2)

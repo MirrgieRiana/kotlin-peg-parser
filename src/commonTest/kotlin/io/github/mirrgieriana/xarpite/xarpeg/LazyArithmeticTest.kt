@@ -24,35 +24,35 @@ class PositionMarkerException(message: String, context: ParseContext, position: 
  * The parser evaluates integer arithmetic lazily and uses '!' to mark positions.
  */
 class LazyArithmeticTest {
-    
+
     // Lazy arithmetic parser implementation
     private object LazyArithmetic {
-        private val number: Parser<() -> Int> = 
+        private val number: Parser<() -> Int> =
             +Regex("[0-9]+") mapEx { _, result ->
                 val value = result.value.value.toInt()
                 return@mapEx { value }
             }
-        
+
         private val positionMarker: Parser<() -> Int> =
             +'!' mapEx { context, result ->
                 val position = result.start
                 return@mapEx { throw PositionMarkerException("Position marker at index $position", context, position) }
             }
-        
+
         private val primary: Parser<() -> Int> =
             number + positionMarker + (-'(' * ref { expr } * -')')
-        
+
         private val term: Parser<() -> Int> =
-            leftAssociative(primary, +'*' + +'/') { a, op, b -> 
+            leftAssociative(primary, +'*' + +'/') { a, op, b ->
                 when (op) {
                     '*' -> ({ a() * b() })
                     '/' -> ({ a() / b() })
                     else -> error("Unknown operator: $op")
                 }
             }
-        
+
         val expr: Parser<() -> Int> =
-            leftAssociative(term, +'+' + +'-') { a, op, b -> 
+            leftAssociative(term, +'+' + +'-') { a, op, b ->
                 when (op) {
                     '+' -> ({ a() + b() })
                     '-' -> ({ a() - b() })

@@ -8,7 +8,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.Tuple0
 /**
  * A parser that matches only at the end of input.
  * Does not consume any characters.
- * 
+ *
  * Example:
  * ```
  * val parser = +"hello" * endOfInput

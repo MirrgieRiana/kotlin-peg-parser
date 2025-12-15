@@ -58,7 +58,7 @@ class PositionTutorialTest {
         val result1 = keywordWithLocation.parseAllOrThrow("hello")
         val expected1: Located<String> = Located("hello", 1, 1)
         assertEquals<Located<String>>(expected1, result1)
-        
+
         // To test multiline, we'd need a more complex parser that handles the whole input
         // For now, demonstrate that the withLocation function correctly tracks positions
     }

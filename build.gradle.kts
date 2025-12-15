@@ -123,7 +123,7 @@ tasks.register("writeKotlinMetadata") {
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
     moduleName.set(providers.gradleProperty("repositoryName"))
     outputDirectory.set(layout.buildDirectory.dir("dokka"))
-    
+
     // Whitelist: Only process JVM source set by name
     dokkaSourceSets {
         configureEach {
@@ -142,7 +142,7 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
         iconTarget.parentFile.mkdirs()
         iconSource.copyTo(iconTarget, overwrite = true)
     }
-    
+
     // Ensure generated sources are available before Dokka runs
     dependsOn("generateTuples")
 }
@@ -151,25 +151,25 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
 tasks.register("generateTuples") {
     description = "Generates tuple source files"
     group = "build"
-    
+
     val outputDir = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg").asFile
     val outputDirParsers = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg/parsers").asFile
 
     val generatedTuplesKt = outputDir.resolve("Tuples.kt")
     val generatedTupleParserKt = outputDirParsers.resolve("TupleParser.kt")
-    
+
     doLast {
         // Configuration: Maximum tuple size to generate
         val maxTupleSize = 16
-        
+
         // Create output directories
         outputDir.mkdirs()
         outputDirParsers.mkdirs()
-        
+
         // Generate Tuples.kt programmatically
         generatedTuplesKt.writeText(getTupleSrc(maxTupleSize))
         println("Generated: ${generatedTuplesKt.absolutePath}")
-        
+
         // Generate TupleParser.kt programmatically
         generatedTupleParserKt.writeText(getTupleParserSrc(maxTupleSize))
         println("Generated: ${generatedTupleParserKt.absolutePath}")
