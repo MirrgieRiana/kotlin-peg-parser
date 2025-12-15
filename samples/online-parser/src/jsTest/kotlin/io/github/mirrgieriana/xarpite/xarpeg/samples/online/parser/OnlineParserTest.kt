@@ -532,54 +532,50 @@ class OnlineParserTest {
         // The error should show line 3 for func2 call and line 2 for func1 call  
         assertTrue(result.contains("line 3") || result.contains("line 2"))
     }
-
+    
     @Test
-    fun divisionErrorShowsOnlyOperatorNotRightOperand() {
-        // Test that division by zero error shows only the division operator position,
-        // not including the right operand in the error position text
-        val result = parseExpression("func = (a, b) -> a / b\nfunc(10, 0)")
+    fun divisionErrorShowsOperatorRangeWithContext() {
+        // Test that division by zero error shows the operator range with full line context
+        val result = parseExpression("a = 1 + (4 / 0) - 4")
         assertTrue(result.startsWith("Error"))
         assertTrue(result.contains("Division by zero"))
-        // Verify the stack trace shows only "/" in the error position text, not "/ b"
+        // Should show the line with the problematic range highlighted
         assertTrue(result.contains("line 1"))
-        assertTrue(result.contains(": /"))
-        // Ensure it doesn't include the right operand "b" in the position text
-        val lines = result.split("\n")
-        val stackTraceLine = lines.find { it.contains("at line 1") }
-        assertNotNull(stackTraceLine)
-        // The text after the colon should be just "/" not "/ b" or similar
-        val textPart = stackTraceLine!!.substringAfter(": ")
-        assertEquals("/", textPart.trim())
+        // The highlighted range should include the operator and operand(s)
+        assertTrue(result.contains("[") && result.contains("]"))
+        // Should show division operator
+        assertTrue(result.contains("/"))
     }
     
     @Test
-    fun divisionByZeroStackTraceShowsOnlyOperatorSymbol() {
-        // Test that verifies the exact text shown in stack trace for division operator
+    fun stackTraceShowsHighlightedRange() {
+        // Test that stack trace shows the full source line with highlighted problem range
         val result = parseExpression("10 / 0")
         assertTrue(result.startsWith("Error"))
         assertTrue(result.contains("Division by zero"))
-        // Parse the stack trace to verify the position text
+        // Should contain brackets to highlight the problem range
+        assertTrue(result.contains("[") && result.contains("]"))
+        // Should show the division in highlighted form
         val lines = result.split("\n")
-        val stackTraceLine = lines.find { it.contains("at line 1") }
-        assertNotNull(stackTraceLine)
-        // Extract the code snippet shown in the stack trace (after ": ")
-        val codeSnippet = stackTraceLine!!.substringAfter(": ")
-        // Should be exactly "/" not "/ 0" or " / 0"
-        assertEquals("/", codeSnippet)
+        val stackLine = lines.find { it.contains("at line") }
+        assertNotNull(stackLine)
+        // The stack trace line should show the operator with highlighting
+        assertTrue(stackLine!!.contains("[") && stackLine.contains("]"))
     }
     
     @Test
-    fun multiLineStackTraceShowsOnlyOperatorInPosition() {
-        // Test with the example from HTML to verify operator position in nested calls
-        val result = parseExpression("func1 = (a, b) -> a / b\nfunc2 = (a, b) -> func1(a + b, a - b)\nfunc2(10, 10)")
+    fun errorRangeDoesNotIncludeLeadingWhitespace() {
+        // Test that the error range starts at the operator, not before it
+        val result = parseExpression("a = 5 / 0")
         assertTrue(result.startsWith("Error"))
         assertTrue(result.contains("Division by zero"))
-        // Check that the division operator position shows only "/"
         val lines = result.split("\n")
-        val divisionLine = lines.find { it.contains("at line 1") && it.contains("division") }
-        assertNotNull(divisionLine)
-        val codeSnippet = divisionLine!!.substringAfter(": ")
-        // The position text should be just "/" not "/ b"
-        assertEquals("/", codeSnippet)
+        val stackLine = lines.find { it.contains("at line") }
+        assertNotNull(stackLine)
+        // The highlighted part should start with the operator, not whitespace
+        val highlighted = stackLine!!.substringAfter("[").substringBefore("]")
+        assertTrue(highlighted.startsWith("/") || highlighted.startsWith("/ "))
+        // Should not start with whitespace
+        assertFalse(highlighted.startsWith(" "))
     }
 }
