@@ -161,12 +161,19 @@ fun main() {
 Parser names are particularly useful when building complex grammars with many alternatives:
 
 ```kotlin
-val keyword = (+"if" + +"while" + +"for") named "keyword"
-val operator = (+"+" + +"-" + +"*" + +"/") named "operator"
-val number = (+Regex("[0-9]+")) named "number"
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-// When parsing fails, error messages can reference these names
-val expression = (number * operator * number) named "binary_expression"
+fun main() {
+    val keyword = (+"if" + +"while" + +"for") named "keyword"
+    val operator = (+"+" + +"-" + +"*" + +"/") named "operator"
+    val number = (+Regex("[0-9]+")) named "number"
+
+    // When parsing fails, error messages can reference these names
+    val expression = (number * operator * number) named "binary_expression"
+    
+    println(expression.parseAllOrThrow("42+17"))
+}
 ```
 
 Named parsers compose naturally with all other combinators:
