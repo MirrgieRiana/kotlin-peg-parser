@@ -90,13 +90,6 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     version.set("1.3.1")
     android.set(false)
     outputColorName.set("RED")
-
-    filter {
-        exclude("**/build/**")
-        exclude("**/generated/**")
-        exclude("src/importedMain/**")
-        exclude("src/importedTest/**")
-    }
 }
 
 publishing {
