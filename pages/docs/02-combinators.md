@@ -128,5 +128,61 @@ This demonstrates that `startOfInput` and `endOfInput` check the current positio
 
 > **Note**: When using `parseAllOrThrow`, these boundary checks are redundant because it already starts at position 0 and verifies the entire input is consumed. These parsers are most useful with `parseOrNull` or within complex grammars where you parse sub-expressions.
 
+## Naming parsers for better error messages
+
+Use the `named` infix function to assign meaningful names to parsers. Named parsers improve error reporting by providing clearer context when parsing fails:
+
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+// Create named parsers for better error messages
+val digit = (+Regex("[0-9]")) named "digit"
+val letter = (+Regex("[a-z]")) named "letter"
+
+// Named parsers work with all combinators
+val identifier = (letter * (letter + digit).zeroOrMore) named "identifier"
+
+fun main() {
+    // Success case
+    val result = identifier.parseAllOrThrow("x123")
+    println(result) // Tuple2(Tuple1(MatchResult(value=x)), List(MatchResult(value=1), ...))
+    
+    // When parsing fails, the named parser helps identify what was expected
+    try {
+        identifier.parseAllOrThrow("123abc")
+    } catch (e: UnmatchedInputParseException) {
+        println("Failed: ${e.message}") 
+        // The error context includes information about named parsers
+    }
+}
+```
+
+Parser names are particularly useful when building complex grammars with many alternatives:
+
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+fun main() {
+    val keyword = (+"if" + +"while" + +"for") named "keyword"
+    val operator = (+"+" + +"-" + +"*" + +"/") named "operator"
+    val number = (+Regex("[0-9]+")) named "number"
+
+    // When parsing fails, error messages can reference these names
+    val expression = (number * operator * number) named "binary_expression"
+    
+    println(expression.parseAllOrThrow("42+17"))
+}
+```
+
+Named parsers compose naturally with all other combinators:
+- Sequences: `(namedParser * otherParser)`
+- Choices: `(namedParser + otherParser)`
+- Repetition: `namedParser.oneOrMore`
+- Mapping: `namedParser map { ... }`
+
+> **Note**: Naming is optional and primarily benefits error reporting and debugging. It does not affect parsing behavior or performance significantly.
+
 Next, handle recursion and associativity to build expression parsers with less code.  
 → [Step 3: Handle expressions and recursion](03-expressions.md)
