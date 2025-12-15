@@ -54,12 +54,13 @@ fun main() {
 
 Key points in the example:
 
-- The wildcard `parsers.*` import brings all operator overloads (`+`, `-`, `*`, `!`, `map`, etc.) into scope.
+- The wildcard `parsers.*` import brings all operator overloads (`+`, `-`, `*`, `!`, `map`, `named`, etc.) into scope.
 - `+'a'`, `+"abc"`, and `+Regex("...")` create parsers for characters, strings, and regex matches (`MatchResult`)—map them to the shape you need.
 - `-parser` (for example, `-'('`) ignores the matched token and yields `Tuple0`, so you can drop delimiters.
 - `*` sequences parsers and returns tuples (`Tuple0..Tuple16`), preserving the parts you care about.
 - `leftAssociative`/`rightAssociative` build operator chains without manual recursion.
 - `ref { }` creates a forward reference for recursive grammars. Properties using `ref` should have explicit type declarations for type resolution.
+- `parser named "name"` assigns a name to a parser for better error messages and debugging.
 - `parseAllOrThrow` requires the entire input to be consumed; it throws on unmatched input or trailing characters.
 
 > 💡 **Want to learn more?** Check out the [Tutorial section](#-tutorial---learn-step-by-step) below for a complete step-by-step guide!
