@@ -5,7 +5,7 @@ Thank you for your interest in contributing to Xarpeg! This guide will help you 
 ## Prerequisites
 
 - **JDK 11 or higher** - Required for building and testing
-- **Gradle 8.5** - Provided via the wrapper (automatically downloaded)
+- **Gradle 9.2.1** - Provided via the wrapper (automatically downloaded)
 
 ## Development Workflow
 
