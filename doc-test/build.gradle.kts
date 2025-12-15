@@ -2,10 +2,18 @@ import org.gradle.api.tasks.JavaExec
 
 plugins {
     kotlin("jvm")
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 repositories {
     mavenCentral()
+}
+
+// ktlint configuration
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    version.set("1.3.1")
+    android.set(false)
+    outputColorName.set("RED")
 }
 
 dependencies {
@@ -227,4 +235,9 @@ val runDocSamples = tasks.register<JavaExec>("runDocSamples") {
 
 tasks.named("check") {
     dependsOn(runDocSamples)
+}
+
+// Make build task depend on ktlintFormat
+tasks.named("build") {
+    dependsOn("ktlintFormat")
 }

@@ -215,3 +215,8 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 tasks.named("check") {
     dependsOn("detekt")
 }
+
+// Make build task depend on ktlintFormat
+tasks.named("build") {
+    dependsOn("ktlintFormat")
+}
