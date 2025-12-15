@@ -11,17 +11,17 @@ fun interface Parser<out T : Any> {
 
 val Parser<*>.nameOrString get() = this.name ?: this.toString()
 
-class ParseContext(val src: String, val useCache: Boolean) {
-    private val cache = mutableMapOf<Pair<Parser<*>, Int>, ParseResult<Any>?>()
+class ParseContext(val src: String, val useMemoization: Boolean) {
+    private val memo = mutableMapOf<Pair<Parser<*>, Int>, ParseResult<Any>?>()
     var isInNamedParser = false
     var errorPosition: Int = 0
     val suggestedParsers = mutableSetOf<Parser<*>>()
 
     fun <T : Any> parseOrNull(parser: Parser<T>, start: Int): ParseResult<T>? {
-        val result = if (useCache) {
+        val result = if (useMemoization) {
             val key = Pair(parser, start)
-            if (key in cache) {
-                return cache[key] as ParseResult<T>?
+            if (key in memo) {
+                return memo[key] as ParseResult<T>?
             } else {
                 val result = if (!isInNamedParser && parser.name != null) {
                     isInNamedParser = true
@@ -31,7 +31,7 @@ class ParseContext(val src: String, val useCache: Boolean) {
                 } else {
                     parser.parseOrNull(this, start)
                 }
-                cache[key] = result
+                memo[key] = result
                 result
             }
         } else {
@@ -66,8 +66,8 @@ class UnmatchedInputParseException(message: String, context: ParseContext, posit
 
 class ExtraCharactersParseException(message: String, context: ParseContext, position: Int) : ParseException(message, context, position)
 
-fun <T : Any> Parser<T>.parseAllOrThrow(src: String, useCache: Boolean = true): T {
-    val context = ParseContext(src, useCache)
+fun <T : Any> Parser<T>.parseAllOrThrow(src: String, useMemoization: Boolean = true): T {
+    val context = ParseContext(src, useMemoization)
     val result = this.parseOrNull(context, 0) ?: throw UnmatchedInputParseException("Failed to parse.", context, 0)
     if (result.end != src.length) {
         val string = src.drop(result.end).truncate(10, "...").escapeDoubleQuote()
