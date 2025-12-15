@@ -143,29 +143,45 @@ The Online Parser Sample is a working example of Xarpeg powering a complete brow
 
 #### Token Candidates for Better Error Messages
 
-When parsing fails, Xarpeg automatically tracks which parsers were attempted at the furthest position. This helps you provide informative error messages:
+When parsing fails, Xarpeg automatically tracks which parsers were attempted at the furthest position. The error message already includes expected token names:
 
 ```kotlin
 val number = +Regex("[0-9]+") named "number"
 val identifier = +Regex("[a-zA-Z]+") named "identifier"
-val expression = number + identifier
 
 try {
-    expression.parseAllOrThrow("@invalid")
+    (number + identifier).parseAllOrThrow("@invalid")
 } catch (e: UnmatchedInputParseException) {
-    val context = ParseContext("@invalid", useCache = true)
-    context.parseOrNull(expression, 0)
-    
-    val expected = context.suggestedParsers
-        .mapNotNull { it.name }
-        .joinToString(", ")
-    
-    println("Expected: $expected at position ${context.errorPosition}")
-    // Output: "Expected: number, identifier at position 0"
+    println(e.message)
+    // Output: "Failed to parse at position 0. Expected: number, identifier"
 }
 ```
 
-Use the `named` infix function to give parsers user-friendly names that appear in error messages.
+For custom error handling, access the `ParseContext` directly to get `errorPosition` and `suggestedParsers`:
+
+```kotlin
+val number = +Regex("[0-9]+") named "number"
+val operator = +Regex("[+\\-*/]") named "operator"
+val expression = number * operator * number
+
+val input = "123 @ 456"
+val context = ParseContext(input, useCache = true)
+val result = context.parseOrNull(expression, 0)
+
+if (result == null) {
+    val pos = context.errorPosition
+    val expected = context.suggestedParsers.mapNotNull { it.name }.joinToString(", ")
+    val snippet = input.substring(0, pos) + " ← here"
+    
+    println("Error at position $pos: $snippet")
+    println("Expected: $expected")
+    // Output:
+    // Error at position 4: 123  ← here
+    // Expected: operator
+}
+```
+
+Use the `named` infix function to give parsers user-friendly names that appear in error messages and suggestions.
 
 ---
 

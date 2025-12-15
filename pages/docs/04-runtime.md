@@ -34,22 +34,52 @@ The `ParseContext` maintains two properties:
 
 When a parser fails, it records suggestions only at the furthest position. Earlier failures are automatically discarded as parsing progresses deeper into the input.
 
-### Usage example
+### Usage examples
+
+#### Automatic error messages
+
+The `parseAllOrThrow` function automatically includes expected tokens in error messages:
 
 ```kotlin
 val number = +Regex("[0-9]+") named "number"
 val identifier = +Regex("[a-zA-Z]+") named "identifier"
-val keyword = +"if" named "if keyword"
 
-val expression = number + identifier + keyword
-val context = ParseContext("@invalid", useCache = true)
+try {
+    (number + identifier).parseAllOrThrow("@invalid")
+} catch (e: UnmatchedInputParseException) {
+    println(e.message)
+    // Output: "Failed to parse at position 0. Expected: number, identifier"
+}
+```
 
+#### Custom error handling with Context
+
+Access `ParseContext` directly for custom error messages:
+
+```kotlin
+val number = +Regex("[0-9]+") named "number"
+val operator = +Regex("[+\\-*/]") named "operator"
+val expression = number * operator * number
+
+val input = "123 @ 456"
+val context = ParseContext(input, useCache = true)
 val result = context.parseOrNull(expression, 0)
+
 if (result == null) {
     val position = context.errorPosition
     val expected = context.suggestedParsers.mapNotNull { it.name }.joinToString(", ")
-    println("Parse failed at position $position. Expected: $expected")
-    // Output: "Parse failed at position 0. Expected: number, identifier, if keyword"
+    
+    // Show error location in context
+    val before = input.substring(0, position.coerceAtMost(input.length))
+    val after = input.substring(position.coerceAtMost(input.length))
+    
+    println("Syntax error at position $position:")
+    println("  $before ← here")
+    println("  Expected: $expected")
+    // Output:
+    // Syntax error at position 4:
+    //   123  ← here
+    //   Expected: operator
 }
 ```
 

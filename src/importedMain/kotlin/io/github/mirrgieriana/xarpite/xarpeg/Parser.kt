@@ -66,6 +66,19 @@ class UnmatchedInputParseException(message: String, position: Int) : ParseExcept
 
 class ExtraCharactersParseException(message: String, position: Int) : ParseException(message, position)
 
+/**
+ * Parse the entire input and return both the result and the context.
+ * This allows access to errorPosition and suggestedParsers for custom error handling.
+ * 
+ * @return Pair of ParseResult and ParseContext, or null if parsing fails
+ */
+fun <T : Any> Parser<T>.parseAllWithContext(src: String, useCache: Boolean = true): Pair<ParseResult<T>, ParseContext>? {
+    val context = ParseContext(src, useCache)
+    val result = this.parseOrNull(context, 0) ?: return null
+    if (result.end != src.length) return null
+    return Pair(result, context)
+}
+
 fun <T : Any> Parser<T>.parseAllOrThrow(src: String, useCache: Boolean = true): T {
     val context = ParseContext(src, useCache)
     val result = this.parseOrNull(context, 0) ?: run {

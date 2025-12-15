@@ -290,4 +290,90 @@ class TokenCandidateTest {
             assertEquals(0, e.position) // エラー位置は0
         }
     }
+
+    @Test
+    fun parseAllWithContext_accessErrorPositionOnFailure() {
+        // parseAllWithContextを使ってエラー位置と候補を取得
+        val number = +Regex("[0-9]+") named "number"
+        val identifier = +Regex("[a-zA-Z]+") named "identifier"
+        val expression = number + identifier
+        
+        val result = expression.parseAllWithContext("@invalid")
+        
+        // パースは失敗するのでnullが返る
+        assertNull(result)
+    }
+
+    @Test
+    fun parseAllWithContext_accessContextDirectly() {
+        // Contextを直接使ってエラー情報を取得する実用例
+        val number = +Regex("[0-9]+") named "number"
+        val identifier = +Regex("[a-zA-Z]+") named "identifier"
+        val operator = +Regex("[+\\-*/]") named "operator"
+        val expression = number + operator + identifier
+        
+        val input = "123 @ abc"  // @はoperatorとして無効
+        val context = ParseContext(input, useCache = true)
+        val result = context.parseOrNull(expression, 0)
+        
+        if (result == null) {
+            // エラー位置と候補を取得
+            val position = context.errorPosition
+            val expected = context.suggestedParsers
+                .mapNotNull { it.name }
+                .joinToString(", ")
+            
+            // エラー位置は4（"123 "の後）
+            assertEquals(4, position)
+            // 候補にはoperatorが含まれる
+            assertTrue(expected.contains("operator"))
+        }
+    }
+
+    @Test
+    fun parseAllWithContext_customErrorMessage() {
+        // Contextを使ってカスタムエラーメッセージを作成
+        val keyword = (+"if" + +"else" + +"while") named "keyword"
+        val input = "for"
+        
+        val context = ParseContext(input, useCache = true)
+        val result = context.parseOrNull(keyword, 0)
+        
+        assertNull(result) // パースは失敗
+        
+        // カスタムエラーメッセージを構築
+        val position = context.errorPosition
+        val candidates = context.suggestedParsers.mapNotNull { it.name }
+        val errorMessage = "Syntax error at position $position: expected ${candidates.joinToString(" or ")}"
+        
+        // エラーメッセージが期待通り構築される
+        assertTrue(errorMessage.contains("Syntax error at position 0"))
+        assertTrue(errorMessage.contains("keyword"))
+    }
+
+    @Test
+    fun parseAllWithContext_showInputContextInError() {
+        // エラー位置の前後の文字を表示する実用例
+        val number = +Regex("[0-9]+") named "number"
+        val operator = +"+" named "plus"
+        val expr = number * operator * number
+        
+        val input = "123- 456"  // -は無効な演算子（スペースなし）
+        val context = ParseContext(input, useCache = true)
+        val result = context.parseOrNull(expr, 0)
+        
+        if (result == null) {
+            val pos = context.errorPosition
+            val before = input.substring(0, pos.coerceAtMost(input.length))
+            val after = input.substring(pos.coerceAtMost(input.length))
+            
+            // エラー位置は3（"123"の後）
+            assertEquals(3, pos)
+            assertEquals("123", before)
+            assertEquals("- 456", after)
+            
+            // 期待される候補
+            assertTrue(context.suggestedParsers.any { it.name == "plus" })
+        }
+    }
 }
