@@ -540,8 +540,9 @@ class OnlineParserTest {
         val result = parseExpression("func = (a, b) -> a / b\nfunc(10, 0)")
         assertTrue(result.startsWith("Error"))
         assertTrue(result.contains("Division by zero"))
-        // The error should show "/ b" or just "/", not the entire right operand
-        // We verify this by checking that the error shows line 1 for the division operator
+        // The error should show just the operator (e.g., " / " with whitespace),
+        // not including the entire right operand.
+        // We verify this by checking that the error shows line 1 for the division operator.
         assertTrue(result.contains("line 1"))
         // The error message should contain the division operator text
         assertTrue(result.contains("/"))
