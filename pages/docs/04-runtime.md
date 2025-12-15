@@ -1,36 +1,41 @@
 ---
 layout: default
-title: Step 4 – Runtime
+title: Step 4 – Runtime Behavior
 ---
 
-# Step 4: Errors and runtime behavior
+# Step 4: Runtime Behavior
 
-Review how parsers handle full consumption, exceptions, and memoization cache settings.
+Understand how parsers handle errors, consume input, and control caching for optimal performance.
 
-## Consume the entire input
+## Parsing Methods
 
-`parseAllOrThrow` verifies that the input is matched from start to end and throws informative exceptions when it is not:
+### `parseAllOrThrow`
 
-- No parser matched at the start: `UnmatchedInputParseException`
-- A prefix matches but trailing input remains: `ExtraCharactersParseException`
+Requires the entire input to be consumed:
 
-If a `map` throws, the exception bubbles up and aborts parsing; validate before mapping or catch and wrap errors when you need to recover.
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-## Cache on or off
+val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
 
-`ParseContext` memoizes by default so heavy backtracking stays predictable.  
-Disable with `parseAllOrThrow(input, useCache = false)` if you want lower memory usage or need side effects to re-run.
+fun main() {
+    number.parseAllOrThrow("123")      // ✓ Returns 123
+    // number.parseAllOrThrow("123abc") // ✗ ExtraCharactersParseException
+    // number.parseAllOrThrow("abc")    // ✗ UnmatchedInputParseException
+}
+```
 
-## Error reporting with ParseContext
+### Exception Types
 
-When parsing fails, `ParseContext` provides detailed information to help you build user-friendly error messages:
+- **`UnmatchedInputParseException`** - No parser matched at the current position
+- **`ExtraCharactersParseException`** - Parsing succeeded but trailing input remains
 
-- `errorPosition`: The furthest position in the input that was attempted during parsing
-- `suggestedParsers`: A set of parsers that failed at `errorPosition`
+Both exceptions provide a `context` property for detailed error information.
 
-This information is especially useful when combined with named parsers to tell users what was expected at the failure point.
+## Error Context
 
-### Basic error context usage
+`ParseContext` tracks parsing failures to help build user-friendly error messages:
 
 ```kotlin
 import io.github.mirrgieriana.xarpite.xarpeg.*
@@ -45,7 +50,7 @@ fun main() {
     val result = identifier.parseOrNull(context, 0)
     
     if (result == null) {
-        println("Failed at position ${context.errorPosition}")
+        println("Failed at position ${context.errorPosition}")  // => 0
         
         val expected = context.suggestedParsers
             .mapNotNull { it.name }
@@ -53,22 +58,22 @@ fun main() {
             .sorted()
             .joinToString(", ")
         
-        if (expected.isNotEmpty()) {
-            println("Expected: $expected")
-        }
+        println("Expected: $expected")  // => "letter"
     }
 }
 ```
 
-This will output:
-```
-Failed at position 0
-Expected: letter
-```
+### Error Tracking Properties
 
-### Error context with exceptions
+- **`errorPosition`** - Furthest position attempted during parsing
+- **`suggestedParsers`** - Set of parsers that failed at `errorPosition`
 
-When using `parseAllOrThrow`, you can catch the exception and access its `context` property:
+As parsing proceeds:
+1. When a parser fails further than `errorPosition`, it updates and `suggestedParsers` clears
+2. Parsers failing at the current `errorPosition` are added to `suggestedParsers`
+3. Named parsers appear using their assigned names
+
+### Using Error Context with Exceptions
 
 ```kotlin
 import io.github.mirrgieriana.xarpite.xarpeg.*
@@ -87,56 +92,130 @@ fun main() {
             .joinToString(", ")
         
         println("Parse error at position ${e.context.errorPosition}")
-        if (suggestions.isNotEmpty()) {
-            println("Expected: $suggestions")
-        }
+        println("Expected: $suggestions")
     }
 }
 ```
 
-### How error tracking works
+## Memoization and Caching
 
-The error position advances as parsing proceeds through your grammar:
+### Default Behavior
 
-- When a parser fails at a position further than the current `errorPosition`, the `errorPosition` is updated and `suggestedParsers` is cleared
-- All parsers that fail at the current `errorPosition` are added to `suggestedParsers`
-- Named parsers appear in `suggestedParsers` using their assigned names
-
-**Example**: In a sequence `a * b * c`, if `a` and `b` succeed but `c` fails at position 10, then `errorPosition` will be 10 and `suggestedParsers` will contain `c`.
-
-### Named parsers for better error messages
-
-Use `parser named "name"` to give parsers meaningful names that appear in error messages:
+`ParseContext` caches results by default to make backtracking predictable:
 
 ```kotlin
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val lparen = (+'(') named "left_parenthesis"
-val rparen = (+')') named "right_parenthesis"
-val number = (+Regex("[0-9]+")) named "number" map { it.value.toInt() }
-val expr = lparen * number * rparen
+val parser = +Regex("[a-z]+") map { it.value }
 
 fun main() {
-    val context = ParseContext("(42", useCache = true)
-    expr.parseOrNull(context, 0)
-    
-    // After "(" and "42", parser expected ")" at position 3
-    // errorPosition: 3
-    // suggestedParsers contains parser named "right_parenthesis"
+    // Cache enabled (default)
+    parser.parseAllOrThrow("hello", useCache = true)
 }
 ```
 
-Without names, parsers are tracked but appear less user-friendly in error messages. Always name parsers that users should recognize.
+Each `(parser, position)` pair is memoized, so repeated attempts at the same position return cached results.
 
-## Debugging tips
+### Disabling Cache
 
-- Reproduce failures with small inputs and confirm how `optional` or `zeroOrMore` rewind.
-- When unsure about shapes and types, lean on IDE KDoc and completion.
-- Use `ParseContext` directly with `parseOrNull` to inspect `errorPosition` and `suggestedParsers` for debugging.
-- For more examples, see the tests in [src/commonTest/kotlin/io/github/mirrgieriana/xarpite/xarpeg/ErrorContextTest.kt](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/blob/main/src/commonTest/kotlin/io/github/mirrgieriana/xarpite/xarpeg/ErrorContextTest.kt).
+Disable caching for lower memory usage when your grammar doesn't backtrack heavily:
 
----
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-Next, learn how to work with parsing positions using `mapEx` to extract location information when you need it.  
-→ [Step 5: Working with parsing positions](05-positions.md)
+val parser = +Regex("[a-z]+") map { it.value }
+
+fun main() {
+    parser.parseAllOrThrow("hello", useCache = false)
+}
+```
+
+**Trade-offs:**
+- **Cache enabled** - Higher memory, predictable performance with heavy backtracking
+- **Cache disabled** - Lower memory, potential performance issues with alternatives
+
+## Error Propagation
+
+If a `map` function throws an exception, it bubbles up and aborts parsing:
+
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+val divisionByZero = +Regex("[0-9]+") map { value ->
+    val n = value.value.toInt()
+    if (n == 0) error("Cannot divide by zero")
+    100 / n
+}
+
+fun main() {
+    divisionByZero.parseAllOrThrow("10")  // ✓ Returns 10
+    // divisionByZero.parseAllOrThrow("0")  // ✗ IllegalStateException
+}
+```
+
+Validate before mapping or catch and wrap errors when recovery is needed.
+
+## Debugging Tips
+
+### Use `parseOrNull` Directly
+
+Work with `ParseContext` directly to inspect error details:
+
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+val parser = (+Regex("[a-z]+")) named "word"
+
+fun main() {
+    val context = ParseContext("123", useCache = true)
+    val result = context.parseOrNull(parser, 0)
+    
+    if (result == null) {
+        println("Error position: ${context.errorPosition}")
+        println("Suggestions: ${context.suggestedParsers.mapNotNull { it.name }}")
+    }
+}
+```
+
+### Check Rewind Behavior
+
+Confirm how `optional` and `zeroOrMore` rewind on failure:
+
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+val parser = (+Regex("[a-z]+")).optional * +Regex("[0-9]+")
+
+fun main() {
+    val context = ParseContext("123", useCache = true)
+    val result = parser.parseOrNull(context, 0)
+    // optional fails but rewinds, allowing number parser to succeed
+    println(result != null)  // => true
+}
+```
+
+### Use Tests as Reference
+
+Check the test suite for observed behavior:
+- **[ErrorContextTest.kt](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/blob/main/src/commonTest/kotlin/io/github/mirrgieriana/xarpite/xarpeg/ErrorContextTest.kt)** - Error tracking examples
+- **[ParserTest.kt](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/blob/main/src/importedTest/kotlin/io/github/mirrgieriana/xarpite/xarpeg/ParserTest.kt)** - Comprehensive behavior tests
+
+## Key Takeaways
+
+- **`parseAllOrThrow`** requires full consumption, throws on failure
+- **Error context** provides `errorPosition` and `suggestedParsers`
+- **Named parsers** appear in error messages with their assigned names
+- **Memoization** is enabled by default; disable with `useCache = false`
+- **Exceptions in `map`** bubble up and abort parsing
+- **`parseOrNull`** with `ParseContext` enables detailed debugging
+
+## Next Steps
+
+Learn how to extract position information for error reporting and source mapping.
+
+→ **[Step 5: Parsing Positions](05-positions.html)**

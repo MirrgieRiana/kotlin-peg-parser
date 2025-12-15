@@ -1,37 +1,36 @@
 ---
 layout: default
-title: Step 6 – Template strings
+title: Step 6 – Template Strings
 ---
 
-# Step 6: Template strings without tokenization
+# Step 6: Template Strings
 
-One of the key advantages of PEG-style parsers is that they work directly on the input string without requiring a separate tokenization phase. This makes it straightforward to handle template strings with embedded expressions—a pattern that can be challenging for traditional lexer-based parsers.
+Learn how PEG-style parsers naturally handle template strings with embedded expressions—without tokenization.
 
-## The challenge with tokenization
+## Why No Tokenizer?
 
-Traditional parsers with separate lexer/tokenizer phases struggle with template strings like `"hello $(1+2) world"` because:
+Traditional parsers with separate lexer/tokenizer phases struggle with template strings like `"hello $(1+2) world"`:
 
-- The lexer must decide upfront whether `$` is part of a string literal or an expression delimiter
-- Nested structures (expressions inside strings inside expressions) require complex lookahead logic
-- Token boundaries become ambiguous when contexts switch mid-stream
+- **Ambiguous boundaries** - Is `$` part of the string or an expression delimiter?
+- **Context switching** - Token rules must handle all possible contexts upfront
+- **Nested structures** - Expressions inside strings inside expressions require complex lookahead
 
-With PEG parsers that work character-by-character, you can define rules that naturally handle context switches without designing complicated token rules.
+PEG parsers working character-by-character naturally handle context switches without designing complicated token rules.
 
-## A complete template string parser
+## Complete Template String Parser
 
-Here's a full example that parses template strings with embedded arithmetic expressions:
+Here's a parser for template strings with embedded arithmetic expressions:
 
 ```kotlin
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-// Define the result types
 sealed class TemplateElement
 data class StringPart(val text: String) : TemplateElement()
 data class ExpressionPart(val value: Int) : TemplateElement()
 
 val templateStringParser: Parser<String> = object {
-    // Expression parser (reusing from earlier tutorials)
+    // Expression parser (arithmetic with precedence)
     val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
     val grouped: Parser<Int> = -'(' * ref { sum } * -')'
     val factor: Parser<Int> = number + grouped
@@ -40,7 +39,6 @@ val templateStringParser: Parser<String> = object {
     val expression = sum
 
     // String parts: match everything except $( and closing "
-    // The key insight: use a regex that stops before template markers
     val stringPart: Parser<TemplateElement> =
         +Regex("""[^"$]+|\$(?!\()""") map { match ->
             StringPart(match.value)
@@ -55,7 +53,7 @@ val templateStringParser: Parser<String> = object {
     // Template elements can be string parts or expression parts
     val templateElement = expressionPart + stringPart
 
-    // A complete template string: "..." with any number of elements
+    // Complete template string: "..." with any number of elements
     val templateString: Parser<String> =
         -'"' * templateElement.zeroOrMore * -'"' map { elements ->
             elements.joinToString("") { element ->
@@ -71,48 +69,56 @@ val templateStringParser: Parser<String> = object {
 
 fun main() {
     check(templateStringParser.parseAllOrThrow(""""hello"""") == "hello")
-    
     check(templateStringParser.parseAllOrThrow(""""result: $(1+2)"""") == "result: 3")
-    
     check(templateStringParser.parseAllOrThrow(""""$(2*(3+4)) = answer"""") == "14 = answer")
-    
     check(templateStringParser.parseAllOrThrow(""""a$(1)b$(2)c$(3)d"""") == "a1b2c3d")
 }
 ```
 
-The Kotlin string literals above double each quote mark that should appear in the parsed input. For example, `""""hello""""` represents the input `"hello"` because each inner `"` must be escaped inside the Kotlin source string.
+**Note:** In Kotlin string literals, `""""hello""""` represents the input `"hello"` because inner quotes must be escaped.
 
-## How it works
+## How It Works
 
-The key to this parser is the `stringPart` regex:
+### The Key: Smart Regex Boundaries
 
 ```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.*
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
-
-val stringPartRegexParser = +Regex("""[^"$]+|\$(?!\()""") named "string_part"
-
-fun main() {
-    stringPartRegexParser.parseAllOrThrow("hello")
-}
++Regex("""[^"$]+|\$(?!\()""")
 ```
 
-This regex pattern matches:
-- `[^"$]+` — one or more characters that are neither `"` nor `$`
-- `\$(?!\()` — a `$` that is **not** followed by `(` (using negative lookahead)
+This pattern matches:
+- **`[^"$]+`** - One or more characters that are neither `"` nor `$`
+- **`\$(?!\()` - A `$` NOT followed by `(` (negative lookahead)
 
-This regex naturally stops at template boundaries (`$(`) without needing explicit tokenization rules. When the parser encounters `$(`, it switches to `expressionPart`, which recursively invokes the expression parser.
+The regex naturally stops at template boundaries (`$(`) without explicit tokenization. When `$(` is encountered, control passes to `expressionPart`, which recursively invokes the expression parser.
 
-## Nested template strings
+### Context Switching
 
-You can extend this pattern to handle nested template strings (strings inside expressions):
+The choice combinator handles context switching:
 
 ```kotlin
+val templateElement = expressionPart + stringPart
+```
 
+Try to parse an expression first. If that fails (no `$(` found), parse a string part. This naturally alternates between contexts as needed.
+
+### Recursion
+
+The `grouped` parser uses `ref { sum }` to allow parenthesized sub-expressions:
+
+```kotlin
+val grouped: Parser<Int> = -'(' * ref { sum } * -')'
+```
+
+This enables nested expressions like `$(2*(3+4))`.
+
+## Nested Template Strings
+
+Extend the pattern to handle strings inside expressions:
+
+```kotlin
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-// Re-declared so this snippet remains self-contained for doc-test
 sealed class TemplateElement
 data class StringPart(val text: String) : TemplateElement()
 data class ExpressionPart(val value: Int) : TemplateElement()
@@ -142,7 +148,7 @@ object TemplateWithNestedStrings {
         }
     }
 
-    // Now expressions can contain template strings
+    // Expressions can now contain template strings
     val factor: Parser<Int> = number + grouped + (templateString map { it.length })
     val sum: Parser<Int> = leftAssociative(factor, -'+') { a, _, b -> a + b }
 }
@@ -152,20 +158,72 @@ fun main() {
 }
 ```
 
-This demonstrates the power of PEG parsers: the expression parser can recursively call the template string parser, and vice versa, without pre-tokenization complexity.
+The expression parser can recursively call the template string parser, and vice versa. This mutual recursion works naturally with PEG—no pre-tokenization complexity.
 
-## Key benefits recap
+## Benefits Recap
 
-Using a PEG parser without tokenization for template strings provides:
+**Natural context switching:**
+The parser adapts based on what it has seen, not predetermined token boundaries.
 
-1. **Natural context switching** — The parser adapts its rules based on what it has seen, not predetermined token boundaries
-2. **Simpler grammar** — No need to design complex token rules that handle all possible contexts
-3. **Recursive embedding** — Expressions can contain strings, strings can contain expressions, without special cases
-4. **Regex-based boundaries** — Use negative lookahead and character classes to define natural stopping points
+**Simpler grammar:**
+No complex token rules that must handle all possible contexts upfront.
 
-This approach scales well to more complex scenarios like:
-- Multiple expression delimiters (`$(...)`, `#{...}`, etc.)
-- Escape sequences (`\$(` to include literal `$(`)
-- Different string quote styles (`"..."`, `'...'`, `"""..."""`)
+**Recursive embedding:**
+Expressions can contain strings, strings can contain expressions—without special cases.
+
+**Regex-based boundaries:**
+Use negative lookahead and character classes to define natural stopping points.
+
+## Extending Further
+
+This approach scales well to more complex scenarios:
+
+**Multiple delimiters:**
+```kotlin
+// Support both $(...) and #{...}
+val exprPart1 = -Regex("""\$\(""") * expression * -')'
+val exprPart2 = -Regex("""#\{""") * expression * -'}'
+val expressionPart = exprPart1 + exprPart2
+```
+
+**Escape sequences:**
+```kotlin
+// Match \$( as literal text
+val stringPart = +Regex("""(?:[^"$\\]|\\.)+|\$(?!\()""")
+```
+
+**Different quote styles:**
+```kotlin
+val singleQuoted = -"'" * content * -"'"
+val doubleQuoted = -'"' * content * -'"'
+val templateString = singleQuoted + doubleQuoted
+```
 
 Each addition is a localized change to the relevant parser, not a redesign of the entire token vocabulary.
+
+## Key Takeaways
+
+- **No tokenizer** - Parse directly from characters
+- **Regex boundaries** - Use negative lookahead to define stopping points
+- **Choice combinator** - Natural context switching between alternatives
+- **Recursion** - Mutual recursion between string and expression parsers
+- **Scalable** - Easy to extend with new delimiters or escape sequences
+
+## Congratulations!
+
+You've completed the Xarpeg tutorial! You now know how to:
+- Build parsers with the operator-based DSL
+- Combine parsers with sequences, choices, and repetition
+- Handle recursion and operator precedence
+- Work with errors, caching, and debugging
+- Extract position information
+- Parse complex nested structures
+
+### Next Steps
+
+- **[Explore Examples](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/tree/main/samples)** - Study complete applications
+- **[Read Tests](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/tree/main/src/commonTest/kotlin)** - See all features in action
+- **[Browse Source](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/tree/main/src/importedMain/kotlin/io/github/mirrgieriana/xarpite/xarpeg)** - Understand implementation details
+- **[Build Something](https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser)** - Create your own parser!
+
+→ **[Back to Tutorial Index](index.html)**
