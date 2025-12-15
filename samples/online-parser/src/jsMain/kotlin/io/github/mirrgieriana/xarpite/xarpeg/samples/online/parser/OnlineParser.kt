@@ -281,24 +281,20 @@ private object ExpressionGrammar {
     }
 
     // Multiplication operator parser
-    private val multiplyOp = (whitespace * (+'*' * whitespace * factor) mapEx { parseCtx, result ->
-        val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+    private val multiplyOp = (whitespace * +'*' * whitespace * factor) mapEx { parseCtx, result ->
+        // Skip leading whitespace in position tracking by using the operator's position
+        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '*' }
         val (_, rightExpr: Expression) = result.value
-        Pair(opPosition, rightExpr)
-    }) map { result -> 
-        val (_, pair) = result.value
-        val (opPosition, rightExpr) = pair
+        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
         arithmeticOp("*", "multiplication", Double::times)(rightExpr, opPosition)
     }
     
     // Division operator parser
-    private val divideOp = (whitespace * (+'/' * whitespace * factor) mapEx { parseCtx, result ->
-        val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+    private val divideOp = (whitespace * +'/' * whitespace * factor) mapEx { parseCtx, result ->
+        // Skip leading whitespace in position tracking by using the operator's position
+        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '/' }
         val (_, rightExpr: Expression) = result.value
-        Pair(opPosition, rightExpr)
-    }) map { result ->
-        val (_, pair) = result.value
-        val (opPosition, rightExpr) = pair
+        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
         arithmeticOp("/", "division", Double::div, additionalCheck = { rightVal, ctx, opPos ->
             if (rightVal.value == 0.0) {
                 val newCtx = ctx.copy(callStack = ctx.callStack + CallFrame("division", opPos))
@@ -311,24 +307,20 @@ private object ExpressionGrammar {
         leftAssociativeBinaryOp(factor, multiplyOp + divideOp)
 
     // Addition operator parser
-    private val addOp = (whitespace * (+'+' * whitespace * product) mapEx { parseCtx, result ->
-        val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+    private val addOp = (whitespace * +'+' * whitespace * product) mapEx { parseCtx, result ->
+        // Skip leading whitespace in position tracking by using the operator's position
+        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '+' }
         val (_, rightExpr: Expression) = result.value
-        Pair(opPosition, rightExpr)
-    }) map { result ->
-        val (_, pair) = result.value
-        val (opPosition, rightExpr) = pair
+        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
         arithmeticOp("+", "addition", Double::plus)(rightExpr, opPosition)
     }
     
     // Subtraction operator parser
-    private val subtractOp = (whitespace * (+'-' * whitespace * product) mapEx { parseCtx, result ->
-        val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+    private val subtractOp = (whitespace * +'-' * whitespace * product) mapEx { parseCtx, result ->
+        // Skip leading whitespace in position tracking by using the operator's position
+        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '-' }
         val (_, rightExpr: Expression) = result.value
-        Pair(opPosition, rightExpr)
-    }) map { result ->
-        val (_, pair) = result.value
-        val (opPosition, rightExpr) = pair
+        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
         arithmeticOp("-", "subtraction", Double::minus)(rightExpr, opPosition)
     }
     
@@ -357,46 +349,38 @@ private object ExpressionGrammar {
     // Ordering comparison operators: <, <=, >, >=
     private val orderingComparison: Parser<Expression> = run {
         // Less than or equal operator parser (must come before < to match correctly)
-        val lessEqualOp = (whitespace * (+"<=" * whitespace * sum) mapEx { parseCtx, result ->
-            val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+        val lessEqualOp = (whitespace * +"<=" * whitespace * sum) mapEx { parseCtx, result ->
+            // Skip leading whitespace in position tracking by using the operator's position
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("<=")
             val (_, rightExpr: Expression) = result.value
-            Pair(opPosition, rightExpr)
-        }) map { result ->
-            val (_, pair) = result.value
-            val (opPosition, rightExpr) = pair
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
             comparisonOp("<=") { l, r -> l <= r }(rightExpr, opPosition)
         }
         
         // Greater than or equal operator parser (must come before > to match correctly)
-        val greaterEqualOp = (whitespace * (+">=" * whitespace * sum) mapEx { parseCtx, result ->
-            val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+        val greaterEqualOp = (whitespace * +">=" * whitespace * sum) mapEx { parseCtx, result ->
+            // Skip leading whitespace in position tracking by using the operator's position
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf(">=")
             val (_, rightExpr: Expression) = result.value
-            Pair(opPosition, rightExpr)
-        }) map { result ->
-            val (_, pair) = result.value
-            val (opPosition, rightExpr) = pair
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
             comparisonOp(">=") { l, r -> l >= r }(rightExpr, opPosition)
         }
         
         // Less than operator parser
-        val lessOp = (whitespace * (+'<' * whitespace * sum) mapEx { parseCtx, result ->
-            val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+        val lessOp = (whitespace * +'<' * whitespace * sum) mapEx { parseCtx, result ->
+            // Skip leading whitespace in position tracking by using the operator's position
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '<' }
             val (_, rightExpr: Expression) = result.value
-            Pair(opPosition, rightExpr)
-        }) map { result ->
-            val (_, pair) = result.value
-            val (opPosition, rightExpr) = pair
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
             comparisonOp("<") { l, r -> l < r }(rightExpr, opPosition)
         }
         
         // Greater than operator parser
-        val greaterOp = (whitespace * (+'>' * whitespace * sum) mapEx { parseCtx, result ->
-            val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+        val greaterOp = (whitespace * +'>' * whitespace * sum) mapEx { parseCtx, result ->
+            // Skip leading whitespace in position tracking by using the operator's position
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '>' }
             val (_, rightExpr: Expression) = result.value
-            Pair(opPosition, rightExpr)
-        }) map { result ->
-            val (_, pair) = result.value
-            val (opPosition, rightExpr) = pair
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
             comparisonOp(">") { l, r -> l > r }(rightExpr, opPosition)
         }
         
@@ -416,13 +400,11 @@ private object ExpressionGrammar {
     // Equality comparison operators: ==, !=
     private val equalityComparison: Parser<Expression> = run {
         // Equality operator parser
-        val equalOp = (whitespace * (+"==" * whitespace * orderingComparison) mapEx { parseCtx, result ->
-            val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+        val equalOp = (whitespace * +"==" * whitespace * orderingComparison) mapEx { parseCtx, result ->
+            // Skip leading whitespace in position tracking by using the operator's position
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("==")
             val (_, rightExpr: Expression) = result.value
-            Pair(opPosition, rightExpr)
-        }) map { result ->
-            val (_, pair) = result.value
-            val (opPosition, rightExpr) = pair
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
             BinaryOperator { left, ctx ->
                 val rightVal = rightExpr.evaluate(ctx)
                 val compareResult = when {
@@ -438,13 +420,11 @@ private object ExpressionGrammar {
         }
         
         // Inequality operator parser
-        val notEqualOp = (whitespace * (+"!=" * whitespace * orderingComparison) mapEx { parseCtx, result ->
-            val opPosition = SourcePosition(result.start, result.end, result.text(parseCtx))
+        val notEqualOp = (whitespace * +"!=" * whitespace * orderingComparison) mapEx { parseCtx, result ->
+            // Skip leading whitespace in position tracking by using the operator's position
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("!=")
             val (_, rightExpr: Expression) = result.value
-            Pair(opPosition, rightExpr)
-        }) map { result ->
-            val (_, pair) = result.value
-            val (opPosition, rightExpr) = pair
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
             BinaryOperator { left, ctx ->
                 val rightVal = rightExpr.evaluate(ctx)
                 val compareResult = when {
