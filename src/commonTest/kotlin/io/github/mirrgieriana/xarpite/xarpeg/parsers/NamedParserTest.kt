@@ -144,6 +144,7 @@ class NamedParserTest {
             val digit = (+Regex("[0-9]")) named "digit" map { it.value.toInt() }
             val lparen = -'('
             val rparen = -')'
+
             // Explicit type declaration required for ref in Kotlin 1.9.20
             val expr: Parser<Int> by lazy { ((digit) + (lparen * ref { expr } * rparen)) named "expression" }
         }

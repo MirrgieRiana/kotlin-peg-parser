@@ -3,7 +3,7 @@ import build_logic.getTupleParserSrc
 import build_logic.getTupleSrc
 
 plugins {
-    kotlin("multiplatform") version "1.9.20"
+    kotlin("multiplatform") version "1.9.21"
     id("maven-publish")
     id("org.jetbrains.dokka") version "2.0.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
