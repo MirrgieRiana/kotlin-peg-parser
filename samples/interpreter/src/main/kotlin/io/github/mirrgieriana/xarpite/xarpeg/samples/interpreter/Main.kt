@@ -4,6 +4,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.mapEx
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.named
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.plus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
@@ -39,16 +40,16 @@ data class OperatorInfo(val position: Int, val op: Char)
 
 private object ArithmeticParser {
     // Parse a number and wrap it in a lazy value
-    val number: Parser<LazyValue> = +Regex("[0-9]+") mapEx { _, result ->
+    val number: Parser<LazyValue> = (+Regex("[0-9]+") mapEx { _, result ->
         val value = result.value.value.toInt()
         LazyValue(result.start) { value }
-    }
+    }) named "number"
     
     // Parse a grouped expression with parentheses
     val grouped: Parser<LazyValue> = -'(' * ref { expr } * -')'
     
     // Primary expression: number or grouped
-    val primary: Parser<LazyValue> = number + grouped
+    val primary: Parser<LazyValue> = (number + grouped) named "primary"
     
     // Multiplication and division (higher precedence)
     val product: Parser<LazyValue> = leftAssociative(
