@@ -1,6 +1,6 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
-import io.github.mirrgieriana.xarpite.xarpeg.impl.escapeJsonString
+import io.github.mirrgieriana.xarpite.xarpeg.impl.escapeDoubleQuote
 import io.github.mirrgieriana.xarpite.xarpeg.impl.truncate
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.normalize
 
@@ -52,7 +52,7 @@ fun <T : Any> Parser<T>.parseAllOrThrow(src: String, useCache: Boolean = true): 
     val context = ParseContext(src, useCache)
     val result = this.parseOrNull(context, 0) ?: throw UnmatchedInputParseException("Failed to parse.", 0) // TODO 候補
     if (result.end != src.length) {
-        val string = src.drop(result.end).truncate(10, "...").escapeJsonString()
+        val string = src.drop(result.end).truncate(10, "...").escapeDoubleQuote()
         throw ExtraCharactersParseException("""Extra characters found after position ${result.end}: "$string"""", result.end)
     }
     return result.value
