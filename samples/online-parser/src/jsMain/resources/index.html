@@ -33,6 +33,13 @@
             display: flex;
             justify-content: center;
         }
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
         .hero-header {
             width: 100%;
             display: flex;
@@ -66,12 +73,25 @@
             color: var(--accent-strong);
         }
         main {
-            width: min(960px, 100%);
+            flex: 1;
+            min-width: 0;
             background: var(--surface);
             padding: 2rem 1.75rem;
             border-radius: 18px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+        }
+        .sidebar {
+            flex: 0 0 380px;
+            background: var(--surface);
+            padding: 2rem 1.75rem;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            position: sticky;
+            top: 1.25rem;
+            max-height: calc(100vh - 2.5rem);
+            overflow-y: auto;
         }
         h1 {
             margin: 0 0 1rem;
@@ -285,8 +305,18 @@
             font-family: inherit;
             font-size: 0.85em;
         }
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                flex: 1;
+                max-height: none;
+                position: static;
+            }
+        }
         @media (max-width: 640px) {
-            main {
+            main, .sidebar {
                 padding: 1.5rem 1rem;
             }
             .hero-header {
@@ -304,7 +334,8 @@
     </style>
 </head>
     <body>
-        <main>
+        <div class="container">
+            <main>
             <div class="hero-header">
                 <div class="hero-brand">
                     <img class="hero-logo" src="https://raw.githubusercontent.com/MirrgieRiana/xarpeg-kotlin-peg-parser/main/assets/xarpeg-icon.svg" alt="Xarpeg Kotlin PEG Parser icon">
@@ -337,6 +368,53 @@
                 </div>
             </div>
 
+            <div class="section">
+                <div class="section-header">
+                    <label>About this sample</label>
+                    <div class="link-row">
+                        <a class="source" href="https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/">Documentation home</a>
+                    </div>
+                </div>
+                <p class="muted-text">The parser evaluates expressions with arithmetic operations, comparison operators, ternary conditionals, variables, lambda expressions, and function calls. Stack traces are shown for runtime errors.</p>
+                <ul class="muted-list">
+                    <li>Enter expressions using <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, and parentheses.</li>
+                    <li>Compare values: <code>5 > 3</code>, <code>10 == 10</code>, <code>x != y</code>, <code>a &lt;= b</code></li>
+                    <li>Use ternary operator: <code>condition ? valueIfTrue : valueIfFalse</code></li>
+                    <li>Assign variables: <code>x = 10</code></li>
+                    <li>Define lambdas: <code>add = (a, b) -&gt; a + b</code></li>
+                    <li>Call functions: <code>add(5, 3)</code></li>
+                    <li>Identifiers can use letters, digits, and underscore (but cannot start with a digit).</li>
+                    <li>Comparison operators return boolean values (<code>true</code>/<code>false</code>) with strict type checking.</li>
+                    <li>See the evaluated result or read error messages with stack traces.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <label>Grammar (PEG)</label>
+                    <div class="link-row">
+                        <a class="source" href="https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/blob/main/samples/online-parser/src/jsMain/kotlin/io/github/mirrgieriana/xarpite/xarpeg/samples/online/parser/OnlineParser.kt">View Source Code</a>
+                    </div>
+                </div>
+                <p class="muted-text">This grammar includes arithmetic operations, comparison operators, ternary conditionals, variables, lambda expressions, and function calls.</p>
+                <pre class="code-block"><code>Expression      &lt;- _ Assignment _
+Assignment      &lt;- (Identifier _ '=' _ Assignment) / Ternary
+Ternary         &lt;- (Equality _ '?' _ Equality _ ':' _ Equality) / Equality
+Equality        &lt;- Ordering (_ ('==' / '!=') _ Ordering)*
+Ordering        &lt;- Sum (_ ('&lt;=' / '&gt;=' / '&lt;' / '&gt;') _ Sum)*
+Sum             &lt;- Product (_ ('+' / '-') _ Product)*
+Product         &lt;- Factor (_ ('*' / '/') _ Factor)*
+Factor          &lt;- Lambda / FunctionCall / Variable / Number / '(' _ Expression _ ')'
+Lambda          &lt;- '(' _ (Identifier _ (',' _ Identifier _)*)? ')' _ '-&gt;' _ Expression
+FunctionCall    &lt;- Identifier _ '(' _ (Expression _ (',' _ Expression _)*)? ')'
+Variable        &lt;- Identifier
+Identifier      &lt;- [a-zA-Z_][a-zA-Z0-9_]*
+Number          &lt;- [0-9]+ ('.' [0-9]+)?
+_               &lt;- [ \t\r\n]*</code></pre>
+            </div>
+        </main>
+
+        <aside class="sidebar">
             <div class="section">
                 <label>Try Examples</label>
                 <p class="muted-text">Click any example below to try it in the parser:</p>
@@ -410,52 +488,8 @@ func2(10, 10)</code>
                     </div>
                 </div>
             </div>
-
-            <div class="section">
-                <div class="section-header">
-                    <label>About this sample</label>
-                    <div class="link-row">
-                        <a class="source" href="https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/">Documentation home</a>
-                    </div>
-                </div>
-                <p class="muted-text">The parser evaluates expressions with arithmetic operations, comparison operators, ternary conditionals, variables, lambda expressions, and function calls. Stack traces are shown for runtime errors.</p>
-                <ul class="muted-list">
-                    <li>Enter expressions using <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, and parentheses.</li>
-                    <li>Compare values: <code>5 > 3</code>, <code>10 == 10</code>, <code>x != y</code>, <code>a &lt;= b</code></li>
-                    <li>Use ternary operator: <code>condition ? valueIfTrue : valueIfFalse</code></li>
-                    <li>Assign variables: <code>x = 10</code></li>
-                    <li>Define lambdas: <code>add = (a, b) -&gt; a + b</code></li>
-                    <li>Call functions: <code>add(5, 3)</code></li>
-                    <li>Identifiers can use letters, digits, and underscore (but cannot start with a digit).</li>
-                    <li>Comparison operators return boolean values (<code>true</code>/<code>false</code>) with strict type checking.</li>
-                    <li>See the evaluated result or read error messages with stack traces.</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <div class="section-header">
-                    <label>Grammar (PEG)</label>
-                    <div class="link-row">
-                        <a class="source" href="https://github.com/MirrgieRiana/xarpeg-kotlin-peg-parser/blob/main/samples/online-parser/src/jsMain/kotlin/io/github/mirrgieriana/xarpite/xarpeg/samples/online/parser/OnlineParser.kt">View Source Code</a>
-                    </div>
-                </div>
-                <p class="muted-text">This grammar includes arithmetic operations, comparison operators, ternary conditionals, variables, lambda expressions, and function calls.</p>
-                <pre class="code-block"><code>Expression      &lt;- _ Assignment _
-Assignment      &lt;- (Identifier _ '=' _ Assignment) / Ternary
-Ternary         &lt;- (Equality _ '?' _ Equality _ ':' _ Equality) / Equality
-Equality        &lt;- Ordering (_ ('==' / '!=') _ Ordering)*
-Ordering        &lt;- Sum (_ ('&lt;=' / '&gt;=' / '&lt;' / '&gt;') _ Sum)*
-Sum             &lt;- Product (_ ('+' / '-') _ Product)*
-Product         &lt;- Factor (_ ('*' / '/') _ Factor)*
-Factor          &lt;- Lambda / FunctionCall / Variable / Number / '(' _ Expression _ ')'
-Lambda          &lt;- '(' _ (Identifier _ (',' _ Identifier _)*)? ')' _ '-&gt;' _ Expression
-FunctionCall    &lt;- Identifier _ '(' _ (Expression _ (',' _ Expression _)*)? ')'
-Variable        &lt;- Identifier
-Identifier      &lt;- [a-zA-Z_][a-zA-Z0-9_]*
-Number          &lt;- [0-9]+ ('.' [0-9]+)?
-_               &lt;- [ \t\r\n]*</code></pre>
-        </div>
-    </main>
+        </aside>
+    </div>
 
     <script type="module">
         import { parseExpression } from "./online-parser.mjs";
