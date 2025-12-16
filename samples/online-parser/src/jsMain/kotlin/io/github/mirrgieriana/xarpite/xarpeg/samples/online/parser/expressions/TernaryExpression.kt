@@ -19,10 +19,8 @@ class TernaryExpression(
 ) : Expression {
     override fun evaluate(ctx: EvaluationContext): Value {
         val condVal = condition.evaluate(ctx)
-        if (condVal !is Value.BooleanValue) {
-            val newCtx = ctx.copy(callStack = ctx.callStack + CallFrame("ternary operator", position))
-            throw EvaluationException("Condition in ternary operator must be a boolean", newCtx, ctx.sourceCode)
-        }
-        return if (condVal.value) trueExpression.evaluate(ctx) else falseExpression.evaluate(ctx)
+        val newCtx = ctx.copy(callStack = ctx.callStack + CallFrame("ternary operator", position))
+        val condBool = condVal.requireBoolean(newCtx, "Condition in ternary operator")
+        return if (condBool) trueExpression.evaluate(ctx) else falseExpression.evaluate(ctx)
     }
 }

@@ -23,10 +23,7 @@ class VariableReferenceExpression(private val name: String) : Expression {
 }
 
 @JsExport
-class AssignmentExpression(
-    private val name: String,
-    private val valueExpression: Expression
-) : Expression {
+class AssignmentExpression(private val name: String, private val valueExpression: Expression) : Expression {
     override fun evaluate(ctx: EvaluationContext): Value {
         val value = valueExpression.evaluate(ctx)
         ctx.variableTable.set(name, value)
@@ -35,11 +32,7 @@ class AssignmentExpression(
 }
 
 @JsExport
-class LambdaExpression(
-    private val params: List<String>,
-    private val body: Expression,
-    private val position: SourcePosition
-) : Expression {
+class LambdaExpression(private val params: List<String>, private val body: Expression, private val position: SourcePosition) : Expression {
     override fun evaluate(ctx: EvaluationContext): Value {
         return Value.LambdaValue(params, body, mutableMapOf(), definitionPosition = position)
     }

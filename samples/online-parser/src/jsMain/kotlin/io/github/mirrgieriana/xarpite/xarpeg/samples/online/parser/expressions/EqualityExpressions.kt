@@ -37,21 +37,15 @@ abstract class EqualityOperatorExpression(
 }
 
 @JsExport
-class EqualsExpression(
-    left: Expression,
-    right: Expression,
-    position: SourcePosition
-) : EqualityOperatorExpression(left, right, position) {
+class EqualsExpression(left: Expression, right: Expression, position: SourcePosition) :
+    EqualityOperatorExpression(left, right, position) {
     override val operatorSymbol = "=="
     override fun compareValues(result: Boolean) = result
 }
 
 @JsExport
-class NotEqualsExpression(
-    left: Expression,
-    right: Expression,
-    position: SourcePosition
-) : EqualityOperatorExpression(left, right, position) {
+class NotEqualsExpression(left: Expression, right: Expression, position: SourcePosition) :
+    EqualityOperatorExpression(left, right, position) {
     override val operatorSymbol = "!="
     override fun compareValues(result: Boolean) = !result
 }
