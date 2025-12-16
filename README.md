@@ -110,7 +110,7 @@ Interactive browser-based parser that demonstrates:
 
 ### Parsing Methods
 
-- **`parseAllOrThrow(input, useMemoization = true)`** - Parse entire input or throw exception
+- **`parseAllOrThrow(input)`** - Parse entire input or throw exception
 - **`parseOrNull(context, start)`** - Attempt parse at position; return `ParseResult<T>?`
 
 ### Error Handling
