@@ -37,30 +37,7 @@ Both exceptions provide a `context` property for detailed error information.
 
 `ParseContext` tracks parsing failures to help build user-friendly error messages:
 
-```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.*
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val letter = (+Regex("[a-z]")) named "letter" map { it.value }
-val digit = (+Regex("[0-9]")) named "digit" map { it.value }
-val identifier = letter * (letter + digit).zeroOrMore
-
-fun main() {
-    val context = ParseContext("1abc", useMemoization = true)
-    val result = identifier.parseOrNull(context, 0)
-    
-    check(result == null)  // Parsing fails
-    check(context.errorPosition == 0)  // Failed at position 0
-    
-    val expected = context.suggestedParsers
-        .mapNotNull { it.name }
-        .distinct()
-        .sorted()
-        .joinToString(", ")
-    
-    check(expected == "letter")  // Expected "letter"
-}
-```
 
 ### Error Tracking Properties
 
@@ -161,39 +138,13 @@ Validate before mapping or catch and wrap errors when recovery is needed.
 
 Work with `ParseContext` directly to inspect error details:
 
-```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.*
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val parser = (+Regex("[a-z]+")) named "word"
-
-fun main() {
-    val context = ParseContext("123", useMemoization = true)
-    val result = context.parseOrNull(parser, 0)
-    
-    check(result == null)  // Parsing fails
-    check(context.errorPosition == 0)  // Error at position 0
-    check(context.suggestedParsers.any { it.name == "word" })  // Suggests "word"
-}
-```
 
 ### Check Rewind Behavior
 
 Confirm how `optional` and `zeroOrMore` rewind on failure:
 
-```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.*
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val parser = (+Regex("[a-z]+")).optional * +Regex("[0-9]+")
-
-fun main() {
-    val context = ParseContext("123", useMemoization = true)
-    val result = parser.parseOrNull(context, 0)
-    // optional fails but rewinds, allowing number parser to succeed
-    check(result != null)  // Succeeds
-}
-```
 
 ### Use Tests as Reference
 

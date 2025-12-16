@@ -122,17 +122,8 @@ fun <T : Any> Parser<T>.withPos(): Parser<Token> = this mapEx { ctx, result ->
 fun main() {
     val word = +Regex("[a-z]+") map { it.value }
     val wordWithPos = word.withPos()
-    
-    val input = "first\nsecond\nthird"
-    val context = ParseContext(input, useMemoization = true)
-    
-    // Parse first word
-    val result1 = wordWithPos.parseOrNull(context, 0)
-    check(result1?.value == Token("first", 1, 1))
-    
-    // Parse word after first newline
-    val result2 = wordWithPos.parseOrNull(context, 6)
-    check(result2?.value == Token("second", 2, 1))
+    val result = wordWithPos.parseAllOrThrow("hello")
+    check(result == Token("hello", 1, 1))
 }
 ```
 

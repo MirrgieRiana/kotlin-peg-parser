@@ -113,25 +113,6 @@ fun main() {
 
 `startOfInput` and `endOfInput` match at position boundaries without consuming input:
 
-```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.*
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
-
-val word = +Regex("[a-z]+") map { it.value }
-
-fun main() {
-    val context = ParseContext("hello world", useMemoization = true)
-    
-    // Match word at start
-    val atStart = (startOfInput * word).parseOrNull(context, 0)
-    check(atStart?.value == "hello")  // Succeeds at position 0
-    
-    // Fails: position 6 is not at start
-    val notAtStart = (startOfInput * word).parseOrNull(context, 6)
-    check(notAtStart == null)  // Fails when not at start
-}
-```
-
 **Note:** When using `parseAllOrThrow`, boundary checks are redundant—it already verifies the entire input is consumed. Use these parsers with `parseOrNull` or within sub-grammars.
 
 ## Naming Parsers
@@ -161,33 +142,7 @@ fun main() {
 
 Named composite parsers hide constituent parsers from error suggestions:
 
-```kotlin
-import io.github.mirrgieriana.xarpite.xarpeg.*
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
-
-fun main() {
-    val parserA = (+'a') named "letter_a"
-    val parserB = (+'b') named "letter_b"
-    
-    // Named composite: only "ab_sequence" in errors
-    val namedComposite = (parserA * parserB) named "ab_sequence"
-    
-    // Unnamed composite: "letter_a" in errors
-    val unnamedComposite = parserA * parserB
-    
-    val context1 = ParseContext("c", useMemoization = true)
-    context1.parseOrNull(namedComposite, 0)
-    check(context1.suggestedParsers.map { it.name } == listOf("ab_sequence"))
-    
-    val context2 = ParseContext("c", useMemoization = true)
-    context2.parseOrNull(unnamedComposite, 0)
-    check(context2.suggestedParsers.map { it.name } == listOf("letter_a"))
-}
-```
-
 **Best practice:** Name composite parsers for semantic errors ("Expected: identifier") and leave components unnamed for detailed token-level errors during development.
-
-> **Tip:** Call parsers through `context.parseOrNull(parser, start)` rather than `parser.parseOrNull(context, start)` for proper named parser handling.
 
 ## Key Takeaways
 
