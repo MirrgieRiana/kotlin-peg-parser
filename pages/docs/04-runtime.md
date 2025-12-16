@@ -46,7 +46,7 @@ val digit = (+Regex("[0-9]")) named "digit" map { it.value }
 val identifier = letter * (letter + digit).zeroOrMore
 
 fun main() {
-    val context = ParseContext("1abc", useCache = true)
+    val context = ParseContext("1abc", useMemoization = true)
     val result = identifier.parseOrNull(context, 0)
     
     check(result == null)  // Parsing fails
@@ -108,7 +108,7 @@ val parser = +Regex("[a-z]+") map { it.value }
 
 fun main() {
     // Cache enabled (default)
-    parser.parseAllOrThrow("hello", useCache = true)
+    parser.parseAllOrThrow("hello", useMemoization = true)
 }
 ```
 
@@ -125,7 +125,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 val parser = +Regex("[a-z]+") map { it.value }
 
 fun main() {
-    parser.parseAllOrThrow("hello", useCache = false)
+    parser.parseAllOrThrow("hello", useMemoization = false)
 }
 ```
 
@@ -168,7 +168,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 val parser = (+Regex("[a-z]+")) named "word"
 
 fun main() {
-    val context = ParseContext("123", useCache = true)
+    val context = ParseContext("123", useMemoization = true)
     val result = context.parseOrNull(parser, 0)
     
     check(result == null)  // Parsing fails
@@ -188,7 +188,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 val parser = (+Regex("[a-z]+")).optional * +Regex("[0-9]+")
 
 fun main() {
-    val context = ParseContext("123", useCache = true)
+    val context = ParseContext("123", useMemoization = true)
     val result = parser.parseOrNull(context, 0)
     // optional fails but rewinds, allowing number parser to succeed
     check(result != null)  // Succeeds
@@ -206,7 +206,7 @@ Check the test suite for observed behavior:
 - **`parseAllOrThrow`** requires full consumption, throws on failure
 - **Error context** provides `errorPosition` and `suggestedParsers`
 - **Named parsers** appear in error messages with their assigned names
-- **Memoization** is enabled by default; disable with `useCache = false`
+- **Memoization** is enabled by default; disable with `useMemoization = false`
 - **Exceptions in `map`** bubble up and abort parsing
 - **`parseOrNull`** with `ParseContext` enables detailed debugging
 
