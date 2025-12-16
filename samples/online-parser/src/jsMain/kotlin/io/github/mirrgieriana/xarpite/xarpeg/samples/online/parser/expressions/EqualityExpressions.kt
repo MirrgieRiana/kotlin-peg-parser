@@ -11,7 +11,7 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 @JsExport
-abstract class EqualityOperator(
+abstract class EqualityOperatorExpression(
     protected val left: Expression,
     protected val right: Expression,
     protected val position: SourcePosition
@@ -34,4 +34,24 @@ abstract class EqualityOperator(
 
         return Value.BooleanValue(compareValues(compareResult))
     }
+}
+
+@JsExport
+class EqualsExpression(
+    left: Expression,
+    right: Expression,
+    position: SourcePosition
+) : EqualityOperatorExpression(left, right, position) {
+    override val operatorSymbol = "=="
+    override fun compareValues(result: Boolean) = result
+}
+
+@JsExport
+class NotEqualsExpression(
+    left: Expression,
+    right: Expression,
+    position: SourcePosition
+) : EqualityOperatorExpression(left, right, position) {
+    override val operatorSymbol = "!="
+    override fun compareValues(result: Boolean) = !result
 }

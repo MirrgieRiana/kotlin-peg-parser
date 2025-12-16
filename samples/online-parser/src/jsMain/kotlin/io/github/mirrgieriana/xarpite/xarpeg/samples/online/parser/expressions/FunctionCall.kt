@@ -10,7 +10,7 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 @JsExport
-class FunctionCall(
+class FunctionCallExpression(
     private val name: String,
     private val args: List<Expression>,
     private val position: SourcePosition,

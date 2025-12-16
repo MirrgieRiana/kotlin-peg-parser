@@ -11,7 +11,7 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 @JsExport
-abstract class ComparisonOperator(
+abstract class ComparisonOperatorExpression(
     protected val left: Expression,
     protected val right: Expression,
     protected val position: SourcePosition
@@ -34,4 +34,44 @@ abstract class ComparisonOperator(
 
         return Value.BooleanValue(compare(leftVal.value, rightVal.value))
     }
+}
+
+@JsExport
+class LessThanExpression(
+    left: Expression,
+    right: Expression,
+    position: SourcePosition
+) : ComparisonOperatorExpression(left, right, position) {
+    override val operatorSymbol = "<"
+    override fun compare(leftValue: Double, rightValue: Double) = leftValue < rightValue
+}
+
+@JsExport
+class LessThanOrEqualExpression(
+    left: Expression,
+    right: Expression,
+    position: SourcePosition
+) : ComparisonOperatorExpression(left, right, position) {
+    override val operatorSymbol = "<="
+    override fun compare(leftValue: Double, rightValue: Double) = leftValue <= rightValue
+}
+
+@JsExport
+class GreaterThanExpression(
+    left: Expression,
+    right: Expression,
+    position: SourcePosition
+) : ComparisonOperatorExpression(left, right, position) {
+    override val operatorSymbol = ">"
+    override fun compare(leftValue: Double, rightValue: Double) = leftValue > rightValue
+}
+
+@JsExport
+class GreaterThanOrEqualExpression(
+    left: Expression,
+    right: Expression,
+    position: SourcePosition
+) : ComparisonOperatorExpression(left, right, position) {
+    override val operatorSymbol = ">="
+    override fun compare(leftValue: Double, rightValue: Double) = leftValue >= rightValue
 }

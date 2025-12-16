@@ -8,7 +8,7 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 @JsExport
-class Program(private val expressions: List<Expression>) : Expression {
+class ProgramExpression(private val expressions: List<Expression>) : Expression {
     override fun evaluate(ctx: EvaluationContext): Value {
         var result: Value = Value.NumberValue(0.0)
         for (expr in expressions) {

@@ -9,7 +9,7 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 @JsExport
-class Lambda(
+class LambdaExpression(
     private val params: List<String>,
     private val body: Expression,
     private val position: SourcePosition

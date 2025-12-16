@@ -15,24 +15,24 @@ import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryMinus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.zeroOrMore
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Add
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Assignment
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Divide
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Equals
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.AddExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.AssignmentExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.DivideExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.EqualsExpression
 import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Expression
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.FunctionCall
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.GreaterThan
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.GreaterThanOrEqual
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Lambda
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.LessThan
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.LessThanOrEqual
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Multiply
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.NotEquals
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.NumberLiteral
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Program
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.Subtract
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.FunctionCallExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.GreaterThanExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.GreaterThanOrEqualExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.LambdaExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.LessThanExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.LessThanOrEqualExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.MultiplyExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.NotEqualsExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.NumberLiteralExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.ProgramExpression
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.SubtractExpression
 import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.TernaryExpression
-import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.VariableReference
+import io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser.expressions.VariableReferenceExpression
 import io.github.mirrgieriana.xarpite.xarpeg.text
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
@@ -175,7 +175,7 @@ private object ExpressionGrammar {
 
     // Variable reference
     private val variableRef: Parser<Expression> = identifier map { name ->
-        VariableReference(name)
+        VariableReferenceExpression(name)
     }
 
     // Helper to parse comma-separated list of identifiers
@@ -195,7 +195,7 @@ private object ExpressionGrammar {
             val (params, bodyParser) = result.value
             val lambdaText = result.text(parseCtx)
             val position = SourcePosition(result.start, result.end, lambdaText)
-            Lambda(params, bodyParser, position)
+            LambdaExpression(params, bodyParser, position)
         })
 
     // Helper to parse comma-separated list of expressions
@@ -215,12 +215,12 @@ private object ExpressionGrammar {
             val (name, args) = result.value
             val callText = result.text(parseCtx)
             val callPosition = SourcePosition(result.start, result.end, callText)
-            FunctionCall(name, args, callPosition, parseCtx.src)
+            FunctionCallExpression(name, args, callPosition, parseCtx.src)
         })
 
     // Primary expression: number, variable reference, function call, lambda, or grouped expression
     private val primary: Parser<Expression> =
-        lambda + functionCall + variableRef + (number map { v -> NumberLiteral(v) }) +
+        lambda + functionCall + variableRef + (number map { v -> NumberLiteralExpression(v) }) +
             (-'(' * whitespace * ref { expression } * whitespace * -')')
 
     private val factor: Parser<Expression> = primary
@@ -231,7 +231,7 @@ private object ExpressionGrammar {
         val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '*' }
         val (_, rightExpr: Expression) = result.value
         val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> Multiply(left, rightExpr, opPosition) }
+        return@mapEx { left: Expression -> MultiplyExpression(left, rightExpr, opPosition) }
     }
 
     // Division operator parser
@@ -240,7 +240,7 @@ private object ExpressionGrammar {
         val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '/' }
         val (_, rightExpr: Expression) = result.value
         val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> Divide(left, rightExpr, opPosition) }
+        return@mapEx { left: Expression -> DivideExpression(left, rightExpr, opPosition) }
     }
 
     private val product: Parser<Expression> =
@@ -252,7 +252,7 @@ private object ExpressionGrammar {
         val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '+' }
         val (_, rightExpr: Expression) = result.value
         val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> Add(left, rightExpr, opPosition) }
+        return@mapEx { left: Expression -> AddExpression(left, rightExpr, opPosition) }
     }
 
     // Subtraction operator parser
@@ -261,7 +261,7 @@ private object ExpressionGrammar {
         val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '-' }
         val (_, rightExpr: Expression) = result.value
         val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> Subtract(left, rightExpr, opPosition) }
+        return@mapEx { left: Expression -> SubtractExpression(left, rightExpr, opPosition) }
     }
 
     private val sum: Parser<Expression> =
@@ -275,7 +275,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("<=")
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> LessThanOrEqual(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> LessThanOrEqualExpression(left, rightExpr, opPosition) }
         }
 
         // Greater than or equal operator parser (must come before > to match correctly)
@@ -284,7 +284,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf(">=")
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> GreaterThanOrEqual(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> GreaterThanOrEqualExpression(left, rightExpr, opPosition) }
         }
 
         // Less than operator parser
@@ -293,7 +293,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '<' }
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> LessThan(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> LessThanExpression(left, rightExpr, opPosition) }
         }
 
         // Greater than operator parser
@@ -302,7 +302,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '>' }
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> GreaterThan(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> GreaterThanExpression(left, rightExpr, opPosition) }
         }
 
         val restItem = lessEqualOp + greaterEqualOp + lessOp + greaterOp
@@ -318,7 +318,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("==")
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> Equals(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> EqualsExpression(left, rightExpr, opPosition) }
         }
 
         // Inequality operator parser
@@ -327,7 +327,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("!=")
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> NotEquals(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> NotEqualsExpression(left, rightExpr, opPosition) }
         }
 
         val restItem = equalOp + notEqualOp
@@ -351,7 +351,7 @@ private object ExpressionGrammar {
     // Assignment: variable = expression
     private val assignment: Parser<Expression> = run {
         ((identifier * whitespace * -'=' * whitespace * ref { expression }) map { (name, valueExpr) ->
-            Assignment(name, valueExpr)
+            AssignmentExpression(name, valueExpr)
         }) + ternary
     }
 
@@ -362,7 +362,7 @@ private object ExpressionGrammar {
     val program: Parser<Expression> = run {
         val newlineSep = -Regex("[ \\t]*\\r?\\n[ \\t\\r\\n]*")
         ((expression * (newlineSep * expression).zeroOrMore) map { (first, rest) ->
-            Program(listOf(first) + rest)
+            ProgramExpression(listOf(first) + rest)
         })
     }
 
@@ -374,7 +374,7 @@ private object ExpressionGrammar {
 fun parseExpression(input: String): String {
     return try {
         // Reset function call counter for each evaluation to ensure each call is independent
-        FunctionCall.functionCallCount = 0
+        FunctionCallExpression.functionCallCount = 0
 
         // Create initial evaluation context with empty call stack, source code, and fresh variable table
         val initialContext = EvaluationContext(sourceCode = input)

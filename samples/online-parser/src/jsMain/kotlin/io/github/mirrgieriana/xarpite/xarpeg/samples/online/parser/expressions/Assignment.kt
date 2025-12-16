@@ -8,7 +8,7 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 @JsExport
-class Assignment(
+class AssignmentExpression(
     private val name: String,
     private val valueExpression: Expression
 ) : Expression {
