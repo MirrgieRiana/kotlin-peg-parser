@@ -37,7 +37,31 @@ Both exceptions provide a `context` property for detailed error information.
 
 `ParseContext` tracks parsing failures to help build user-friendly error messages:
 
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
+val letter = (+Regex("[a-z]")) named "letter" map { it.value }
+val digit = (+Regex("[0-9]")) named "digit" map { it.value }
+val identifier = letter * (letter + digit).zeroOrMore
+
+fun main() {
+    try {
+        identifier.parseAllOrThrow("1abc")
+    } catch (e: UnmatchedInputParseException) {
+        // Access error context from exception
+        check(e.context.errorPosition == 0)  // Failed at position 0
+        
+        val expected = e.context.suggestedParsers
+            .mapNotNull { it.name }
+            .distinct()
+            .sorted()
+            .joinToString(", ")
+        
+        check(expected == "letter")  // Expected "letter"
+    }
+}
+```
 
 ### Error Tracking Properties
 
@@ -134,17 +158,42 @@ Validate before mapping or catch and wrap errors when recovery is needed.
 
 ## Debugging Tips
 
-### Use `parseOrNull` Directly
+### Inspect Error Details from Exceptions
 
-Work with `ParseContext` directly to inspect error details:
+Access error context from parse exceptions:
 
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
+val parser = (+Regex("[a-z]+")) named "word"
+
+fun main() {
+    try {
+        parser.parseAllOrThrow("123")
+    } catch (e: UnmatchedInputParseException) {
+        check(e.context.errorPosition == 0)  // Error at position 0
+        check(e.context.suggestedParsers.any { it.name == "word" })  // Suggests "word"
+    }
+}
+```
 
 ### Check Rewind Behavior
 
 Confirm how `optional` and `zeroOrMore` rewind on failure:
 
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
+val parser = (+Regex("[a-z]+")).optional * +Regex("[0-9]+")
+
+fun main() {
+    // optional fails but rewinds, allowing number parser to succeed
+    val result = parser.parseAllOrThrow("123")
+    check(result != null)  // Succeeds
+}
+```
 
 ### Use Tests as Reference
 

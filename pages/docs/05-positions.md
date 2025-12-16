@@ -122,6 +122,8 @@ fun <T : Any> Parser<T>.withPos(): Parser<Token> = this mapEx { ctx, result ->
 fun main() {
     val word = +Regex("[a-z]+") map { it.value }
     val wordWithPos = word.withPos()
+    
+    // Parse tracks position in input
     val result = wordWithPos.parseAllOrThrow("hello")
     check(result == Token("hello", 1, 1))
 }

@@ -113,6 +113,19 @@ fun main() {
 
 `startOfInput` and `endOfInput` match at position boundaries without consuming input:
 
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+val word = +Regex("[a-z]+") map { it.value }
+
+fun main() {
+    // Matches at start of input
+    val atStart = (startOfInput * word).parseAllOrThrow("hello")
+    check(atStart == "hello")  // Succeeds
+}
+```
+
 **Note:** When using `parseAllOrThrow`, boundary checks are redundant—it already verifies the entire input is consumed. Use these parsers with `parseOrNull` or within sub-grammars.
 
 ## Naming Parsers
@@ -141,6 +154,34 @@ fun main() {
 ### Named Composite Parsers
 
 Named composite parsers hide constituent parsers from error suggestions:
+
+```kotlin
+import io.github.mirrgieriana.xarpite.xarpeg.*
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
+
+fun main() {
+    val parserA = (+'a') named "letter_a"
+    val parserB = (+'b') named "letter_b"
+    
+    // Named composite: only "ab_sequence" in errors
+    val namedComposite = (parserA * parserB) named "ab_sequence"
+    
+    // Unnamed composite: "letter_a" in errors
+    val unnamedComposite = parserA * parserB
+    
+    try {
+        namedComposite.parseAllOrThrow("c")
+    } catch (e: UnmatchedInputParseException) {
+        check(e.context.suggestedParsers.mapNotNull { it.name }.contains("ab_sequence"))
+    }
+    
+    try {
+        unnamedComposite.parseAllOrThrow("c")
+    } catch (e: UnmatchedInputParseException) {
+        check(e.context.suggestedParsers.mapNotNull { it.name }.contains("letter_a"))
+    }
+}
+```
 
 **Best practice:** Name composite parsers for semantic errors ("Expected: identifier") and leave components unnamed for detailed token-level errors during development.
 
