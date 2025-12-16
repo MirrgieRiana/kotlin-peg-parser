@@ -14,9 +14,6 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     version.set("1.3.1")
     android.set(false)
     outputColorName.set("RED")
-    filter {
-        exclude("**/generated/**")
-    }
 }
 
 dependencies {
@@ -245,9 +242,13 @@ tasks.named("build") {
     dependsOn("ktlintFormat")
 }
 
-// Make ktlint tasks depend on generateSrc and disable check tasks for generated sources
-tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask> {
+// Make ktlint format tasks depend on generateSrc
+tasks.matching { it.name.startsWith("runKtlintFormat") }.configureEach {
     dependsOn("generateSrc")
-    // Disable check tasks because generated sources may have formatting issues from markdown
-    enabled = false
+}
+
+// Make ktlint check tasks depend on generateSrc and format
+tasks.matching { it.name.startsWith("runKtlintCheck") }.configureEach {
+    dependsOn("generateSrc")
+    mustRunAfter(tasks.matching { it.name.startsWith("runKtlintFormat") })
 }
