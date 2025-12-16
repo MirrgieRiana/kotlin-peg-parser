@@ -372,15 +372,11 @@ private object ExpressionGrammar {
 }
 
 // Format a ParseException with detailed syntax error information
-private fun formatParseException(e: Exception, input: String): String {
+private fun formatParseException(e: ParseException, input: String): String {
     val sb = StringBuilder()
 
-    // Try to extract position information
-    val position = try {
-        (e as? ParseException)?.position ?: 0
-    } catch (ex: Exception) {
-        0
-    }
+    // Extract position information
+    val position = (e as? ParseException)?.position ?: 0
 
     // Calculate line and column numbers
     val beforePosition = input.substring(0, position.coerceAtMost(input.length))
@@ -428,12 +424,10 @@ fun parseExpression(input: String): String {
         } else {
             "Error: ${e.message}"
         }
+    } catch (e: ParseException) {
+        // Format parse exceptions with detailed syntax error information
+        formatParseException(e, input)
     } catch (e: Exception) {
-        // Check if it's a parse exception and format it accordingly
-        if (e::class.simpleName?.contains("ParseException") == true) {
-            formatParseException(e, input)
-        } else {
-            "Error: ${e.message}"
-        }
+        "Error: ${e.message}"
     }
 }
