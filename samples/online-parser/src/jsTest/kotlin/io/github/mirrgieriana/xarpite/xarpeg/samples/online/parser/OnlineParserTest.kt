@@ -534,7 +534,7 @@ class OnlineParserTest {
         // The error should show line 3 for func2 call and line 2 for func1 call
         assertTrue(result.contains("line 3") || result.contains("line 2"))
     }
-    
+
     @Test
     fun divisionErrorShowsOperatorRangeWithContext() {
         // Test that division by zero error shows the operator range with full line context
@@ -548,7 +548,7 @@ class OnlineParserTest {
         // Should show division operator
         assertTrue(result.contains("/"))
     }
-    
+
     @Test
     fun stackTraceShowsHighlightedRange() {
         // Test that stack trace shows the full source line with highlighted problem range
@@ -564,7 +564,7 @@ class OnlineParserTest {
         // The stack trace line should show the operator with highlighting
         assertTrue(stackLine!!.contains("[") && stackLine.contains("]"))
     }
-    
+
     @Test
     fun errorRangeDoesNotIncludeLeadingWhitespace() {
         // Test that the error range starts at the operator, not before it
