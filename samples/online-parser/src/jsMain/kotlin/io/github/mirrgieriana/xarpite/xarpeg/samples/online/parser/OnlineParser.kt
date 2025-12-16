@@ -3,6 +3,7 @@
 package io.github.mirrgieriana.xarpite.xarpeg.samples.online.parser
 
 import io.github.mirrgieriana.xarpite.xarpeg.ParseContext
+import io.github.mirrgieriana.xarpite.xarpeg.ParseException
 import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
 import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
@@ -370,6 +371,43 @@ private object ExpressionGrammar {
     val programRoot = whitespace * program * whitespace
 }
 
+// Format a ParseException with detailed syntax error information
+private fun formatParseException(e: Exception, input: String): String {
+    val sb = StringBuilder()
+
+    // Try to extract position information
+    val position = try {
+        (e as? ParseException)?.position ?: 0
+    } catch (ex: Exception) {
+        0
+    }
+
+    // Calculate line and column numbers
+    val beforePosition = input.substring(0, position.coerceAtMost(input.length))
+    val line = beforePosition.count { it == '\n' } + 1
+    val column = position - (beforePosition.lastIndexOf('\n') + 1) + 1
+
+    // Build error message
+    sb.append("Error: Syntax error at line $line, column $column")
+
+    // Show the line with error indicator
+    val lineStart = beforePosition.lastIndexOf('\n') + 1
+    val lineEnd = input.indexOf('\n', position).let { if (it == -1) input.length else it }
+    val sourceLine = input.substring(lineStart, lineEnd)
+
+    if (sourceLine.isNotEmpty()) {
+        sb.append("\n")
+        sb.append(sourceLine)
+        sb.append("\n")
+        // Add caret pointing to the error position
+        val caretPosition = position - lineStart
+        sb.append(" ".repeat(caretPosition.coerceAtLeast(0)))
+        sb.append("^")
+    }
+
+    return sb.toString()
+}
+
 @JsExport
 fun parseExpression(input: String): String {
     return try {
@@ -391,6 +429,11 @@ fun parseExpression(input: String): String {
             "Error: ${e.message}"
         }
     } catch (e: Exception) {
-        "Error: ${e.message}"
+        // Check if it's a parse exception and format it accordingly
+        if (e::class.simpleName?.contains("ParseException") == true) {
+            formatParseException(e, input)
+        } else {
+            "Error: ${e.message}"
+        }
     }
 }
