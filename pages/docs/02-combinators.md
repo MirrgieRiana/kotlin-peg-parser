@@ -169,11 +169,13 @@ fun main() {
     
     val result1 = namedComposite.parseAll("c")
     val exception1 = result1.exceptionOrNull() as? UnmatchedInputParseException
-    check(exception1?.context?.suggestedParsers?.mapNotNull { it.name }?.contains("ab_sequence") == true)
+    val names1 = exception1?.context?.suggestedParsers?.mapNotNull { it.name } ?: emptyList()
+    check(names1.contains("ab_sequence"))
     
     val result2 = unnamedComposite.parseAll("c")
     val exception2 = result2.exceptionOrNull() as? UnmatchedInputParseException
-    check(exception2?.context?.suggestedParsers?.mapNotNull { it.name }?.contains("letter_a") == true)
+    val names2 = exception2?.context?.suggestedParsers?.mapNotNull { it.name } ?: emptyList()
+    check(names2.contains("letter_a"))
 }
 ```
 
