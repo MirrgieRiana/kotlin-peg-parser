@@ -21,7 +21,8 @@ class ParseContext(val src: String, val useMemoization: Boolean) {
         val result = if (useMemoization) {
             val key = Pair(parser, start)
             if (key in memo) {
-                return memo[key] as ParseResult<T>?
+                @Suppress("UNCHECKED_CAST")
+                memo[key] as ParseResult<T>?
             } else {
                 val result = if (!isInNamedParser && parser.name != null) {
                     isInNamedParser = true
@@ -37,8 +38,11 @@ class ParseContext(val src: String, val useMemoization: Boolean) {
         } else {
             if (!isInNamedParser && parser.name != null) {
                 isInNamedParser = true
-                val result = parser.parseOrNull(this, start)
-                isInNamedParser = false
+                val result = try {
+                    parser.parseOrNull(this, start)
+                } finally {
+                    isInNamedParser = false
+                }
                 result
             } else {
                 parser.parseOrNull(this, start)
@@ -72,7 +76,7 @@ fun <T : Any> Parser<T>.parseAllOrNull(src: String, useMemoization: Boolean = tr
 
 fun <T : Any> Parser<T>.parseAll(src: String, useMemoization: Boolean = true): Result<T> {
     val context = ParseContext(src, useMemoization)
-    val result = this.parseOrNull(context, 0) ?: return Result.failure(UnmatchedInputParseException("Failed to parse.", context, 0))
+    val result = context.parseOrNull(this, 0) ?: return Result.failure(UnmatchedInputParseException("Failed to parse.", context, 0))
     if (result.end != src.length) {
         val string = src.drop(result.end).truncate(10, "...").escapeDoubleQuote()
         return Result.failure(ExtraCharactersParseException("""Extra characters found after position ${result.end}: "$string"""", context, result.end))
