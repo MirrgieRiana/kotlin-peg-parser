@@ -53,7 +53,7 @@ private object ArithmeticParser {
     // Multiplication and division (higher precedence)
     val product: Parser<LazyValue> = leftAssociative(
         primary,
-        (+'*' mapEx { _, r -> OperatorInfo(r.start, '*') } named "multiply") + (+'/' mapEx { _, r -> OperatorInfo(r.start, '/') } named "divide")
+        (+'*' mapEx { _, r -> OperatorInfo(r.start, '*') }) + (+'/' mapEx { _, r -> OperatorInfo(r.start, '/') })
     ) { a, op, b ->
         when (op.op) {
             '*' -> LazyValue(op.position) { a.compute() * b.compute() }
@@ -74,7 +74,7 @@ private object ArithmeticParser {
     }
 
     // Addition and subtraction (lower precedence)
-    val sum: Parser<LazyValue> = leftAssociative(product, ((+'+') named "plus") + ((+'-') named "minus")) { a, op, b ->
+    val sum: Parser<LazyValue> = leftAssociative(product, +'+' + +'-') { a, op, b ->
         when (op) {
             '+' -> LazyValue(a.position) { a.compute() + b.compute() }
             '-' -> LazyValue(a.position) { a.compute() - b.compute() }

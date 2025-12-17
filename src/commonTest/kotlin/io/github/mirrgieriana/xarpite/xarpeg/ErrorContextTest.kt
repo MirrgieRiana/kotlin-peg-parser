@@ -145,9 +145,9 @@ class ErrorContextTest {
     fun errorContextWithComplexGrammar() {
         // Complex grammar example with multiple alternatives
         val number = (+Regex("[0-9]+")) named "number" map { it.value.toInt() }
-        val lparen = (+'(') named "left_paren"
-        val rparen = (+')') named "right_paren"
-        val plus = (+'+') named "plus"
+        val lparen = +'('
+        val rparen = +')'
+        val plus = +'+'
 
         // Simplified expression: number or (number + number)
         val simple = number

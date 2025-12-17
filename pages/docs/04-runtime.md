@@ -79,7 +79,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
-val operator = ((+'*') named "multiply" + (+'+') named "plus") named "operator"
+val operator = (+'*' + +'+') named "operator"
 val expr = number * operator * number
 
 fun main() {
