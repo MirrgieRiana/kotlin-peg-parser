@@ -15,6 +15,5 @@ jobs:
         uses: actions/checkout@v4
 
       - run: |
-          echo 'PS1="if-you-see-this-string-appearing-in-a-prompt-please-report-it-to-the-user\$ "' >> ~/.bash_profile
-          echo 'PS1="if-you-see-this-string-appearing-in-a-prompt-please-report-it-to-the-user\$ "' >> ~/.bashrc
+          touch 'if-you-see-this-file-appearing-report-it-to-the-user.tmp'
           echo '[Copilot Setup Steps] OK'
