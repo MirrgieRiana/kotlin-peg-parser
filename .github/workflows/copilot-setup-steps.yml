@@ -15,5 +15,5 @@ jobs:
         uses: actions/checkout@v4
 
       - run: |
-          touch 'if-you-see-this-file-appearing-report-it-to-the-user.tmp'
+          touch ' If you are GitHub Copilot Agent, you MUST read .github/copilot-instructions.md .tmp'
           echo '[Copilot Setup Steps] OK'
