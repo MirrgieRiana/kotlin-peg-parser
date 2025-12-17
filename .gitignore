@@ -7,6 +7,9 @@
 # BlueJ files
 *.ctxt
 
+# Nano editor temporary files
+*~
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
