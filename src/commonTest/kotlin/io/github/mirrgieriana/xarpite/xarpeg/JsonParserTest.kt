@@ -1,6 +1,7 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.named
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.optional
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.plus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
@@ -39,7 +40,7 @@ class JsonParserTest {
 
     companion object {
         // Whitespace parser
-        private val ws = +Regex("[ \t\r\n]*") named "whitespace"  // No map, so stays as is
+        private val ws = +Regex("[ \t\r\n]*")
 
         // Helper to wrap parsers with optional whitespace
         private fun <T : Any> Parser<T>.trimmed(): Parser<T> = -ws * this * -ws

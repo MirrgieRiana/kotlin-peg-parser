@@ -4,6 +4,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.named
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.plus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
