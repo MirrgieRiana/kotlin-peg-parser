@@ -3,10 +3,10 @@ import build_logic.getTupleParserSrc
 import build_logic.getTupleSrc
 
 plugins {
-    kotlin("multiplatform") version "2.2.20"
+    kotlin("multiplatform") version "1.9.21"
     id("maven-publish")
     id("org.jetbrains.dokka") version "2.0.0"
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("io.gitlab.arturbosch.detekt") version "1.23.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
     id("build-logic")
 }
@@ -43,6 +43,11 @@ repositories {
 kotlin {
     // JVM target
     jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+        }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
@@ -55,7 +60,8 @@ kotlin {
     }
 
     // WASM target for JavaScript
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    // Note: Removed @OptIn(ExperimentalWasmDsl) for Kotlin 1.9.20 compatibility
+    // The annotation class doesn't exist in this version, though WASM is experimental
     wasmJs {
         binaries.executable()
         nodejs()
