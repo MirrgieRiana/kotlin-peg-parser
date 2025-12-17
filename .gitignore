@@ -39,3 +39,8 @@ src/generated/
 # Kotlin/JS
 kotlin-js-store/
 node_modules/
+
+# Nano editor temporary files
+*~
+*.save
+*.swp
