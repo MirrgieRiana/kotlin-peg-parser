@@ -76,7 +76,7 @@ class NamedParserTest {
 
     @Test
     fun namedParserWithOptional() {
-        val parser = ((+'a') named "letter_a").optional
+        val parser = (+'a' named "letter_a").optional
         val result1 = parser.parseAllOrThrow("a")
         assertNotNull(result1.a)
         assertEquals('a', result1.a)
@@ -87,7 +87,7 @@ class NamedParserTest {
 
     @Test
     fun namedParserWithRepetition() {
-        val parser = ((+'a') named "letter_a").oneOrMore
+        val parser = (+'a' named "letter_a").oneOrMore
         val result = parser.parseAllOrThrow("aaa")
         assertEquals(listOf('a', 'a', 'a'), result)
     }
@@ -106,7 +106,7 @@ class NamedParserTest {
 
     @Test
     fun namedParserWithLookAhead() {
-        val parser = ((+'a') named "letter_a").lookAhead
+        val parser = (+'a' named "letter_a").lookAhead
         val context = ParseContext("a", useMemoization = true)
         val result = parser.parseOrNull(context, 0)
         assertNotNull(result)
@@ -117,7 +117,7 @@ class NamedParserTest {
 
     @Test
     fun namedParserWithNegativeLookAhead() {
-        val parser = ((+'a') named "letter_a").negativeLookAhead
+        val parser = (+'a' named "letter_a").negativeLookAhead
         val context1 = ParseContext("b", useMemoization = true)
         val result1 = parser.parseOrNull(context1, 0)
         assertNotNull(result1)
