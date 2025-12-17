@@ -1,4 +1,4 @@
-package io.github.mirrgieriana.xarpite.xarpeg.impl
+package io.github.mirrgieriana.xarpite.xarpeg.internal
 
 internal fun String.truncate(maxLength: Int, ellipsis: String): String {
     if (maxLength < 0) return ""

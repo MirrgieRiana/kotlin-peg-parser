@@ -1,7 +1,7 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
-import io.github.mirrgieriana.xarpite.xarpeg.impl.escapeDoubleQuote
-import io.github.mirrgieriana.xarpite.xarpeg.impl.truncate
+import io.github.mirrgieriana.xarpite.xarpeg.internal.escapeDoubleQuote
+import io.github.mirrgieriana.xarpite.xarpeg.internal.truncate
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.normalize
 
 fun interface Parser<out T : Any> {

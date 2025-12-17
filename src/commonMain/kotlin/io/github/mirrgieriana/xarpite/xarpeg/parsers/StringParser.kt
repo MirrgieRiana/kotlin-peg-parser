@@ -5,7 +5,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.ParseResult
 import io.github.mirrgieriana.xarpite.xarpeg.Parser
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple0
 import io.github.mirrgieriana.xarpite.xarpeg.Tuple1
-import io.github.mirrgieriana.xarpite.xarpeg.impl.escapeDoubleQuote
+import io.github.mirrgieriana.xarpite.xarpeg.internal.escapeDoubleQuote
 import io.github.mirrgieriana.xarpite.xarpeg.isNative
 
 class StringParser(val string: String) : Parser<String> {
