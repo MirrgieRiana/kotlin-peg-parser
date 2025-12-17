@@ -15,12 +15,13 @@ data class ParseResult<out T : Any>(val value: T, val start: Int, val end: Int)
 
 fun ParseResult<*>.text(context: ParseContext) = context.src.substring(this.start, this.end).normalize()
 
-open class ParseException(message: String, val context: ParseContext, val position: Int) : Exception(message)
 
+open class ParseException(message: String, val context: ParseContext, val position: Int) : Exception(message)
 
 class UnmatchedInputParseException(message: String, context: ParseContext, position: Int) : ParseException(message, context, position)
 
 class ExtraCharactersParseException(message: String, context: ParseContext, position: Int) : ParseException(message, context, position)
+
 
 fun <T : Any> Parser<T>.parseAllOrThrow(src: String, useMemoization: Boolean = true) = this.parseAll(src, useMemoization).getOrThrow()
 
