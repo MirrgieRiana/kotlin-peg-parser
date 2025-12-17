@@ -8,7 +8,7 @@ class SerialParser<out T : Any>(val parsers: List<Parser<T>>) : Parser<List<T>> 
     override fun parseOrNull(context: ParseContext, start: Int): ParseResult<List<T>>? {
         val results = mutableListOf<T>()
         var nextIndex = start
-        for (parser in parsers) {
+        parsers.forEach { parser ->
             val result = context.parseOrNull(parser, nextIndex) ?: return null
             results += result.value
             nextIndex = result.end

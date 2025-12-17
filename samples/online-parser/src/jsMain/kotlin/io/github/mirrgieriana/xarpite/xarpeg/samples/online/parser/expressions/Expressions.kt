@@ -42,7 +42,7 @@ class LambdaExpression(private val params: List<String>, private val body: Expre
 class ProgramExpression(private val expressions: List<Expression>) : Expression {
     override fun evaluate(ctx: EvaluationContext): Value {
         var result: Value = Value.NumberValue(0.0)
-        for (expr in expressions) {
+        expressions.forEach { expr ->
             result = expr.evaluate(ctx)
         }
         return result
