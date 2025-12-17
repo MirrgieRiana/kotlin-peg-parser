@@ -18,6 +18,8 @@ If you are acting on an issue or pull request, the user who created that issue o
 
 If you are acting in a space created by an AI, the user who provided the original prompt to that AI is your intended recipient.
 
+If you are managing an issue or pull request, any associated natural-language text must also follow this rule.
+
 ### Conversational Responses
 
 Before you finish working on a pull request, you must send a response message to the user with a summary of your work.
