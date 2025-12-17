@@ -23,11 +23,11 @@ Who to Follow
 - When acting in a space managed by a human, you must follow that person’s natural-language.
 - When acting in a space managed by an AI, you must follow the natural-language of the human who provided the prompt to that AI.
 
-If you find existing natural-language text that violates this rule, you must fix it immediately.
+If you find existing natural-language text that violates this rule, you must fix it immediately. In particular, you must keep in mind that a AI ​​will always initialize the pull request title and description in English ignoring the natural-language of the original prompt and the original issue.
 
 ### Conversational Responses
 
-Before you finish working on a pull request, you must send a response message to the user with a summary of your work.
+Before you finish working on a pull request, you must explain the your work in the pull request.
 
 ### Declaration of Compliance with this Instructions
 
