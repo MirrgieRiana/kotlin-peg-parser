@@ -4,9 +4,18 @@ import io.github.mirrgieriana.xarpite.xarpeg.internal.escapeDoubleQuote
 import io.github.mirrgieriana.xarpite.xarpeg.internal.truncate
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.normalize
 
-fun interface Parser<out T : Any> {
+// fun interfaceにすると1.9.21/jvmで不正なname-getterを持つクラスが生成されてバグる
+interface Parser<out T : Any> {
     fun parseOrNull(context: ParseContext, start: Int): ParseResult<T>?
     val name: String? get() = null
+}
+
+inline fun <T : Any> Parser(crossinline block: (context: ParseContext, start: Int) -> ParseResult<T>?): Parser<T> {
+    return object : Parser<T> {
+        override fun parseOrNull(context: ParseContext, start: Int): ParseResult<T>? {
+            return block(context, start)
+        }
+    }
 }
 
 val Parser<*>.nameOrString get() = this.name ?: this.toString()
