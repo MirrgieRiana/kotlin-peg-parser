@@ -11,57 +11,6 @@ fun interface Parser<out T : Any> {
 
 val Parser<*>.nameOrString get() = this.name ?: this.toString()
 
-class ParseContext(val src: String, val useMemoization: Boolean) {
-    private val memo = mutableMapOf<Pair<Parser<*>, Int>, ParseResult<Any>?>()
-    var isInNamedParser = false
-    var errorPosition: Int = 0
-    val suggestedParsers = mutableSetOf<Parser<*>>()
-
-    fun <T : Any> parseOrNull(parser: Parser<T>, start: Int): ParseResult<T>? {
-        val result = if (useMemoization) {
-            val key = Pair(parser, start)
-            if (key in memo) {
-                @Suppress("UNCHECKED_CAST")
-                memo[key] as ParseResult<T>?
-            } else {
-                val result = if (!isInNamedParser && parser.name != null) {
-                    isInNamedParser = true
-                    val result = try {
-                        parser.parseOrNull(this, start)
-                    } finally {
-                        isInNamedParser = false
-                    }
-                    result
-                } else {
-                    parser.parseOrNull(this, start)
-                }
-                memo[key] = result
-                result
-            }
-        } else {
-            if (!isInNamedParser && parser.name != null) {
-                isInNamedParser = true
-                val result = try {
-                    parser.parseOrNull(this, start)
-                } finally {
-                    isInNamedParser = false
-                }
-                result
-            } else {
-                parser.parseOrNull(this, start)
-            }
-        }
-        if (result == null && !isInNamedParser && start >= errorPosition) {
-            if (start > errorPosition) {
-                errorPosition = start
-                suggestedParsers.clear()
-            }
-            suggestedParsers += parser
-        }
-        return result
-    }
-}
-
 data class ParseResult<out T : Any>(val value: T, val start: Int, val end: Int)
 
 fun ParseResult<*>.text(context: ParseContext) = context.src.substring(this.start, this.end).normalize()
