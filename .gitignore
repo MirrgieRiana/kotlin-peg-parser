@@ -4,6 +4,9 @@
 # Log file
 *.log
 
+# Nano editor backup files
+*~
+
 # BlueJ files
 *.ctxt
 
