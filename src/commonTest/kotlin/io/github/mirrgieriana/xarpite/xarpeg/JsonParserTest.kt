@@ -39,7 +39,7 @@ class JsonParserTest {
 
     companion object {
         // Whitespace parser
-        private val ws = +Regex("[ \t\r\n]*")
+        private val ws = +Regex("[ \t\r\n]*") named "whitespace"
 
         // Helper to wrap parsers with optional whitespace
         private fun <T : Any> Parser<T>.trimmed(): Parser<T> = -ws * this * -ws
@@ -68,7 +68,7 @@ class JsonParserTest {
             val escapeN = +'n' map { "\n" }
             val escapeR = +'r' map { "\r" }
             val escapeT = +'t' map { "\t" }
-            val escapeUnicode = +'u' * +Regex("[0-9a-fA-F]{4}") map { (_, hex) ->
+            val escapeUnicode = +'u' * +Regex("[0-9a-fA-F]{4}") named "unicode_hex" map { (_, hex) ->
                 hex.value.toInt(16).toChar().toString()
             }
             val escape = +'\\' * (
@@ -78,7 +78,7 @@ class JsonParserTest {
                 ) map { (_, str) -> str }
 
             // Regular characters (not backslash or quote)
-            val charContent = +Regex("[^\\\\\"]+") map { it.value }
+            val charContent = +Regex("[^\\\\\"]+") named "string_content" map { it.value }
 
             // String content is a sequence of escape sequences or regular characters
             val stringContent = (escape + charContent).zeroOrMore map { chars ->
@@ -91,7 +91,7 @@ class JsonParserTest {
 
         // JSON number parser (supports integers and floating-point)
         private val jsonNumber: Parser<JsonValue.JsonNumber> =
-            +Regex("-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?") map { match ->
+            +Regex("-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?") named "number" map { match ->
                 JsonValue.JsonNumber(match.value.toDouble())
             }
 

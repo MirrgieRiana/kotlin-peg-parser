@@ -36,7 +36,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 val expr: Parser<Int> = object {
-    val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
+    val number = +Regex("[0-9]+") named "number" map { it.value.toInt() }
     val brackets: Parser<Int> = -'(' * ref { root } * -')'
     val factor = number + brackets
     val mul = leftAssociative(factor, -'*') { a, _, b -> a * b }
@@ -57,6 +57,11 @@ fun main() {
 - `named` improves error messages
 - `ref { }` enables recursive grammars
 - `leftAssociative` handles operator precedence without manual recursion
+
+**Best practices:**
+- Use `+'x'` for single characters, not `+"x"`
+- Use `+"xyz"` for fixed strings, not `+Regex("xyz")`
+- Always use `named` with `Regex` parsers for better error messages
 
 > 💡 **New to parser combinators?** Start with our [step-by-step tutorial](#-learn-xarpeg-step-by-step)!
 

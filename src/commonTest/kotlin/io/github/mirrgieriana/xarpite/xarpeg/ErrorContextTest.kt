@@ -52,7 +52,7 @@ class ErrorContextTest {
     fun errorPositionWithSequence() {
         // In sequences, errorPosition shows the furthest position reached
         val hello = +"hello"
-        val space = +" "
+        val space = +' '
         val world = +"world"
         val parser = hello * space * world
 
@@ -109,7 +109,7 @@ class ErrorContextTest {
         // suggestedParsers only contains parsers that failed at the errorPosition
         // When a sequence partially matches, the error position advances
         val hello = (+"hello") named "hello"
-        val space = +" "
+        val space = +' '
         val world = (+"world") named "world"
         val parser = hello * space * world
 
@@ -237,7 +237,7 @@ class ErrorContextTest {
         val world = (+"world") named "farewell"
 
         // Test with partial match advancing error position
-        val parser = hello * +" " * world
+        val parser = hello * +' ' * world
 
         val context1 = ParseContext("hello test", useMemoization = true)
         parser.parseOrNull(context1, 0)

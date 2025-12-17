@@ -15,8 +15,8 @@ Let's build a simple key-value parser that matches patterns like `count=42`:
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val identifier = +Regex("[a-zA-Z][a-zA-Z0-9_]*") map { it.value } named "identifier"
-val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
+val identifier = +Regex("[a-zA-Z][a-zA-Z0-9_]*") named "identifier" map { it.value }
+val number = +Regex("[0-9]+") named "number" map { it.value.toInt() }
 val kv: Parser<Pair<String, Int>> =
     identifier * -'=' * number map { (key, value) -> key to value }
 
@@ -51,8 +51,8 @@ fun main() {
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val identifier = +Regex("[a-zA-Z][a-zA-Z0-9_]*") map { it.value } named "identifier"
-val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
+val identifier = +Regex("[a-zA-Z][a-zA-Z0-9_]*") named "identifier" map { it.value }
+val number = +Regex("[0-9]+") named "number" map { it.value.toInt() }
 val kv: Parser<Pair<String, Int>> =
     identifier * -'=' * number map { (key, value) -> key to value }
 
@@ -80,6 +80,28 @@ fun main() {
 - **`map`** transforms parsed values to your domain types
 - **`named`** improves error messages
 - **`parseAllOrThrow`** parses complete input or throws exceptions
+
+## Best Practices
+
+When choosing parser types, follow these guidelines for optimal performance and clarity:
+
+**Use Char tokens for single characters:**
+- Good: `+'x'` - efficient character matching
+- Bad: `+"x"` - unnecessary string overhead
+- Bad: `+Regex("x")` - regex overhead for fixed character
+
+**Use String tokens for fixed strings:**
+- Good: `+"xyz"` - efficient string matching  
+- Bad: `+Regex("xyz")` - regex overhead for fixed strings
+
+**Use Regex tokens with `named` for patterns:**
+- Good: `+Regex("[0-9]+") named "number"` - named regex gives clear error messages
+- Bad: `+Regex("[0-9]+")` - unnamed regex gives poor error messages
+
+**Summary:**
+- Single character → use `+'x'`, not `+"x"` or `+Regex("x")`
+- Fixed string → use `+"xyz"`, not `+Regex("xyz")`
+- Pattern/variable content → use `+Regex("...") named "name"`
 
 ## Next Steps
 
