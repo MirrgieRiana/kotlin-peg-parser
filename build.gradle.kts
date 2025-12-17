@@ -72,12 +72,10 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            kotlin.srcDir("src/importedMain/kotlin")
             kotlin.srcDir("src/generated/kotlin")
         }
 
         val commonTest by getting {
-            kotlin.srcDir("src/importedTest/kotlin")
             dependencies {
                 implementation(kotlin("test"))
             }
@@ -195,9 +193,7 @@ detekt {
         "src/jvmMain/kotlin",
         "src/jvmTest/kotlin",
         "src/jsMain/kotlin",
-        "src/jsTest/kotlin",
-        "src/importedMain/kotlin",
-        "src/importedTest/kotlin"
+        "src/jsTest/kotlin"
     )
 }
 

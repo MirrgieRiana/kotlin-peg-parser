@@ -36,8 +36,6 @@ For **complete verification** before submitting changes, run the full test suite
 
 - `src/commonMain/` - Common Kotlin code for all platforms
 - `src/commonTest/` - Common tests for all platforms
-- `src/importedMain/` - Core parser implementation
-- `src/importedTest/` - Core parser tests
 - `pages/docs/` - Tutorial documentation (published to GitHub Pages)
 - `samples/` - Example applications
 
