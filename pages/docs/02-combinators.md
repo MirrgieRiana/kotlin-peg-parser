@@ -33,7 +33,7 @@ fun main() {
 import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
-val sign = ((+'+') map { '+' }) + ((+'-') map { '-' })
+val sign = (+'+' map { '+' }) + (+'-' map { '-' })
 val signOpt = sign.optional map { it.a ?: '+' }
 val unsigned = +Regex("[0-9]+") map { it.value.toInt() } named "number"
 val signedInt = signOpt * unsigned map { (s, value) ->
@@ -161,8 +161,8 @@ import io.github.mirrgieriana.xarpite.xarpeg.*
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.*
 
 fun main() {
-    val parserA = (+'a') named "letter_a"
-    val parserB = (+'b') named "letter_b"
+    val parserA = +'a' named "letter_a"
+    val parserB = +'b' named "letter_b"
     
     // Named composite: only "ab_sequence" in errors
     val namedComposite = (parserA * parserB) named "ab_sequence"
