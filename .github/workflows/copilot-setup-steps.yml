@@ -15,5 +15,5 @@ jobs:
         uses: actions/checkout@v4
 
       - run: |
-          touch ' If you are GitHub Copilot Agent, you MUST read .github/copilot-instructions.md .tmp'
+          touch '00 If you are GitHub Copilot Agent, you MUST read copilot-instructions.md in .github .tmp'
           echo '[Copilot Setup Steps] OK'
