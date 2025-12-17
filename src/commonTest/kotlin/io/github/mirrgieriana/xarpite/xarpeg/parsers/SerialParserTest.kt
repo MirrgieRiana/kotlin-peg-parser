@@ -101,12 +101,12 @@ class SerialParserTest {
         val article = +"the" + +"a"
         val adjective = +"quick" + +"lazy"
         val noun = +"fox" + +"dog"
-        
+
         val phrase = serial(article, +" ", adjective, +" ", noun)
-        
+
         val result1 = phrase.parseAllOrThrow("the quick fox")
         assertEquals(listOf("the", " ", "quick", " ", "fox"), result1)
-        
+
         val result2 = phrase.parseAllOrThrow("a lazy dog")
         assertEquals(listOf("a", " ", "lazy", " ", "dog"), result2)
     }
