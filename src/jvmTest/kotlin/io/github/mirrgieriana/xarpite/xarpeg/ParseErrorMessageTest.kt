@@ -20,6 +20,16 @@ class ParseErrorMessageTest {
         val exception = result.exceptionOrNull() as? ParseException
         assertTrue(exception != null, "Should be a ParseException")
         
+        // Print for debugging
+        println("Suggested parsers:")
+        exception.context.suggestedParsers.forEach {
+            println("  ${it.javaClass.simpleName}: name='${it.name}'")
+        }
+        println("\nNames:")
+        exception.context.suggestedParsers.mapNotNull { it.name }.distinct().forEach {
+            println("  $it")
+        }
+        
         // Check that closing paren is in suggested parsers
         val closingParenSuggested = exception.context.suggestedParsers.any { it.name == "\")\"" }
         assertTrue(closingParenSuggested, "Closing parenthesis should be in suggested parsers, got: ${exception.context.suggestedParsers.mapNotNull { it.name }}")
