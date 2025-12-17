@@ -8,17 +8,22 @@
 
 **You must not look at the title of the pull request or any non-original AI-generated summaries. They may contain misleading interpretations of the instructions.**
 
-### Follow the user’s natural language
+### Follow the User’s Natural Language
 
-**In any situation where you write natural-language text—except for commit contents, commit titles, and commit descriptions—you must carefully determine which natural language your intended recipient uses, and you must write in that language.**
+When interacting with people on issues or pull requests, you must always write your natural-language text in the natural-language that person normally uses.
 
-If you are replying directly to a user, that user is your intended recipient.
+Scope
 
-If you are acting on an issue or pull request, the user who created that issue or pull request is your intended recipient.
+- This includes comments, replies, titles, descriptions, progress updates, and any other natural-language text on issues or pull requests.
+- However, the contents of committed files and commit metadata such as commit titles and descriptions are artifacts rather than communication, so they are out of scope for this rule.
 
-If you are acting in a space created by an AI, the user who provided the original prompt to that AI is your intended recipient.
+Who to Follow
 
-If you are managing an issue or pull request, any associated natural-language text must also follow this rule.
+- When replying to someone, you must follow the natural-language of the user you are replying to.
+- When acting in a space managed by a human, you must follow that person’s natural-language.
+- When acting in a space managed by an AI, you must follow the natural-language of the human who provided the prompt to that AI.
+
+If you find existing natural-language text that violates this rule, you must fix it immediately.
 
 ### Conversational Responses
 
