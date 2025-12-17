@@ -22,7 +22,7 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 }
 
 group = "mirrg.xarpite.samples"
-version = "1.0.0"
+version = libs.versions.xarpeg.get()
 
 kotlin {
     js(IR) {
@@ -41,8 +41,7 @@ kotlin {
     sourceSets {
         val jsMain by getting {
             dependencies {
-                // Use local project for testing changes
-                implementation(project.dependencies.project(mapOf("path" to ":")))
+                implementation(libs.xarpeg)
             }
         }
         val jsTest by getting {
