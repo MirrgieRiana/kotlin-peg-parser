@@ -44,17 +44,13 @@ data class VariableTable(
     val variables: MutableMap<String, Value> = mutableMapOf(),
     val parent: VariableTable? = null
 ) {
-    fun get(name: String): Value? {
-        return variables[name] ?: parent?.get(name)
-    }
+    fun get(name: String): Value? = variables[name] ?: parent?.get(name)
 
     fun set(name: String, value: Value) {
         variables[name] = value
     }
 
-    fun createChild(): VariableTable {
-        return VariableTable(mutableMapOf(), this)
-    }
+    fun createChild(): VariableTable = VariableTable(mutableMapOf(), this)
 }
 
 // Evaluation context that holds call stack information and variable scope
@@ -63,13 +59,11 @@ data class EvaluationContext(
     val sourceCode: String? = null,
     val variableTable: VariableTable = VariableTable()
 ) {
-    fun pushFrame(functionName: String, callPosition: SourcePosition): EvaluationContext {
-        return copy(callStack = callStack + CallFrame(functionName, callPosition))
-    }
+    fun pushFrame(functionName: String, callPosition: SourcePosition): EvaluationContext =
+        copy(callStack = callStack + CallFrame(functionName, callPosition))
 
-    fun withNewScope(): EvaluationContext {
-        return copy(variableTable = variableTable.createChild())
-    }
+    fun withNewScope(): EvaluationContext =
+        copy(variableTable = variableTable.createChild())
 }
 
 // Represents a single call frame in the stack
@@ -120,10 +114,12 @@ data class SourcePosition(val start: Int, val end: Int, val text: String) {
 // Value types that can be stored in variables
 sealed class Value {
     data class NumberValue(val value: Double) : Value() {
-        override fun toString() = if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
+        override fun toString(): String = 
+            if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
     }
+    
     data class BooleanValue(val value: Boolean) : Value() {
-        override fun toString() = value.toString()
+        override fun toString(): String = value.toString()
     }
     data class LambdaValue(
         val params: List<String>,
@@ -242,7 +238,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == operator }
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            { left: Expression -> expressionFactory(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> expressionFactory(left, rightExpr, opPosition) }
         }
     }
 
@@ -274,7 +270,7 @@ private object ExpressionGrammar {
             val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf(operator)
             val (_, rightExpr: Expression) = result.value
             val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            { left: Expression -> expressionFactory(left, rightExpr, opPosition) }
+            return@mapEx { left: Expression -> expressionFactory(left, rightExpr, opPosition) }
         }
     }
 
@@ -387,29 +383,23 @@ private fun StringBuilder.appendSourceLineWithCaret(input: String, position: Int
 }
 
 @JsExport
-fun parseExpression(input: String): String {
-    return try {
-        // Reset function call counter for each evaluation to ensure each call is independent
-        FunctionCallExpression.functionCallCount = 0
+fun parseExpression(input: String): String = try {
+    FunctionCallExpression.functionCallCount = 0
+    val initialContext = EvaluationContext(sourceCode = input)
+    val resultExpr = ExpressionGrammar.programRoot.parseAllOrThrow(input)
+    val result = resultExpr.evaluate(initialContext)
+    result.toString()
+} catch (e: EvaluationException) {
+    formatEvaluationException(e)
+} catch (e: ParseException) {
+    formatParseException(e, input)
+} catch (e: Exception) {
+    "Error: ${e.message}"
+}
 
-        // Create initial evaluation context with empty call stack, source code, and fresh variable table
-        val initialContext = EvaluationContext(sourceCode = input)
-
-        // Try to parse as a multi-statement program first (handles both single and multiple expressions)
-        val resultExpr = ExpressionGrammar.programRoot.parseAllOrThrow(input)
-        val result = resultExpr.evaluate(initialContext)
-        result.toString()
-    } catch (e: EvaluationException) {
-        // Use custom formatting if call stack is available
-        if (e.context != null && e.context.callStack.isNotEmpty()) {
-            e.formatWithCallStack()
-        } else {
-            "Error: ${e.message}"
-        }
-    } catch (e: ParseException) {
-        // Format parse exceptions with detailed syntax error information
-        formatParseException(e, input)
-    } catch (e: Exception) {
+private fun formatEvaluationException(e: EvaluationException): String =
+    if (e.context != null && e.context.callStack.isNotEmpty()) {
+        e.formatWithCallStack()
+    } else {
         "Error: ${e.message}"
     }
-}
