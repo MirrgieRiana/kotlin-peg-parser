@@ -24,7 +24,7 @@ class PositionTutorialTest {
 
     @Test
     fun simpleMapExample() {
-        val number = (+Regex("[0-9]+") named "number") map { it.value.toInt() }
+        val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
         assertEquals(42, number.parseAllOrThrow("42"))
     }
 
@@ -39,7 +39,7 @@ class PositionTutorialTest {
 
     @Test
     fun withLocationExample() {
-        val keyword = (+Regex("[a-z]+") named "keyword") map { it.value }
+        val keyword = +Regex("[a-z]+") map { it.value } named "keyword"
         val keywordWithLocation = keyword.withLocation()
 
         val result = keywordWithLocation.parseAllOrThrow("hello")
@@ -49,7 +49,7 @@ class PositionTutorialTest {
 
     @Test
     fun withLocationMultiline() {
-        val keyword = (+Regex("[a-z]+") named "keyword") map { it.value }
+        val keyword = +Regex("[a-z]+") map { it.value } named "keyword"
         val keywordWithLocation = keyword.withLocation()
 
         // Parse keyword on line 1, column 1
