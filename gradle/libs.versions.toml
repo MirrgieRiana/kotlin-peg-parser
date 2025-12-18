@@ -11,9 +11,6 @@ xarpeg-group = "io.github.mirrgieriana.xarpite"
 xarpeg-name = "xarpeg-kotlin-peg-parser"
 xarpeg-version = "latest"
 
-[libraries]
-xarpeg = { group = "io.github.mirrgieriana.xarpite", name = "xarpeg-kotlin-peg-parser", version.ref = "xarpeg-version" }
-
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka-plugin" }
