@@ -20,7 +20,10 @@ hh := {
     tools: [
       {
         name: "banana"
-        inputSchema: {}
+        inputSchema: {
+          type: "object"
+          additionalProperties: F
+        }
       }
     ]
   })
