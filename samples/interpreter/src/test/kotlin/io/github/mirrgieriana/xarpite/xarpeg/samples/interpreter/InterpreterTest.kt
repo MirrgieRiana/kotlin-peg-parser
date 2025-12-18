@@ -18,14 +18,13 @@ class InterpreterTest {
 
     @BeforeAll
     fun setup() {
-        // Build the distribution before running tests
         val projectDir = File(System.getProperty("user.dir"))
-        val gradlew = if (System.getProperty("os.name").startsWith("Windows")) {
-            File(projectDir, "gradlew.bat")
-        } else {
-            File(projectDir, "gradlew")
-        }
+        buildDistribution(projectDir)
+        classPath = setupClassPath(projectDir)
+    }
 
+    private fun buildDistribution(projectDir: File) {
+        val gradlew = getGradleWrapper(projectDir)
         val buildProcess = ProcessBuilder(gradlew.absolutePath, "installDist", "--console=plain")
             .directory(projectDir)
             .redirectErrorStream(true)
@@ -36,15 +35,25 @@ class InterpreterTest {
             val output = buildProcess.inputStream.bufferedReader().readText()
             throw AssertionError("Failed to build distribution: $output")
         }
+    }
 
-        // Set up the classpath from the installed distribution
+    private fun getGradleWrapper(projectDir: File): File {
+        val wrapperName = if (System.getProperty("os.name").startsWith("Windows")) {
+            "gradlew.bat"
+        } else {
+            "gradlew"
+        }
+        return File(projectDir, wrapperName)
+    }
+
+    private fun setupClassPath(projectDir: File): String {
         val libDir = File(projectDir, "build/install/interpreter/lib")
         assertTrue(libDir.exists(), "Distribution lib directory should exist: ${libDir.absolutePath}")
 
         val jarFiles = libDir.listFiles { file -> file.extension == "jar" }
             ?: throw AssertionError("No jar files found in ${libDir.absolutePath}")
 
-        classPath = jarFiles.joinToString(File.pathSeparator) { it.absolutePath }
+        return jarFiles.joinToString(File.pathSeparator) { it.absolutePath }
     }
 
     private fun runInterpreter(expression: String): Pair<Int, String> {

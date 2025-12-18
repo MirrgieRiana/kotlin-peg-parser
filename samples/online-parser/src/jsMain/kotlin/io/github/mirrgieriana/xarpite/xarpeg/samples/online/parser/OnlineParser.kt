@@ -77,33 +77,43 @@ data class CallFrame(val functionName: String, val position: SourcePosition)
 
 // Represents a position in the source code
 data class SourcePosition(val start: Int, val end: Int, val text: String) {
-    fun formatLineColumn(source: String): String {
+    private fun calculateLineAndColumn(source: String): Pair<Int, Int> {
         val beforeStart = source.substring(0, start.coerceAtMost(source.length))
         val line = beforeStart.count { it == '\n' } + 1
         val column = start - (beforeStart.lastIndexOf('\n') + 1) + 1
+        return line to column
+    }
+
+    fun formatLineColumn(source: String): String {
+        val (line, column) = calculateLineAndColumn(source)
         return "line $line, column $column"
     }
 
     fun formatWithContext(source: String): String {
-        val beforeStart = source.substring(0, start.coerceAtMost(source.length))
-        val line = beforeStart.count { it == '\n' } + 1
-        val column = start - (beforeStart.lastIndexOf('\n') + 1) + 1
+        val (line, column) = calculateLineAndColumn(source)
+        val sourceLine = extractSourceLine(source)
+        val highlightedLine = buildHighlightedLine(source, sourceLine)
+        return "line $line, column $column: $highlightedLine"
+    }
 
-        // Get the line containing this position
+    private fun extractSourceLine(source: String): String {
+        val beforeStart = source.substring(0, start.coerceAtMost(source.length))
         val lineStart = beforeStart.lastIndexOf('\n') + 1
         val lineEnd = source.indexOf('\n', start).let { if (it == -1) source.length else it }
-        val sourceLine = source.substring(lineStart, lineEnd)
+        return source.substring(lineStart, lineEnd)
+    }
 
-        // Calculate positions within the line
+    private fun buildHighlightedLine(source: String, sourceLine: String): String {
+        val beforeStart = source.substring(0, start.coerceAtMost(source.length))
+        val lineStart = beforeStart.lastIndexOf('\n') + 1
         val highlightStart = start - lineStart
         val highlightEnd = (end - lineStart).coerceAtMost(sourceLine.length)
 
-        // Build the formatted output with highlighted range
         val before = sourceLine.substring(0, highlightStart)
         val highlighted = sourceLine.substring(highlightStart, highlightEnd)
         val after = sourceLine.substring(highlightEnd)
 
-        return "line $line, column $column: $before[$highlighted]$after"
+        return "$before[$highlighted]$after"
     }
 }
 
@@ -161,18 +171,11 @@ private object ExpressionGrammar {
     private val number = +Regex("[0-9]+(?:\\.[0-9]+)?") map { Value.NumberValue(it.value.toDouble()) } named "number"
 
     // Helper function for left-associative binary operator aggregation
-    // Takes a term parser and operators that create expressions
     private fun leftAssociativeBinaryOp(
         term: Parser<Expression>,
         operators: Parser<(Expression) -> Expression>
-    ): Parser<Expression> {
-        return (term * operators.zeroOrMore) map { (first, rest) ->
-            var result = first
-            rest.forEach { opFunc ->
-                result = opFunc(result)
-            }
-            result
-        }
+    ): Parser<Expression> = (term * operators.zeroOrMore) map { (first, rest) ->
+        rest.fold(first) { acc, opFunc -> opFunc(acc) }
     }
 
     // Variable reference
@@ -182,7 +185,8 @@ private object ExpressionGrammar {
 
     // Helper to parse comma-separated list of identifiers
     private val identifierList: Parser<List<String>> = run {
-        val restItem = whitespace * -',' * whitespace * identifier
+        val separator = whitespace * -',' * whitespace
+        val restItem = separator * identifier
         (identifier * restItem.zeroOrMore) map { (first, rest) -> listOf(first) + rest }
     }
 
@@ -202,7 +206,8 @@ private object ExpressionGrammar {
 
     // Helper to parse comma-separated list of expressions
     private val exprList: Parser<List<Expression>> = run {
-        val restItem = whitespace * -',' * whitespace * ref { expression }
+        val separator = whitespace * -',' * whitespace
+        val restItem = separator * ref { expression }
         (ref { expression } * restItem.zeroOrMore) map { (first, rest) -> listOf(first) + rest }
     }
 
@@ -227,114 +232,70 @@ private object ExpressionGrammar {
 
     private val factor: Parser<Expression> = primary
 
-    // Multiplication operator parser
-    private val multiplyOp = (whitespace * +'*' * whitespace * factor) mapEx { parseCtx, result ->
-        // Skip leading whitespace in position tracking by using the operator's position
-        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '*' }
-        val (_, rightExpr: Expression) = result.value
-        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> MultiplyExpression(left, rightExpr, opPosition) }
+    // Create binary operator parser
+    private fun createBinaryOp(
+        operator: Char,
+        rightTerm: Parser<Expression>,
+        expressionFactory: (Expression, Expression, SourcePosition) -> Expression
+    ): Parser<(Expression) -> Expression> {
+        return (whitespace * +operator * whitespace * rightTerm) mapEx { parseCtx, result ->
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == operator }
+            val (_, rightExpr: Expression) = result.value
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
+            { left: Expression -> expressionFactory(left, rightExpr, opPosition) }
+        }
     }
 
+    // Multiplication operator parser
+    private val multiplyOp = createBinaryOp('*', factor, ::MultiplyExpression)
+
     // Division operator parser
-    private val divideOp = (whitespace * +'/' * whitespace * factor) mapEx { parseCtx, result ->
-        // Skip leading whitespace in position tracking by using the operator's position
-        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '/' }
-        val (_, rightExpr: Expression) = result.value
-        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> DivideExpression(left, rightExpr, opPosition) }
-    }
+    private val divideOp = createBinaryOp('/', factor, ::DivideExpression)
 
     private val product: Parser<Expression> =
         leftAssociativeBinaryOp(factor, multiplyOp + divideOp)
 
     // Addition operator parser
-    private val addOp = (whitespace * +'+' * whitespace * product) mapEx { parseCtx, result ->
-        // Skip leading whitespace in position tracking by using the operator's position
-        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '+' }
-        val (_, rightExpr: Expression) = result.value
-        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> AddExpression(left, rightExpr, opPosition) }
-    }
+    private val addOp = createBinaryOp('+', product, ::AddExpression)
 
     // Subtraction operator parser
-    private val subtractOp = (whitespace * +'-' * whitespace * product) mapEx { parseCtx, result ->
-        // Skip leading whitespace in position tracking by using the operator's position
-        val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '-' }
-        val (_, rightExpr: Expression) = result.value
-        val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-        return@mapEx { left: Expression -> SubtractExpression(left, rightExpr, opPosition) }
-    }
+    private val subtractOp = createBinaryOp('-', product, ::SubtractExpression)
 
     private val sum: Parser<Expression> =
         leftAssociativeBinaryOp(product, addOp + subtractOp)
 
+    // Create two-character operator parser
+    private fun createTwoCharOp(
+        operator: String,
+        rightTerm: Parser<Expression>,
+        expressionFactory: (Expression, Expression, SourcePosition) -> Expression
+    ): Parser<(Expression) -> Expression> {
+        return (whitespace * +operator * whitespace * rightTerm) mapEx { parseCtx, result ->
+            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf(operator)
+            val (_, rightExpr: Expression) = result.value
+            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
+            { left: Expression -> expressionFactory(left, rightExpr, opPosition) }
+        }
+    }
+
     // Ordering comparison operators: <, <=, >, >=
     private val orderingComparison: Parser<Expression> = run {
-        // Less than or equal operator parser (must come before < to match correctly)
-        val lessEqualOp = (whitespace * +"<=" * whitespace * sum) mapEx { parseCtx, result ->
-            // Skip leading whitespace in position tracking by using the operator's position
-            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("<=")
-            val (_, rightExpr: Expression) = result.value
-            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> LessThanOrEqualExpression(left, rightExpr, opPosition) }
-        }
+        val lessEqualOp = createTwoCharOp("<=", sum, ::LessThanOrEqualExpression)
+        val greaterEqualOp = createTwoCharOp(">=", sum, ::GreaterThanOrEqualExpression)
+        val lessOp = createBinaryOp('<', sum, ::LessThanExpression)
+        val greaterOp = createBinaryOp('>', sum, ::GreaterThanExpression)
 
-        // Greater than or equal operator parser (must come before > to match correctly)
-        val greaterEqualOp = (whitespace * +">=" * whitespace * sum) mapEx { parseCtx, result ->
-            // Skip leading whitespace in position tracking by using the operator's position
-            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf(">=")
-            val (_, rightExpr: Expression) = result.value
-            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> GreaterThanOrEqualExpression(left, rightExpr, opPosition) }
-        }
-
-        // Less than operator parser
-        val lessOp = (whitespace * +'<' * whitespace * sum) mapEx { parseCtx, result ->
-            // Skip leading whitespace in position tracking by using the operator's position
-            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '<' }
-            val (_, rightExpr: Expression) = result.value
-            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> LessThanExpression(left, rightExpr, opPosition) }
-        }
-
-        // Greater than operator parser
-        val greaterOp = (whitespace * +'>' * whitespace * sum) mapEx { parseCtx, result ->
-            // Skip leading whitespace in position tracking by using the operator's position
-            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '>' }
-            val (_, rightExpr: Expression) = result.value
-            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> GreaterThanExpression(left, rightExpr, opPosition) }
-        }
-
-        val restItem = lessEqualOp + greaterEqualOp + lessOp + greaterOp
-
-        leftAssociativeBinaryOp(sum, restItem)
+        val operators = lessEqualOp + greaterEqualOp + lessOp + greaterOp
+        leftAssociativeBinaryOp(sum, operators)
     }
 
     // Equality comparison operators: ==, !=
     private val equalityComparison: Parser<Expression> = run {
-        // Equality operator parser
-        val equalOp = (whitespace * +"==" * whitespace * orderingComparison) mapEx { parseCtx, result ->
-            // Skip leading whitespace in position tracking by using the operator's position
-            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("==")
-            val (_, rightExpr: Expression) = result.value
-            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> EqualsExpression(left, rightExpr, opPosition) }
-        }
+        val equalOp = createTwoCharOp("==", orderingComparison, ::EqualsExpression)
+        val notEqualOp = createTwoCharOp("!=", orderingComparison, ::NotEqualsExpression)
 
-        // Inequality operator parser
-        val notEqualOp = (whitespace * +"!=" * whitespace * orderingComparison) mapEx { parseCtx, result ->
-            // Skip leading whitespace in position tracking by using the operator's position
-            val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOf("!=")
-            val (_, rightExpr: Expression) = result.value
-            val opPosition = SourcePosition(opStart, result.end, result.text(parseCtx).trimStart())
-            return@mapEx { left: Expression -> NotEqualsExpression(left, rightExpr, opPosition) }
-        }
-
-        val restItem = equalOp + notEqualOp
-
-        leftAssociativeBinaryOp(orderingComparison, restItem)
+        val operators = equalOp + notEqualOp
+        leftAssociativeBinaryOp(orderingComparison, operators)
     }
 
     // Ternary operator: condition ? trueExpr : falseExpr
@@ -374,12 +335,17 @@ private object ExpressionGrammar {
 
 // Format a ParseException with detailed syntax error information
 private fun formatParseException(e: ParseException, input: String): String {
-    val sb = StringBuilder()
-
-    // Extract position information
     val position = e.context.errorPosition
+    val (line, column) = calculateLineAndColumn(input, position)
+    
+    return buildString {
+        append("Error: Syntax error at line $line, column $column")
+        appendSuggestedParsers(e)
+        appendSourceLineWithCaret(input, position, line)
+    }
+}
 
-    // Calculate line and column numbers in a single pass
+private fun calculateLineAndColumn(input: String, position: Int): Pair<Int, Int> {
     val beforePosition = input.substring(0, position.coerceAtMost(input.length))
     var line = 1
     var lastNewlinePos = -1
@@ -390,36 +356,34 @@ private fun formatParseException(e: ParseException, input: String): String {
         }
     }
     val column = position - lastNewlinePos
+    return line to column
+}
 
-    // Build error message
-    sb.append("Error: Syntax error at line $line, column $column")
-
-    // Add suggested parsers if available
+private fun StringBuilder.appendSuggestedParsers(e: ParseException) {
     if (e.context.suggestedParsers.isNotEmpty()) {
         val candidates = e.context.suggestedParsers
             .mapNotNull { it.name }
             .distinct()
         if (candidates.isNotEmpty()) {
-            sb.append("\nExpected: ${candidates.joinToString(", ")}")
+            append("\nExpected: ${candidates.joinToString(", ")}")
         }
     }
+}
 
-    // Show the line with error indicator
+private fun StringBuilder.appendSourceLineWithCaret(input: String, position: Int, line: Int) {
+    val beforePosition = input.substring(0, position.coerceAtMost(input.length))
     val lineStart = beforePosition.lastIndexOf('\n') + 1
     val lineEnd = input.indexOf('\n', position).let { if (it == -1) input.length else it }
     val sourceLine = input.substring(lineStart, lineEnd)
 
     if (sourceLine.isNotEmpty()) {
-        sb.append("\n")
-        sb.append(sourceLine)
-        sb.append("\n")
-        // Add caret pointing to the error position
+        append("\n")
+        append(sourceLine)
+        append("\n")
         val caretPosition = position - lineStart
-        sb.append(" ".repeat(caretPosition.coerceAtLeast(0)))
-        sb.append("^")
+        append(" ".repeat(caretPosition.coerceAtLeast(0)))
+        append("^")
     }
-
-    return sb.toString()
 }
 
 @JsExport

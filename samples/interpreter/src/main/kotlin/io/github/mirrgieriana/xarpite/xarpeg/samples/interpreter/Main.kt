@@ -54,7 +54,8 @@ private object ArithmeticParser {
     // Multiplication and division (higher precedence)
     val product: Parser<LazyValue> = leftAssociative(
         primary,
-        (+'*' mapEx { _, r -> OperatorInfo(r.start, '*') }) + (+'/' mapEx { _, r -> OperatorInfo(r.start, '/') })
+        (+'*' mapEx { _, r -> OperatorInfo(r.start, '*') }) + 
+        (+'/' mapEx { _, r -> OperatorInfo(r.start, '/') })
     ) { a, op, b ->
         when (op.op) {
             '*' -> LazyValue(op.position) { a.compute() * b.compute() }
@@ -91,9 +92,11 @@ private object ArithmeticParser {
  * Convert a character index to line and column position.
  */
 fun indexToPosition(text: String, index: Int): Pair<Int, Int> {
-    val lineStartIndices = mutableListOf(0)
-    text.forEachIndexed { i, char ->
-        if (char == '\n') lineStartIndices.add(i + 1)
+    val lineStartIndices = buildList {
+        add(0)
+        text.forEachIndexed { i, char ->
+            if (char == '\n') add(i + 1)
+        }
     }
 
     val lineIndex = lineStartIndices.binarySearch(index).let {
@@ -103,7 +106,7 @@ fun indexToPosition(text: String, index: Int): Pair<Int, Int> {
     val line = lineIndex + 1
     val column = index - lineStart + 1
 
-    return Pair(line, column)
+    return line to column
 }
 
 /**
@@ -131,16 +134,17 @@ fun evaluate(expression: String): Int {
 }
 
 fun main(args: Array<String>) {
-    if (args.isEmpty() || args[0] != "-e") {
-        println("Usage: interpreter -e <expression>")
-        println("Example: interpreter -e \"2+3*4\"")
-        return
-    }
-
-    if (args.size < 2) {
-        println("Error: No expression provided")
-        println("Usage: interpreter -e <expression>")
-        return
+    when {
+        args.isEmpty() || args[0] != "-e" -> {
+            println("Usage: interpreter -e <expression>")
+            println("Example: interpreter -e \"2+3*4\"")
+            return
+        }
+        args.size < 2 -> {
+            println("Error: No expression provided")
+            println("Usage: interpreter -e <expression>")
+            return
+        }
     }
 
     val expression = args[1]
