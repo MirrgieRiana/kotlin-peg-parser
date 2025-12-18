@@ -23,13 +23,13 @@ class PositionTutorialTest {
 
     @Test
     fun simpleMapExample() {
-        val number = +Regex("[0-9]+") map { it.value.toInt() }
+        val number = +Regex("[0-9]+") named "number" map { it.value.toInt() }
         assertEquals(42, number.parseAllOrThrow("42"))
     }
 
     @Test
     fun mapExWithPositions() {
-        val identifier = +Regex("[a-zA-Z][a-zA-Z0-9_]*")
+        val identifier = +Regex("[a-zA-Z][a-zA-Z0-9_]*") named "identifier"
         val identifierWithPosition = identifier mapEx { ctx, result ->
             "${result.value.value}@${result.start}-${result.end}"
         }
@@ -38,7 +38,7 @@ class PositionTutorialTest {
 
     @Test
     fun withLocationExample() {
-        val keyword = +Regex("[a-z]+") map { it.value }
+        val keyword = +Regex("[a-z]+") named "keyword" map { it.value }
         val keywordWithLocation = keyword.withLocation()
 
         val result = keywordWithLocation.parseAllOrThrow("hello")
@@ -48,7 +48,7 @@ class PositionTutorialTest {
 
     @Test
     fun withLocationMultiline() {
-        val keyword = +Regex("[a-z]+") map { it.value }
+        val keyword = +Regex("[a-z]+") named "keyword" map { it.value }
         val keywordWithLocation = keyword.withLocation()
 
         // Parse keyword on line 1, column 1
@@ -62,7 +62,7 @@ class PositionTutorialTest {
 
     @Test
     fun matchedTextExample() {
-        val number = +Regex("[0-9]+")
+        val number = +Regex("[0-9]+") named "number"
         val numberWithText = number mapEx { ctx, result ->
             val matched = result.text(ctx)
             val value = matched.toInt()

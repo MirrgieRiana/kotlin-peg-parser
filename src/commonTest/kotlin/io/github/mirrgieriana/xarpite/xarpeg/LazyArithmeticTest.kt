@@ -25,7 +25,7 @@ class LazyArithmeticTest {
     // Lazy arithmetic parser implementation
     private object LazyArithmetic {
         private val number: Parser<() -> Int> =
-            +Regex("[0-9]+") mapEx { _, result ->
+            +Regex("[0-9]+") named "number" mapEx { _, result ->
                 val value = result.value.value.toInt()
                 return@mapEx { value }
             }

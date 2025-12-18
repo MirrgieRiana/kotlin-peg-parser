@@ -155,9 +155,9 @@ private object ExpressionGrammar {
     private val whitespace = -Regex("[ \\t\\r\\n]*")
 
     // Identifier: alphanumeric and _, but first character cannot be a digit
-    private val identifier = +Regex("[a-zA-Z_][a-zA-Z0-9_]*") map { it.value }
+    private val identifier = +Regex("[a-zA-Z_][a-zA-Z0-9_]*") named "identifier" map { it.value }
 
-    private val number = +Regex("[0-9]+(?:\\.[0-9]+)?") map { Value.NumberValue(it.value.toDouble()) }
+    private val number = +Regex("[0-9]+(?:\\.[0-9]+)?") named "number" map { Value.NumberValue(it.value.toDouble()) }
 
     // Helper function for left-associative binary operator aggregation
     // Takes a term parser and operators that create expressions
@@ -192,7 +192,7 @@ private object ExpressionGrammar {
 
     // Lambda expression: (param1, param2, ...) -> body
     private val lambda: Parser<Expression> =
-        ((paramList * whitespace * -Regex("->") * whitespace * ref { expression }) mapEx { parseCtx, result ->
+        ((paramList * whitespace * -Regex("->") named "arrow" * whitespace * ref { expression }) mapEx { parseCtx, result ->
             val (params, bodyParser) = result.value
             val lambdaText = result.text(parseCtx)
             val position = SourcePosition(result.start, result.end, lambdaText)
@@ -361,7 +361,7 @@ private object ExpressionGrammar {
 
     // Multi-statement parser: parses multiple expressions separated by newlines
     val program: Parser<Expression> = run {
-        val newlineSep = -Regex("[ \\t]*\\r?\\n[ \\t\\r\\n]*")
+        val newlineSep = -Regex("[ \\t]*\\r?\\n[ \\t\\r\\n]*") named "newline"
         ((expression * (newlineSep * expression).zeroOrMore) map { (first, rest) ->
             ProgramExpression(listOf(first) + rest)
         })
