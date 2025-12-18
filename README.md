@@ -19,7 +19,7 @@ Xarpeg (/ˈʃɑrpɛɡ/) is a compact, operator-driven parser combinator library 
 
 ## Why Xarpeg?
 
-- **🎯 Intuitive DSL** - Operator-based syntax feels natural: unary `+` turns literals/regex into parsers, binary `+` is prioritized choice, `*` sequences parsers, and unary `-` ignores tokens
+- **🎯 Intuitive DSL** - Operator-based syntax feels natural. Unary `+` turns literals/regex into parsers; binary `+` is prioritized choice; `*` sequences parsers; unary `-` ignores tokens.
 - **📦 Multiplatform** - Write once, run on JVM, JS (IR/Node.js), and Native (Linux/Windows)
 - **🔧 No Tokenizer Needed** - Parse directly from strings using character, string, and regex parsers
 - **⚡ Built-in Memoization** - Automatic caching keeps backtracking predictable; disable for lower memory use
@@ -29,9 +29,9 @@ Xarpeg (/ˈʃɑrpɛɡ/) is a compact, operator-driven parser combinator library 
 
 - Operator-driven grammar definitions use Xarpeg-specific operators.
 - Binary `+` represents prioritized choice (tries the first option and only falls back if it fails).
-- Binary `*` represents sequencing (e.g., `lhs * rhs`).
+- Binary `*` represents sequencing (e.g., `'(' * number * ')'`).
 - Unary `-` drops matches (e.g., `-'('`).
-- These operators intentionally differ from standard PEG quantifier meanings (`+` = one-or-more, `*` = zero-or-more), keeping rules short and scannable.
+- In Xarpeg, `+` means choice and `*` means sequencing; this intentionally differs from standard PEG quantifiers (`+` = one-or-more, `*` = zero-or-more), keeping rules short and scannable.
 - Typed tuples make it obvious which parts of the input you keep or ignore, so you avoid ad-hoc casting later.
 - Helpers like `ref { expr }` and `leftAssociative` remove boilerplate for recursive grammars and precedence handling.
 - Works directly on raw strings without tokenizers, so error positions stay aligned with the original input text.
