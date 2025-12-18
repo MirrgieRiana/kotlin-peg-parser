@@ -63,7 +63,12 @@ jobs:
       - name: Update version in TOML
         working-directory: main
         run: |
-          sed -i 's/^[ ]*xarpeg-version[ ]*=[ ]*".*"[ ]*$/xarpeg-version = "'"$VERSION"'"/' gradle/libs.versions.toml
+          old=$(cat gradle/libs.versions.toml)
+          echo "$old" | perl -lpE 's/^(\s*xarpeg-version\s*=\s*")[^"]*("\s*(?:#.*)?)$/$1.$ENV{VERSION}.$2/ge' > gradle/libs.versions.toml
+          diff <(echo "$old") <(cat gradle/libs.versions.toml) && {
+            echo "Failed to update version"
+            exit 1
+          }
           echo "Updated version to $VERSION in gradle/libs.versions.toml"
           grep xarpeg-version gradle/libs.versions.toml
 
