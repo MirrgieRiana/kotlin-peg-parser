@@ -6,7 +6,7 @@ fun getTupleSrc(maxElementCount: Int): String {
         appendLine("package io.github.mirrgieriana.xarpite.xarpeg")
         appendLine()
         appendLine("object Tuple0")
-        for (n in 1..maxElementCount) {
+        (1..maxElementCount).forEach { n ->
             val params = typeParams.take(n)
             val typeParamStr = params.joinToString(", ") { "out $it" }
             val paramStr = params.mapIndexed { _, param -> "val ${param.lowercase()}: $param" }.joinToString(", ")
@@ -23,7 +23,7 @@ fun getTupleParserSrc(maxElementCount: Int): String {
         appendLine("import io.github.mirrgieriana.xarpite.xarpeg.ParseResult")
         appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Parser")
         appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Tuple0")
-        for (n in 1..maxElementCount) {
+        (1..maxElementCount).forEach { n ->
             appendLine("import io.github.mirrgieriana.xarpite.xarpeg.Tuple$n")
         }
         appendLine("import kotlin.jvm.JvmName")
@@ -54,7 +54,7 @@ fun getTupleParserSrc(maxElementCount: Int): String {
         appendLine("@JvmName(\"times0P\")")
         appendLine("operator fun <A : Any> Parser<Tuple0>.times(other: Parser<A>) = combine(this, other) { _, b -> b }")
         appendLine()
-        for (n in 1..maxElementCount) {
+        (1..maxElementCount).forEach { n ->
             val params = typeParams.take(n)
             val typeParamStr = params.joinToString(", ") { "$it : Any" }
             appendLine("@JvmName(\"times0$n\")")
@@ -67,7 +67,7 @@ fun getTupleParserSrc(maxElementCount: Int): String {
         appendLine("@JvmName(\"timesP0\")")
         appendLine("operator fun <A : Any> Parser<A>.times(other: Parser<Tuple0>) = combine(this, other) { a, _ -> a }")
         appendLine()
-        for (n in 1..maxElementCount) {
+        (1..maxElementCount).forEach { n ->
             val params = typeParams.take(n)
             val typeParamStr = params.joinToString(", ") { "$it : Any" }
             appendLine("@JvmName(\"times${n}0\")")
@@ -83,7 +83,7 @@ fun getTupleParserSrc(maxElementCount: Int): String {
         appendLine()
         appendLine("// Parser vs TupleNParser = Tuple(N+1)Parser")
         appendLine()
-        for (n in 1..(maxElementCount - 1)) {
+        (1..(maxElementCount - 1)).forEach { n ->
             val resultN = n + 1
             val rightParams = typeParams.subList(1, n + 1) // skip A
             val resultParams = typeParams.take(resultN)
@@ -96,7 +96,7 @@ fun getTupleParserSrc(maxElementCount: Int): String {
         appendLine()
         appendLine("// TupleNParser vs Parser = Tuple(N+1)Parser")
         appendLine()
-        for (n in 1..(maxElementCount - 1)) {
+        (1..(maxElementCount - 1)).forEach { n ->
             val resultN = n + 1
             val leftParams = typeParams.take(n)
             val resultParams = typeParams.take(resultN)
@@ -110,8 +110,8 @@ fun getTupleParserSrc(maxElementCount: Int): String {
         appendLine("// TupleNParser vs TupleMParser = Tuple(N+M)Parser")
         appendLine()
         val combinations = mutableListOf<Triple<Int, Int, Int>>()
-        for (leftN in 1..(maxElementCount - 1)) {
-            for (rightN in 1..(maxElementCount - 1)) {
+        (1..(maxElementCount - 1)).forEach { leftN ->
+            (1..(maxElementCount - 1)).forEach { rightN ->
                 val resultN = leftN + rightN
                 if (resultN <= maxElementCount) {
                     combinations.add(Triple(leftN, rightN, resultN))

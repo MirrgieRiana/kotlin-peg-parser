@@ -6,7 +6,7 @@ import io.github.mirrgieriana.xarpite.xarpeg.Parser
 
 class OrParser<out T : Any>(val parsers: List<Parser<T>>) : Parser<T> {
     override fun parseOrNull(context: ParseContext, start: Int): ParseResult<T>? {
-        for (parser in parsers) {
+        parsers.forEach { parser ->
             val result = context.parseOrNull(parser, start)
             if (result != null) return result
         }

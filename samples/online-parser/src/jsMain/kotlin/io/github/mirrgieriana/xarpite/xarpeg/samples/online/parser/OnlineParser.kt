@@ -167,7 +167,7 @@ private object ExpressionGrammar {
     ): Parser<Expression> {
         return (term * operators.zeroOrMore) map { (first, rest) ->
             var result = first
-            for (opFunc in rest) {
+            rest.forEach { opFunc ->
                 result = opFunc(result)
             }
             result
@@ -382,8 +382,8 @@ private fun formatParseException(e: ParseException, input: String): String {
     val beforePosition = input.substring(0, position.coerceAtMost(input.length))
     var line = 1
     var lastNewlinePos = -1
-    for (i in beforePosition.indices) {
-        if (beforePosition[i] == '\n') {
+    beforePosition.forEachIndexed { i, char ->
+        if (char == '\n') {
             line++
             lastNewlinePos = i
         }
