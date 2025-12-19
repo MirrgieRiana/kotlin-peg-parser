@@ -74,7 +74,7 @@ When making changes to the codebase, you must always ensure that code, tests, an
 
 ### Documentation Code Examples
 
-When writing code examples in documentation (README.md, pages/docs/*.md):
+When writing code examples in documentation (README.md, pages/docs/en/*.md):
 
 * **Never use `println()` in sample code** - Output statements provide no validation
 * **Always use assertions (`check()`, `require()`)** - These verify correctness and will fail if expectations are not met
