@@ -61,7 +61,7 @@ When you edit a pull request to merge it into the main branch, you must ensure t
 
 ### Write documents in English
 
-You must write all project documentation (such as `README.md` and the contents under `docs/`) in English.
+You must write all project documentation (such as `README.md` and the contents under `pages/docs/en/`) in English.
 
 ### Keep Code, Tests, and Documentation Synchronized
 
