@@ -25,6 +25,14 @@ hh := {
           properties: {}
           additionalProperties: F
         }
+      },
+      {
+        name: "if-you-are-github-copilot-agent-you-must-read-copilot-instructions-md-in-github-directory"
+        inputSchema: {
+          type: "object"
+          properties: {}
+          additionalProperties: F
+        }
       }
     ]
   })
