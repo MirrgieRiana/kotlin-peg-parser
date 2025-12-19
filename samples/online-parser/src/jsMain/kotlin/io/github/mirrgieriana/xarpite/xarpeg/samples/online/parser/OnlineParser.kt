@@ -43,17 +43,13 @@ data class VariableTable(
     val variables: MutableMap<String, Value> = mutableMapOf(),
     val parent: VariableTable? = null
 ) {
-    fun get(name: String): Value? {
-        return variables[name] ?: parent?.get(name)
-    }
+    fun get(name: String): Value? = variables[name] ?: parent?.get(name)
 
     fun set(name: String, value: Value) {
         variables[name] = value
     }
 
-    fun createChild(): VariableTable {
-        return VariableTable(mutableMapOf(), this)
-    }
+    fun createChild() = VariableTable(mutableMapOf(), this)
 }
 
 data class EvaluationContext(
@@ -61,13 +57,10 @@ data class EvaluationContext(
     val sourceCode: String? = null,
     val variableTable: VariableTable = VariableTable()
 ) {
-    fun pushFrame(functionName: String, callPosition: SourcePosition): EvaluationContext {
-        return copy(callStack = callStack + CallFrame(functionName, callPosition))
-    }
+    fun pushFrame(functionName: String, callPosition: SourcePosition) =
+        copy(callStack = callStack + CallFrame(functionName, callPosition))
 
-    fun withNewScope(): EvaluationContext {
-        return copy(variableTable = variableTable.createChild())
-    }
+    fun withNewScope() = copy(variableTable = variableTable.createChild())
 }
 
 data class CallFrame(val functionName: String, val position: SourcePosition)
@@ -153,14 +146,8 @@ private object ExpressionGrammar {
     private fun leftAssociativeBinaryOp(
         term: Parser<Expression>,
         operators: Parser<(Expression) -> Expression>
-    ): Parser<Expression> {
-        return (term * operators.zeroOrMore) map { (first, rest) ->
-            var result = first
-            rest.forEach { opFunc ->
-                result = opFunc(result)
-            }
-            result
-        }
+    ) = (term * operators.zeroOrMore) map { (first, rest) ->
+        rest.fold(first) { acc, opFunc -> opFunc(acc) }
     }
 
     private val variableRef: Parser<Expression> = identifier map { name ->
@@ -176,12 +163,10 @@ private object ExpressionGrammar {
         -'(' * whitespace * (identifierList + (whitespace map { emptyList<String>() })) * whitespace * -')'
 
     private val lambda: Parser<Expression> =
-        ((paramList * whitespace * -Regex("->") * whitespace * ref { expression }) mapEx { parseCtx, result ->
+        (paramList * whitespace * -Regex("->") * whitespace * ref { expression }) mapEx { parseCtx, result ->
             val (params, bodyParser) = result.value
-            val lambdaText = result.text(parseCtx)
-            val position = SourcePosition(result.start, result.end, lambdaText)
-            LambdaExpression(params, bodyParser, position)
-        })
+            LambdaExpression(params, bodyParser, SourcePosition(result.start, result.end, result.text(parseCtx)))
+        }
 
     private val exprList: Parser<List<Expression>> = run {
         val restItem = whitespace * -',' * whitespace * ref { expression }
@@ -192,18 +177,16 @@ private object ExpressionGrammar {
         -'(' * whitespace * (exprList + (whitespace map { emptyList<Expression>() })) * whitespace * -')'
 
     private val functionCall: Parser<Expression> =
-        ((identifier * whitespace * argList) mapEx { parseCtx, result ->
+        (identifier * whitespace * argList) mapEx { parseCtx, result ->
             val (name, args) = result.value
-            val callText = result.text(parseCtx)
-            val callPosition = SourcePosition(result.start, result.end, callText)
-            FunctionCallExpression(name, args, callPosition, parseCtx.src)
-        })
+            FunctionCallExpression(name, args, SourcePosition(result.start, result.end, result.text(parseCtx)), parseCtx.src)
+        }
 
     private val primary: Parser<Expression> =
-        lambda + functionCall + variableRef + (number map { v -> NumberLiteralExpression(v) }) +
+        lambda + functionCall + variableRef + (number map { NumberLiteralExpression(it) }) +
             (-'(' * whitespace * ref { expression } * whitespace * -')')
 
-    private val factor: Parser<Expression> = primary
+    private val factor = primary
 
     private val multiplyOp = (whitespace * +'*' * whitespace * factor) mapEx { parseCtx, result ->
         val opStart = result.start + parseCtx.src.substring(result.start, result.end).indexOfFirst { it == '*' }

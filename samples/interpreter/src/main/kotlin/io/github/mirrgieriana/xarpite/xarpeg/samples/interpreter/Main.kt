@@ -99,26 +99,23 @@ fun evaluate(expression: String): Int {
 }
 
 fun main(args: Array<String>) {
-    if (args.isEmpty() || args[0] != "-e") {
-        println("Usage: interpreter -e <expression>")
-        println("Example: interpreter -e \"2+3*4\"")
-        return
-    }
-
-    if (args.size < 2) {
-        println("Error: No expression provided")
-        println("Usage: interpreter -e <expression>")
-        return
-    }
-
-    val expression = args[1]
-
-    try {
-        val result = evaluate(expression)
-        println(result)
-    } catch (e: DivisionByZeroException) {
-        println("Error: ${e.message} at line ${e.line}, column ${e.column}")
-    } catch (e: Exception) {
-        println("Error: ${e.message}")
+    when {
+        args.isEmpty() || args[0] != "-e" -> {
+            println("Usage: interpreter -e <expression>")
+            println("Example: interpreter -e \"2+3*4\"")
+        }
+        args.size < 2 -> {
+            println("Error: No expression provided")
+            println("Usage: interpreter -e <expression>")
+        }
+        else -> {
+            try {
+                println(evaluate(args[1]))
+            } catch (e: DivisionByZeroException) {
+                println("Error: ${e.message} at line ${e.line}, column ${e.column}")
+            } catch (e: Exception) {
+                println("Error: ${e.message}")
+            }
+        }
     }
 }
