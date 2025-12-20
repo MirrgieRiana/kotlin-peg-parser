@@ -16,10 +16,8 @@ class NumberLiteralExpression(private val value: Value.NumberValue) : Expression
 
 @JsExport
 class VariableReferenceExpression(private val name: String) : Expression {
-    override fun evaluate(ctx: EvaluationContext): Value {
-        return ctx.variableTable.get(name)
-            ?: throw EvaluationException("Undefined variable: $name", ctx, ctx.sourceCode)
-    }
+    override fun evaluate(ctx: EvaluationContext) =
+        ctx.variableTable.get(name) ?: throw EvaluationException("Undefined variable: $name", ctx, ctx.sourceCode)
 }
 
 @JsExport
@@ -33,18 +31,12 @@ class AssignmentExpression(private val name: String, private val valueExpression
 
 @JsExport
 class LambdaExpression(private val params: List<String>, private val body: Expression, private val position: SourcePosition) : Expression {
-    override fun evaluate(ctx: EvaluationContext): Value {
-        return Value.LambdaValue(params, body, mutableMapOf(), definitionPosition = position)
-    }
+    override fun evaluate(ctx: EvaluationContext) =
+        Value.LambdaValue(params, body, mutableMapOf(), definitionPosition = position)
 }
 
 @JsExport
 class ProgramExpression(private val expressions: List<Expression>) : Expression {
-    override fun evaluate(ctx: EvaluationContext): Value {
-        var result: Value = Value.NumberValue(0.0)
-        expressions.forEach { expr ->
-            result = expr.evaluate(ctx)
-        }
-        return result
-    }
+    override fun evaluate(ctx: EvaluationContext) =
+        expressions.fold(Value.NumberValue(0.0) as Value) { _, expr -> expr.evaluate(ctx) }
 }

@@ -55,7 +55,7 @@ class DivideExpression(left: Expression, right: Expression, position: SourcePosi
     override val operatorSymbol = "/"
 
     override fun compute(ctx: EvaluationContext, leftValue: Double, rightValue: Double): Double {
-        if (rightValue == 0.0) {
+        require(rightValue != 0.0) {
             val newCtx = ctx.copy(callStack = ctx.callStack + CallFrame("division", position))
             throw EvaluationException("Division by zero", newCtx, ctx.sourceCode)
         }

@@ -7,10 +7,6 @@ import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/**
- * Integration tests for the arithmetic interpreter.
- * Tests run the interpreter using java exec to verify the installed distribution works correctly.
- */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InterpreterTest {
 
@@ -18,7 +14,6 @@ class InterpreterTest {
 
     @BeforeAll
     fun setup() {
-        // Build the distribution before running tests
         val projectDir = File(System.getProperty("user.dir"))
         val gradlew = if (System.getProperty("os.name").startsWith("Windows")) {
             File(projectDir, "gradlew.bat")
@@ -37,7 +32,6 @@ class InterpreterTest {
             throw AssertionError("Failed to build distribution: $output")
         }
 
-        // Set up the classpath from the installed distribution
         val libDir = File(projectDir, "build/install/interpreter/lib")
         assertTrue(libDir.exists(), "Distribution lib directory should exist: ${libDir.absolutePath}")
 
