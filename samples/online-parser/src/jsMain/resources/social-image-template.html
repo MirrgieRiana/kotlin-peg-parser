@@ -20,7 +20,7 @@
         .container {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #FEFDFB 0%, #FFF9F0 100%);
+            background: linear-gradient(135deg, #FFF9F2 0%, #FFF4E6 50%, #FFEFD5 100%);
             position: relative;
             display: flex;
             align-items: center;
@@ -28,175 +28,136 @@
             overflow: hidden;
         }
 
-        /* Animated background pattern */
-        .bg-pattern {
+        /* Subtle background texture */
+        .bg-texture {
             position: absolute;
             width: 100%;
             height: 100%;
-            opacity: 0.4;
+            opacity: 0.03;
             background-image: 
-                repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(207, 123, 0, 0.03) 50px, rgba(207, 123, 0, 0.03) 51px),
-                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(207, 123, 0, 0.03) 50px, rgba(207, 123, 0, 0.03) 51px);
+                radial-gradient(circle at 25% 25%, rgba(207, 123, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(161, 96, 0, 0.1) 0%, transparent 50%);
         }
 
-        /* Decorative geometric lines */
-        .line {
+        /* Elegant decorative elements */
+        .accent-wave {
             position: absolute;
-            background: linear-gradient(135deg, #CF7B00 0%, #A16000 100%);
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(207, 123, 0, 0.15) 50%, transparent 100%);
         }
 
-        .line-1 {
-            width: 300px;
-            height: 4px;
-            top: 100px;
-            right: 150px;
-            transform: rotate(-15deg);
-            opacity: 0.6;
+        .accent-wave-top {
+            top: 120px;
         }
 
-        .line-2 {
-            width: 200px;
-            height: 3px;
+        .accent-wave-bottom {
             bottom: 120px;
-            left: 100px;
-            transform: rotate(25deg);
-            opacity: 0.5;
         }
 
-        .line-3 {
-            width: 150px;
-            height: 3px;
-            top: 250px;
-            left: 200px;
-            transform: rotate(-45deg);
-            opacity: 0.4;
-        }
-
-        .line-4 {
-            width: 180px;
-            height: 3px;
-            bottom: 200px;
-            right: 250px;
-            transform: rotate(35deg);
-            opacity: 0.5;
-        }
-
-        /* Corner accent frame */
-        .corner-accent {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border: 3px solid;
-            border-image: linear-gradient(135deg, #CF7B00, #A16000) 1;
-        }
-
-        .corner-top-left {
-            top: 40px;
-            left: 40px;
-            border-right: none;
-            border-bottom: none;
-        }
-
-        .corner-bottom-right {
-            bottom: 40px;
-            right: 40px;
-            border-left: none;
-            border-top: none;
-        }
-
-        /* Safe zone guide (for development, should be within 1200x630 but keeping important content in ~1000x530) */
+        /* Content container */
         .content {
             position: relative;
             z-index: 10;
             text-align: center;
-            padding: 100px;
+            padding: 60px;
             max-width: 1000px;
         }
 
-        .logo-symbol {
-            font-size: 120px;
-            font-weight: 900;
-            text-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            letter-spacing: -4px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #2D1B00 0%, #1a0f00 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .title {
-            font-size: 96px;
-            font-weight: 800;
-            color: #2D1B00;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 24px;
-            letter-spacing: -2px;
-        }
-
-        .subtitle {
-            font-size: 48px;
-            font-weight: 500;
-            color: rgba(45, 27, 0, 0.85);
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        /* Title above icon */
+        .project-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: rgba(45, 27, 0, 0.75);
+            margin-bottom: 32px;
             letter-spacing: 0.5px;
         }
 
-        .badge {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 12px 28px;
-            background: transparent;
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            border: 2px solid;
-            border-image: linear-gradient(135deg, #CF7B00, #A16000) 1;
-            border-image-slice: 1;
-            font-size: 24px;
-            font-weight: 600;
-            color: #CF7B00;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* Accent elements */
-        .accent-line {
-            width: 120px;
-            height: 4px;
-            background: linear-gradient(90deg, #CF7B00 0%, #A16000 100%);
-            margin: 0 auto 30px;
-            border-radius: 2px;
-        }
-
-        .accent-underline {
+        /* Icon container */
+        .icon-container {
+            margin: 0 auto 36px;
             width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent 0%, #CF7B00 50%, transparent 100%);
-            margin: 20px auto 0;
-            opacity: 0.6;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(207, 123, 0, 0.15));
+        }
+
+        /* Feature labels container */
+        .features {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 36px;
+        }
+
+        .feature-label {
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid rgba(207, 123, 0, 0.25);
+            border-radius: 24px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #A16000;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(207, 123, 0, 0.08);
+        }
+
+        /* Subtle corner ornaments */
+        .ornament {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(207, 123, 0, 0.12);
+        }
+
+        .ornament-tl {
+            top: 30px;
+            left: 30px;
+            border-right: none;
+            border-bottom: none;
+            border-radius: 4px 0 0 0;
+        }
+
+        .ornament-br {
+            bottom: 30px;
+            right: 30px;
+            border-left: none;
+            border-top: none;
+            border-radius: 0 0 4px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="bg-pattern"></div>
-        
-        <!-- Corner accents -->
-        <div class="corner-accent corner-top-left"></div>
-        <div class="corner-accent corner-bottom-right"></div>
-        
-        <!-- Decorative lines -->
-        <div class="line line-1"></div>
-        <div class="line line-2"></div>
-        <div class="line line-3"></div>
-        <div class="line line-4"></div>
+        <div class="bg-texture"></div>
+        <div class="accent-wave accent-wave-top"></div>
+        <div class="accent-wave accent-wave-bottom"></div>
+        <div class="ornament ornament-tl"></div>
+        <div class="ornament ornament-br"></div>
         
         <div class="content">
-            <div class="accent-line"></div>
-            <div class="title">Xarpeg</div>
-            <div class="subtitle">Kotlin PEG Parser</div>
-            <div class="accent-underline"></div>
-            <div class="badge">Multiplatform</div>
+            <div class="project-title">Xarpeg: Kotlin PEG Parser</div>
+            
+            <div class="icon-container">
+                <img src="https://raw.githubusercontent.com/MirrgieRiana/xarpeg-kotlin-peg-parser/main/assets/xarpeg-icon.svg" alt="Xarpeg Icon">
+            </div>
+            
+            <div class="features">
+                <div class="feature-label">Multiplatform</div>
+                <div class="feature-label">Lightweight</div>
+                <div class="feature-label">Type-Safe</div>
+            </div>
         </div>
     </div>
 </body>
