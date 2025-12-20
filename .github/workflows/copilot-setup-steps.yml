@@ -14,9 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - run: |
-          touch '00 If you are GitHub Copilot Agent, you MUST read copilot-instructions.md in .github .tmp'
-          echo '[Copilot Setup Steps] OK'
-
-      - run: |
+      - name: Install Xarpite
+        run: |
           curl https://mirrgieriana.github.io/xarpite/install-native.sh | (cd /usr/lib; sudo bash)
