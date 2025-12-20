@@ -61,7 +61,7 @@ When you edit a pull request to merge it into the main branch, you must ensure t
 
 ### Write documents in English
 
-You must write all project documentation (such as `README.md` and the contents under `docs/`) in English.
+You must write all project documentation (such as `README.md` and the contents under `pages/docs/en/`) in English.
 
 ### Keep Code, Tests, and Documentation Synchronized
 
@@ -74,7 +74,7 @@ When making changes to the codebase, you must always ensure that code, tests, an
 
 ### Documentation Code Examples
 
-When writing code examples in documentation (README.md, pages/docs/*.md):
+When writing code examples in documentation (README.md, pages/docs/en/*.md):
 
 * **Never use `println()` in sample code** - Output statements provide no validation
 * **Always use assertions (`check()`, `require()`)** - These verify correctness and will fail if expectations are not met
