@@ -121,7 +121,7 @@ val bundleRelease by tasks.registering(Sync::class) {
     from(layout.buildDirectory.dir("processedResources/js/main"))
     from(layout.buildDirectory.dir("js/packages/${project.name}/kotlin"))
     into(layout.buildDirectory.dir("site"))
-    
+
     // Generate social image after sync completes
     doLast {
         val outputFile = layout.buildDirectory.dir("site/assets").get().file("social-image.png").asFile
