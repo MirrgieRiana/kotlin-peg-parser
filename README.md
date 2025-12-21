@@ -71,19 +71,6 @@ fun main() {
 
 Follow our comprehensive tutorial to master parser combinators:
 
-1. **Quickstart** - Your first parser in minutes  
-   [[English](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/en/01-quickstart.html)] [[日本語](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/ja/01-quickstart.html)]
-2. **Combinators** - Sequences, choices, repetition, and naming  
-   [[English](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/en/02-combinators.html)] [[日本語](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/ja/02-combinators.html)]
-3. **Expressions & Recursion** - Build recursive grammars with `ref { }`  
-   [[English](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/en/03-expressions.html)] [[日本語](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/ja/03-expressions.html)]
-4. **Runtime Behavior** - Errors, exceptions, and caching  
-   [[English](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/en/04-runtime.html)] [[日本語](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/ja/04-runtime.html)]
-5. **Parsing Positions** - Extract location information with `mapEx`  
-   [[English](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/en/05-positions.html)] [[日本語](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/ja/05-positions.html)]
-6. **Template Strings** - Parse embedded expressions naturally  
-   [[English](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/en/06-template-strings.html)] [[日本語](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/ja/06-template-strings.html)]
-
 **→ Start the Tutorial: [[English](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/en/)] [[日本語](https://mirrgieriana.github.io/xarpeg-kotlin-peg-parser/docs/ja/)]**
 
 ---

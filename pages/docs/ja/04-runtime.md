@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: docs-ja
 title: ステップ4 – 実行時の動作
 ---
 

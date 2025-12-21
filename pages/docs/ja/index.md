@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: docs-ja
 title: Xarpegチュートリアル - パーサコンビネータを学ぶ
 ---
 

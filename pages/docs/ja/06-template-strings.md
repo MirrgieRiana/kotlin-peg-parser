@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: docs-ja
 title: ステップ6 – テンプレート文字列
 ---
 

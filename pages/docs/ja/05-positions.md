@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: docs-ja
 title: ステップ5 – 解析位置
 ---
 
