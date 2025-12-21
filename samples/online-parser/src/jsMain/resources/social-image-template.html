@@ -20,7 +20,7 @@
         .container {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FFF9F0 0%, #FFEFD5 50%, #FFE4B8 100%);
             position: relative;
             display: flex;
             align-items: center;
@@ -28,46 +28,45 @@
             overflow: hidden;
         }
 
-        /* Animated background pattern */
+        /* Soft animated background pattern */
         .bg-pattern {
             position: absolute;
             width: 100%;
             height: 100%;
-            opacity: 0.1;
+            opacity: 0.03;
             background-image: 
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px),
-                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px);
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(207,123,0,0.1) 2px, rgba(207,123,0,0.1) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(207,123,0,0.1) 2px, rgba(207,123,0,0.1) 4px);
         }
 
-        /* Decorative geometric shapes */
+        /* Subtle decorative geometric shapes */
         .shape {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
         }
 
         .shape-1 {
-            width: 400px;
-            height: 400px;
-            top: -150px;
-            right: -100px;
-            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+            width: 500px;
+            height: 500px;
+            top: -200px;
+            right: -150px;
+            background: radial-gradient(circle, rgba(207,123,0,0.08) 0%, rgba(207,123,0,0) 70%);
         }
 
         .shape-2 {
-            width: 300px;
-            height: 300px;
-            bottom: -100px;
-            left: -50px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+            width: 400px;
+            height: 400px;
+            bottom: -150px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(161,96,0,0.06) 0%, rgba(161,96,0,0) 70%);
         }
 
         .shape-3 {
-            width: 200px;
-            height: 200px;
-            top: 100px;
-            left: 100px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            width: 300px;
+            height: 300px;
+            top: 120px;
+            left: 80px;
+            background: radial-gradient(circle, rgba(115,69,0,0.04) 0%, rgba(115,69,0,0) 70%);
         }
 
         /* Content container */
@@ -99,17 +98,18 @@
         /* Accent line */
         .accent-line {
             width: 120px;
-            height: 6px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%);
+            height: 5px;
+            background: linear-gradient(90deg, rgba(207,123,0,0.6) 0%, rgba(161,96,0,0.3) 100%);
             margin: 0 auto 40px;
             border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(207,123,0,0.15);
         }
 
         .title {
             font-size: 120px;
             font-weight: 800;
-            color: #ffffff;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            color: #2D1B00;
+            text-shadow: 0 2px 4px rgba(207,123,0,0.1);
             margin-bottom: 20px;
             letter-spacing: -2px;
         }
@@ -117,8 +117,8 @@
         .subtitle {
             font-size: 56px;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            color: #5A3A00;
+            text-shadow: 0 1px 2px rgba(207,123,0,0.08);
             letter-spacing: 0.5px;
         }
 
@@ -126,13 +126,14 @@
             display: inline-block;
             margin-top: 35px;
             padding: 14px 32px;
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,249,240,0.5) 100%);
             backdrop-filter: blur(10px);
             border-radius: 50px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(207,123,0,0.25);
+            box-shadow: 0 4px 12px rgba(207,123,0,0.1), inset 0 1px 1px rgba(255,255,255,0.5);
             font-size: 28px;
             font-weight: 600;
-            color: #ffffff;
+            color: #734500;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
