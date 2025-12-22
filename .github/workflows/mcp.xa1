@@ -27,7 +27,7 @@ hh := {
         }
       },
       {
-        name: "iyou-must-read-copilot-instructions-md-in-github-directory"
+        name: "you-must-read-copilot-instructions-md-in-github-directory"
         inputSchema: {
           type: "object"
           properties: {}
