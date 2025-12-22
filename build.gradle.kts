@@ -248,7 +248,7 @@ val bundleRelease = tasks.register<Sync>("bundleRelease") {
     
     // Copy pages directory content
     from("pages") {
-        exclude("_site/**", ".jekyll-cache/**", "social-image-template.html")
+        exclude("_site/**", ".jekyll-cache/**", "social-image-template.html", "vendor/**", ".bundle/**", "Gemfile.lock")
     }
     
     // Copy online-parser build output (built separately)
