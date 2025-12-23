@@ -1,0 +1,19 @@
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Xarpite
+        run: |
+          curl https://mirrgieriana.github.io/xarpite/install-native.sh | (cd /usr/lib; sudo bash)

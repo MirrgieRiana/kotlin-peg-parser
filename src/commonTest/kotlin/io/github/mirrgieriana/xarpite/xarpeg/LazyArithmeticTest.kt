@@ -1,12 +1,10 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
-import io.github.mirrgieriana.xarpite.xarpeg.ParseException
-import io.github.mirrgieriana.xarpite.xarpeg.Parser
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.mapEx
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.named
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.plus
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryMinus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
@@ -17,42 +15,42 @@ import kotlin.test.assertFailsWith
 /**
  * Exception thrown when the special '!' operator is evaluated.
  */
-class PositionMarkerException(message: String, position: Int) : ParseException(message, position)
+class PositionMarkerException(message: String, context: ParseContext, position: Int) : ParseException(message, context, position)
 
 /**
  * Test demonstrating position tracking using mapEx with lazy arithmetic parser.
  * The parser evaluates integer arithmetic lazily and uses '!' to mark positions.
  */
 class LazyArithmeticTest {
-    
+
     // Lazy arithmetic parser implementation
     private object LazyArithmetic {
-        private val number: Parser<() -> Int> = 
+        private val number: Parser<() -> Int> =
             +Regex("[0-9]+") mapEx { _, result ->
                 val value = result.value.value.toInt()
                 return@mapEx { value }
-            }
-        
+            } named "number"
+
         private val positionMarker: Parser<() -> Int> =
-            +'!' mapEx { _, result ->
+            +'!' mapEx { context, result ->
                 val position = result.start
-                return@mapEx { throw PositionMarkerException("Position marker at index $position", position) }
+                return@mapEx { throw PositionMarkerException("Position marker at index $position", context, position) }
             }
-        
+
         private val primary: Parser<() -> Int> =
             number + positionMarker + (-'(' * ref { expr } * -')')
-        
+
         private val term: Parser<() -> Int> =
-            leftAssociative(primary, +'*' + +'/') { a, op, b -> 
+            leftAssociative(primary, +'*' + +'/') { a, op, b ->
                 when (op) {
                     '*' -> ({ a() * b() })
                     '/' -> ({ a() / b() })
                     else -> error("Unknown operator: $op")
                 }
             }
-        
+
         val expr: Parser<() -> Int> =
-            leftAssociative(term, +'+' + +'-') { a, op, b -> 
+            leftAssociative(term, +'+' + +'-') { a, op, b ->
                 when (op) {
                     '+' -> ({ a() + b() })
                     '-' -> ({ a() - b() })

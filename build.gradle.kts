@@ -61,12 +61,10 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            kotlin.srcDir("src/importedMain/kotlin")
             kotlin.srcDir("src/generated/kotlin")
         }
 
         val commonTest by getting {
-            kotlin.srcDir("src/importedTest/kotlin")
             dependencies {
                 implementation(kotlin("test"))
             }
@@ -76,16 +74,9 @@ kotlin {
 
 // ktlint configuration
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.3.1")
+    version.set(libs.versions.ktlint.asProvider().get())
     android.set(false)
     outputColorName.set("RED")
-
-    filter {
-        exclude("**/build/**")
-        exclude("**/generated/**")
-        exclude("src/importedMain/**")
-        exclude("src/importedTest/**")
-    }
 }
 
 publishing {
@@ -119,7 +110,7 @@ tasks.register("writeKotlinMetadata") {
 tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
     moduleName.set(providers.gradleProperty("repositoryName"))
     outputDirectory.set(layout.buildDirectory.dir("dokka"))
-    
+
     // Whitelist: Only process JVM source set by name
     dokkaSourceSets {
         configureEach {
@@ -138,7 +129,7 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
         iconTarget.parentFile.mkdirs()
         iconSource.copyTo(iconTarget, overwrite = true)
     }
-    
+
     // Ensure generated sources are available before Dokka runs
     dependsOn("generateTuples")
 }
@@ -147,25 +138,25 @@ tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
 tasks.register("generateTuples") {
     description = "Generates tuple source files"
     group = "build"
-    
+
     val outputDir = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg").asFile
     val outputDirParsers = layout.projectDirectory.dir("src/generated/kotlin/io/github/mirrgieriana/xarpite/xarpeg/parsers").asFile
 
     val generatedTuplesKt = outputDir.resolve("Tuples.kt")
     val generatedTupleParserKt = outputDirParsers.resolve("TupleParser.kt")
-    
+
     doLast {
         // Configuration: Maximum tuple size to generate
         val maxTupleSize = 16
-        
+
         // Create output directories
         outputDir.mkdirs()
         outputDirParsers.mkdirs()
-        
+
         // Generate Tuples.kt programmatically
         generatedTuplesKt.writeText(getTupleSrc(maxTupleSize))
         println("Generated: ${generatedTuplesKt.absolutePath}")
-        
+
         // Generate TupleParser.kt programmatically
         generatedTupleParserKt.writeText(getTupleParserSrc(maxTupleSize))
         println("Generated: ${generatedTupleParserKt.absolutePath}")
@@ -191,9 +182,7 @@ detekt {
         "src/jvmMain/kotlin",
         "src/jvmTest/kotlin",
         "src/jsMain/kotlin",
-        "src/jsTest/kotlin",
-        "src/importedMain/kotlin",
-        "src/importedTest/kotlin"
+        "src/jsTest/kotlin"
     )
 }
 
@@ -210,4 +199,100 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 // Add detekt to the check task
 tasks.named("check") {
     dependsOn("detekt")
+}
+
+// Make build task depend on ktlintFormat
+tasks.named("build") {
+    dependsOn("ktlintFormat")
+}
+
+// Make ktlint check tasks run after format tasks
+tasks.matching { it.name.startsWith("runKtlintCheck") }.configureEach {
+    mustRunAfter(tasks.matching { it.name.startsWith("runKtlintFormat") })
+}
+
+// Generate documentation social image
+val generateDocsSocialImage = tasks.register("generateDocsSocialImage") {
+    group = "build"
+    description = "Generates social image for documentation pages using Playwright"
+
+    val templateSource = file("pages/social-image-template.html")
+    val iconSource = file("assets/xarpeg-icon.svg")
+    val intermediateDir = layout.buildDirectory.dir("socialImage").get().asFile
+    val templateIntermediate = intermediateDir.resolve("social-image-template.html")
+    val iconIntermediate = intermediateDir.resolve("xarpeg-icon.svg")
+    val outputImage = intermediateDir.resolve("social-image.png")
+
+    inputs.files(templateSource, iconSource)
+    outputs.file(outputImage)
+
+    doLast {
+        // Create intermediate directory
+        intermediateDir.mkdirs()
+
+        // Copy template and icon to intermediate directory
+        templateSource.copyTo(templateIntermediate, overwrite = true)
+        iconSource.copyTo(iconIntermediate, overwrite = true)
+
+        // Generate social image using Playwright
+        build_logic.generateSocialImageWithPlaywright(
+            htmlTemplate = templateIntermediate,
+            outputFile = outputImage
+        )
+
+        println("Documentation social image generated: ${outputImage.absolutePath}")
+    }
+}
+
+// Bundle all Pages content for deployment
+val bundleRelease = tasks.register<Sync>("bundleRelease") {
+    group = "build"
+    description = "Bundles all Pages content (pages/, online-parser, dokka) into build/bundleRelease for Jekyll processing"
+
+    val outputDirectory = layout.buildDirectory.dir("bundleRelease")
+
+    dependsOn("dokkaHtml", generateDocsSocialImage)
+
+    into(outputDirectory)
+
+    // Copy pages directory content
+    from("pages") {
+        exclude("_site/**", ".jekyll-cache/**", "social-image-template.html", "vendor/**", ".bundle/**", "Gemfile.lock")
+    }
+
+    // Copy online-parser build output (built separately)
+    from("samples/online-parser/build/site") {
+        into("online-parser")
+    }
+
+    // Copy dokka output
+    from(layout.buildDirectory.dir("dokka")) {
+        into("kdoc")
+    }
+
+    // Copy generated docs social image from intermediate directory
+    from(layout.buildDirectory.dir("socialImage")) {
+        into("assets")
+        include("social-image.png")
+    }
+
+    // Create index.md from README
+    doLast {
+        val readmeFile = file("README.md")
+        val indexFile = outputDirectory.get().file("index.md").asFile
+
+        if (readmeFile.exists()) {
+            indexFile.writeText("""
+                ---
+                layout: default
+                title: Home
+                ---
+                
+            """.trimIndent() + readmeFile.readText())
+        }
+    }
+}
+
+tasks.named("build") {
+    dependsOn(bundleRelease)
 }

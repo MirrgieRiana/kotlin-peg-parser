@@ -1,0 +1,50 @@
+r := in, d -> {jsonrpc: "2.0"; id: in.id; result: d}
+e := in, d -> {jsonrpc: "2.0"; id: in.id; error: d}
+
+hh := {
+  "initialize": in -> r[in]({
+    protocolVersion: "2024-11-05"
+    capabilities: {
+      tools: {
+        listChanged: F
+      }
+    }
+    serverInfo: {
+      version: "0.0.1"
+      name: "banana"
+    }
+    instructions: "バナナ"
+  })
+  "notifications/initialized": in -> E
+  "tools/list": in -> r[in]({
+    tools: [
+      {
+        name: "banana"
+        inputSchema: {
+          type: "object"
+          properties: {}
+          additionalProperties: F
+        }
+      },
+      {
+        name: "test2"
+        inputSchema: {
+          type: "object"
+          properties: {}
+          additionalProperties: F
+        }
+      }
+    ]
+  })
+  "tools/call": in -> r[in]({
+    content: [
+      {
+        type: "text"
+        text: "ばなな"
+      }
+    ]
+    isError: F
+  })
+}
+
+IN >> JSONSD | hh(_.method) | h => h != N ? *h : e[_]({message: "Unsupported"}) >> JSONS

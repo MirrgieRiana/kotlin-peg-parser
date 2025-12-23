@@ -1,0 +1,9 @@
+# Jekyll generated files
+_site/
+.jekyll-cache/
+.jekyll-metadata
+
+# Bundler
+Gemfile.lock
+.bundle/
+vendor/

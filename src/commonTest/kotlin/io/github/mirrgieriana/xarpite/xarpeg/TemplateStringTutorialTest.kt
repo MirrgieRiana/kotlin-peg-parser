@@ -1,11 +1,10 @@
 package io.github.mirrgieriana.xarpite.xarpeg
 
-import io.github.mirrgieriana.xarpite.xarpeg.Parser
-import io.github.mirrgieriana.xarpite.xarpeg.parseAllOrThrow
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.leftAssociative
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.map
-import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.named
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.plus
+import io.github.mirrgieriana.xarpite.xarpeg.parsers.ref
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.times
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryMinus
 import io.github.mirrgieriana.xarpite.xarpeg.parsers.unaryPlus
@@ -14,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Tests for examples from the template strings tutorial (docs/06-template-strings.md)
+ * Tests for examples from the template strings tutorial (docs/en/06-template-strings.md and docs/ja/06-template-strings.md)
  */
 class TemplateStringTutorialTest {
 
@@ -25,7 +24,7 @@ class TemplateStringTutorialTest {
 
     val templateStringParser: Parser<String> = object {
         // Expression parser (reusing from earlier tutorials)
-        val number = +Regex("[0-9]+") map { it.value.toInt() }
+        val number = +Regex("[0-9]+") map { it.value.toInt() } named "number"
         val grouped: Parser<Int> = -'(' * ref { sum } * -')'
         val factor: Parser<Int> = number + grouped
         val product = leftAssociative(factor, -'*') { a, _, b -> a * b }
@@ -37,7 +36,7 @@ class TemplateStringTutorialTest {
         val stringPart: Parser<TemplateElement> =
             +Regex("""[^"$]+|\$(?!\()""") map { match ->
                 StringPart(match.value)
-            }
+            } named "string_part"
 
         // Expression part: $(...)
         val expressionPart: Parser<TemplateElement> =
