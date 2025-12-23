@@ -44,7 +44,7 @@
       <a href="{{ '/docs/en/05-positions.html' | relative_url }}" class="doc-nav-item">📍 Step 5: Positions</a>
       <a href="{{ '/docs/en/06-template-strings.html' | relative_url }}" class="doc-nav-item">🧩 Step 6: Template strings</a>
       <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-        <a href="{{ page.url | replace: '/docs/en/', '/docs/ja/' }}" class="doc-nav-item" style="font-style: italic;">→ 日本語版</a>
+        <a href="{{ page.url | replace: '/docs/en/', '/docs/ja/' | relative_url }}" class="doc-nav-item" style="font-style: italic;">→ 日本語版</a>
       </div>
     </nav>
     {% endif %}
